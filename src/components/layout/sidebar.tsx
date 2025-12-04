@@ -43,17 +43,17 @@ const menuItems = [
     label: "Panel",
   },
   {
-    href: "/dashboard/transactions",
+    href: "/dashboard/pagos",
     icon: CreditCard,
-    label: "Transacciones",
+    label: "Pagos",
   },
   {
-    href: "/dashboard/invoices",
+    href: "/dashboard/cuentas",
     icon: FileText,
-    label: "Facturas",
+    label: "Cuentas",
   },
   {
-    href: "/dashboard/customers",
+    href: "/dashboard/clientes",
     icon: Users,
     label: "Clientes",
   },
@@ -63,7 +63,7 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    return pathname === href;
+    return pathname.startsWith(href);
   };
 
   return (

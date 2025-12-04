@@ -6,9 +6,9 @@ import { useMemo } from "react";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
-  transactions: "Transacciones",
-  invoices: "Facturas",
-  customers: "Clientes",
+  pagos: "Pagos",
+  cuentas: "Cuentas",
+  clientes: "Clientes",
   settings: "Configuración",
   edit: "Editar",
   new: "Nuevo"
@@ -22,13 +22,15 @@ const getTitleFromPath = (path: string) => {
   
   if (lastPart === 'new' && pathParts.length > 2) {
     const parent = pathParts[pathParts.length - 2];
-    const translatedParent = titleTranslations[parent.slice(0, -1)] || parent.slice(0, -1);
+    const singularParent = parent.endsWith('s') ? parent.slice(0, -1) : parent;
+    const translatedParent = titleTranslations[parent] || singularParent;
     return `${titleTranslations.new} ${translatedParent}`;
   }
   
   if (lastPart === 'edit' && pathParts.length > 3) {
     const parent = pathParts[pathParts.length-3];
-    const translatedParent = titleTranslations[parent.slice(0, -1)] || parent.slice(0, -1);
+    const singularParent = parent.endsWith('s') ? parent.slice(0, -1) : parent;
+    const translatedParent = titleTranslations[parent] || singularParent;
      return `${titleTranslations.edit} ${translatedParent}`;
   }
 

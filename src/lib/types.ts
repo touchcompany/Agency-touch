@@ -1,39 +1,80 @@
-export type Transaction = {
+export type Pago = {
   id: string;
-  date: string;
-  description: string;
-  amount: number;
-  type: 'income' | 'expense';
-  category: 'Comida' | 'Transporte' | 'Servicios' | 'Alquiler' | 'Entretenimiento' | 'Compras' | 'Viajes' | 'Salario' | 'Inversiones' | 'Otro';
+  clienteId: string;
+  cuentaId?: string;
+  monto: number;
+  fechaPago: string;
+  descripcion: string;
+  metodoPago: 'efectivo' | 'transferencia' | 'otro';
+  creadoPorIA: boolean;
+  notas?: string;
 };
 
-export type InvoiceItem = {
+export type DetalleCuenta = {
   id: string;
-  description: string;
-  quantity: number;
-  price: number;
+  descripcion: string;
+  cantidad: number;
+  precio: number;
 };
 
-export type Invoice = {
+export type Cuenta = {
   id: string;
-  invoiceNumber: string;
-  customer: Customer;
-  issueDate: string;
-  dueDate: string;
-  items: InvoiceItem[];
-  status: 'paid' | 'pending' | 'overdue';
+  numeroCuenta: string;
+  clienteId: string;
+  descripcion: string;
+  detalle: DetalleCuenta[];
+  valorTotal: number;
+  fechaEmision: string;
+  fechaVencimiento?: string;
+  observaciones?: string;
+  firmaUrl?: string;
+  datosEmpresa: {
+    nombreEmpresa: string;
+    nitEmpresa: string;
+    direccion: string;
+    datosBanco: string;
+  };
+  esGeneradaAutomaticamente: boolean;
+  periodo?: string;
+  estadoEnvio: {
+    enviada: boolean;
+    via: 'whatsapp' | 'email' | 'ninguno';
+    fechaEnvio?: string;
+  };
+  status: 'pagada' | 'pendiente' | 'vencida';
 };
 
-export type Customer = {
+export type Cliente = {
   id: string;
-  name: string;
+  nombre: string;
+  nid: string;
+  whatsapp: string;
   email: string;
-  phone: string;
-  address: string;
-  paymentHistory: Invoice[];
+  esMensual: boolean;
+  logoUrl?: string;
+  activo: boolean;
+  fechaCreacion: string;
+  notas?: string;
+  historialCuentas: Cuenta[];
 };
 
-export type UserSettings = {
-  bankDetails: string;
-  companyLogoUrl: string;
+export type ConfiguracionEmpresa = {
+  nombreEmpresa: string;
+  nitEmpresa: string;
+  direccion: string;
+  telefono: string;
+  email: string;
+  datosBanco: string;
+};
+
+export type AjustesEnvio = {
+  enviarPorWhatsApp: boolean;
+  enviarPorEmail: boolean;
+  diaEnvioMensual: number;
+};
+
+export type Configuracion = {
+  id: 'main';
+  datosEmpresa: ConfiguracionEmpresa;
+  ajustesEnvio: AjustesEnvio;
 };

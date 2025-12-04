@@ -1,76 +1,114 @@
-import type { Transaction, Customer, Invoice } from './types';
+import type { Pago, Cliente, Cuenta } from './types';
 
-export const mockCustomers: Customer[] = [
+export const mockClientes: Cliente[] = [
   {
     id: '1',
-    name: 'Soluciones Tecnológicas Inc.',
+    nombre: 'Soluciones Tecnológicas Inc.',
+    nid: '900.123.456-7',
+    whatsapp: '+15550101',
     email: 'contacto@solucionestec.com',
-    phone: '555-0101',
-    address: '123 Calle Innovación, Silicon Valley, CA',
-    paymentHistory: [],
+    esMensual: true,
+    activo: true,
+    fechaCreacion: new Date().toISOString(),
+    historialCuentas: [],
+    logoUrl: `https://picsum.photos/seed/1/100/100`,
   },
   {
     id: '2',
-    name: 'Diseños Creativos Co.',
+    nombre: 'Diseños Creativos Co.',
+    nid: '800.987.654-3',
+    whatsapp: '+15550102',
     email: 'hola@disenoscreativos.co',
-    phone: '555-0102',
-    address: '456 Avenida del Arte, Nueva York, NY',
-    paymentHistory: [],
+    esMensual: false,
+    activo: true,
+    fechaCreacion: new Date().toISOString(),
+    historialCuentas: [],
+    logoUrl: `https://picsum.photos/seed/2/100/100`,
   },
   {
     id: '3',
-    name: 'Exportaciones Globales Ltd.',
+    nombre: 'Exportaciones Globales Ltd.',
+    nid: '700.555.888-1',
+    whatsapp: '+445550103',
     email: 'ventas@exportacionesglobales.com',
-    phone: '555-0103',
-    address: '789 Calle Comercio, Londres, UK',
-    paymentHistory: [],
+    esMensual: true,
+    activo: false,
+    fechaCreacion: new Date().toISOString(),
+    historialCuentas: [],
+    logoUrl: `https://picsum.photos/seed/3/100/100`,
   },
 ];
 
-export const mockInvoices: Invoice[] = [
+export const mockCuentas: Cuenta[] = [
   {
-    id: 'INV-001',
-    invoiceNumber: 'FAC-001',
-    customer: mockCustomers[0],
-    issueDate: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString(),
-    dueDate: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString(),
-    items: [
-      { id: '1', description: 'Desarrollo de Sitio Web', quantity: 1, price: 5000 },
-      { id: '2', description: 'Hosting Mensual', quantity: 1, price: 100 },
+    id: 'CTA-001',
+    numeroCuenta: '100',
+    clienteId: mockClientes[0].id,
+    descripcion: 'Servicio de desarrollo de software - Enero',
+    detalle: [
+      { id: '1', descripcion: 'Desarrollo de Sitio Web', cantidad: 1, precio: 5000 },
+      { id: '2', descripcion: 'Hosting Mensual', cantidad: 1, precio: 100 },
     ],
-    status: 'pending',
+    valorTotal: 5100,
+    fechaEmision: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString(),
+    fechaVencimiento: new Date(new Date().setDate(new Date().getDate() + 15)).toISOString(),
+    status: 'pendiente',
+    datosEmpresa: {
+        nombreEmpresa: "Mi Empresa SAS",
+        nitEmpresa: "123.456.789-0",
+        direccion: "Calle Falsa 123",
+        datosBanco: "Bancolombia Ahorros 123-456789-00"
+    },
+    esGeneradaAutomaticamente: false,
+    estadoEnvio: { enviada: false, via: 'ninguno'}
   },
   {
-    id: 'INV-002',
-    invoiceNumber: 'FAC-002',
-    customer: mockCustomers[1],
-    issueDate: new Date(new Date().setDate(new Date().getDate() - 40)).toISOString(),
-    dueDate: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(),
-    items: [{ id: '1', description: 'Diseño de Logo', quantity: 1, price: 1200 }],
-    status: 'overdue',
+    id: 'CTA-002',
+    numeroCuenta: '101',
+    clienteId: mockClientes[1].id,
+    descripcion: 'Diseño de identidad de marca',
+    detalle: [{ id: '1', descripcion: 'Diseño de Logo', cantidad: 1, precio: 1200 }],
+    valorTotal: 1200,
+    fechaEmision: new Date(new Date().setDate(new Date().getDate() - 40)).toISOString(),
+    fechaVencimiento: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(),
+    status: 'vencida',
+    datosEmpresa: {
+        nombreEmpresa: "Mi Empresa SAS",
+        nitEmpresa: "123.456.789-0",
+        direccion: "Calle Falsa 123",
+        datosBanco: "Bancolombia Ahorros 123-456789-00"
+    },
+    esGeneradaAutomaticamente: false,
+    estadoEnvio: { enviada: true, via: 'email', fechaEnvio: new Date(new Date().setDate(new Date().getDate() - 40)).toISOString()}
   },
   {
-    id: 'INV-003',
-    invoiceNumber: 'FAC-003',
-    customer: mockCustomers[2],
-    issueDate: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(),
-    dueDate: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
-    items: [{ id: '1', description: 'Servicios de Consultoría', quantity: 10, price: 250 }],
-    status: 'paid',
+    id: 'CTA-003',
+    numeroCuenta: '102',
+    clienteId: mockClientes[2].id,
+    descripcion: 'Consultoría de exportación',
+    detalle: [{ id: '1', descripcion: 'Servicios de Consultoría', cantidad: 10, precio: 250 }],
+    valorTotal: 2500,
+    fechaEmision: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(),
+    fechaVencimiento: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+    status: 'pagada',
+    datosEmpresa: {
+        nombreEmpresa: "Mi Empresa SAS",
+        nitEmpresa: "123.456.789-0",
+        direccion: "Calle Falsa 123",
+        datosBanco: "Bancolombia Ahorros 123-456789-00"
+    },
+    esGeneradaAutomaticamente: false,
+    estadoEnvio: { enviada: true, via: 'whatsapp', fechaEnvio: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString()}
   },
 ];
 
-mockCustomers[0].paymentHistory = [mockInvoices[0]];
-mockCustomers[1].paymentHistory = [mockInvoices[1]];
-mockCustomers[2].paymentHistory = [mockInvoices[2]];
+mockClientes[0].historialCuentas = [mockCuentas[0]];
+mockClientes[1].historialCuentas = [mockCuentas[1]];
+mockClientes[2].historialCuentas = [mockCuentas[2]];
 
 
-export const mockTransactions: Transaction[] = [
-  { id: '1', date: new Date().toISOString(), description: 'Pago de cliente por FAC-003', amount: 2500, type: 'income', category: 'Salario' },
-  { id: '2', date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), description: 'Almuerzo con cliente', amount: 45.50, type: 'expense', category: 'Comida' },
-  { id: '3', date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), description: 'Gasolina para coche de empresa', amount: 60.00, type: 'expense', category: 'Transporte' },
-  { id: '4', date: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(), description: 'Factura de luz de la oficina', amount: 150.75, type: 'expense', category: 'Servicios' },
-  { id: '5', date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(), description: 'Alquiler mensual de la oficina', amount: 2000, type: 'expense', category: 'Alquiler' },
-  { id: '6', date: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(), description: 'Depósito de salario', amount: 7000, type: 'income', category: 'Salario' },
-  { id: '7', date: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(), description: 'Sillas nuevas para la oficina', amount: 800, type: 'expense', category: 'Compras' },
+export const mockPagos: Pago[] = [
+  { id: '1', fechaPago: new Date().toISOString(), descripcion: 'Pago de cliente por CTA-003', monto: 2500, metodoPago: 'transferencia', creadoPorIA: false, clienteId: '3', cuentaId: 'CTA-003' },
+  { id: '2', fechaPago: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), descripcion: 'Adelanto por proyecto de diseño', monto: 600, metodoPago: 'transferencia', creadoPorIA: false, clienteId: '2' },
+  { id: '3', fechaPago: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), descripcion: 'Abono cliente Soluciones Tec.', monto: 1000, metodoPago: 'efectivo', creadoPorIA: false, clienteId: '1' },
 ];
