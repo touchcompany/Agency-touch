@@ -19,45 +19,45 @@ export function AddCustomerSheet() {
       <SheetTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Add Customer
+          Añadir Cliente
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle className="font-headline">Add New Customer</SheetTitle>
+          <SheetTitle className="font-headline">Añadir Nuevo Cliente</SheetTitle>
           <SheetDescription>
-            Add a new customer to your database.
+            Añade un nuevo cliente a tu base de datos.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="name" className="text-right">
-              Name
+              Nombre
             </Label>
-            <Input id="name" placeholder="Customer Name" className="col-span-3" />
+            <Input id="name" placeholder="Nombre del Cliente" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="email" className="text-right">
-              Email
+              Correo
             </Label>
-            <Input id="email" type="email" placeholder="customer@example.com" className="col-span-3" />
+            <Input id="email" type="email" placeholder="cliente@ejemplo.com" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="phone" className="text-right">
-              Phone
+              Teléfono
             </Label>
             <Input id="phone" placeholder="555-0123" className="col-span-3" />
           </div>
            <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="address" className="text-right">
-              Address
+              Dirección
             </Label>
-            <Input id="address" placeholder="123 Main St" className="col-span-3" />
+            <Input id="address" placeholder="123 Calle Principal" className="col-span-3" />
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Save Customer</Button>
+            <Button type="submit">Guardar Cliente</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

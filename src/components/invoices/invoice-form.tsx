@@ -24,6 +24,7 @@ import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
+import { es } from 'date-fns/locale';
 import { cn, formatCurrency } from "@/lib/utils";
 import { Separator } from "../ui/separator";
 
@@ -61,14 +62,14 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
       <form className="grid gap-6 lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Customer & Dates</CardTitle>
+            <CardTitle className="font-headline">Cliente y Fechas</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="customer">Customer</Label>
+              <Label htmlFor="customer">Cliente</Label>
               <Select defaultValue={invoice?.customer.id}>
                 <SelectTrigger id="customer">
-                  <SelectValue placeholder="Select a customer" />
+                  <SelectValue placeholder="Selecciona un cliente" />
                 </SelectTrigger>
                 <SelectContent>
                   {customers.map((customer) => (
@@ -80,16 +81,16 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
               </Select>
             </div>
             <div className="space-y-2">
-                <Label>Company Logo</Label>
+                <Label>Logo de la Empresa</Label>
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 flex-shrink-0 rounded-md border flex items-center justify-center bg-muted">
                     <Upload className="h-6 w-6 text-muted-foreground" />
                   </div>
-                  <Button variant="outline" size="sm">Upload Logo</Button>
+                  <Button variant="outline" size="sm">Subir Logo</Button>
                 </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="issue-date">Issue Date</Label>
+              <Label htmlFor="issue-date">Fecha de Emisión</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -100,16 +101,16 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {issueDate ? format(issueDate, "PPP") : <span>Pick a date</span>}
+                    {issueDate ? format(issueDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={issueDate} onSelect={setIssueDate} initialFocus />
+                  <Calendar mode="single" selected={issueDate} onSelect={setIssueDate} initialFocus locale={es} />
                 </PopoverContent>
               </Popover>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="due-date">Due Date</Label>
+              <Label htmlFor="due-date">Fecha de Vencimiento</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -120,11 +121,11 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
+                    {dueDate ? format(dueDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus />
+                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={es} />
                 </PopoverContent>
               </Popover>
             </div>
@@ -133,28 +134,28 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Invoice Items</CardTitle>
+            <CardTitle className="font-headline">Artículos de la Factura</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {items.map((item, index) => (
                 <div key={index} className="grid grid-cols-12 items-center gap-2">
                   <Input
-                    placeholder="Item description"
+                    placeholder="Descripción del artículo"
                     className="col-span-6"
                     value={item.description}
                     onChange={(e) => handleItemChange(index, 'description', e.target.value)}
                   />
                   <Input
                     type="number"
-                    placeholder="Qty"
+                    placeholder="Cant."
                     className="col-span-2"
                     value={item.quantity}
                     onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value, 10))}
                   />
                   <Input
                     type="number"
-                    placeholder="Price"
+                    placeholder="Precio"
                     className="col-span-3"
                     value={item.price}
                     onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))}
@@ -166,7 +167,7 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
               ))}
             </div>
             <Button variant="outline" size="sm" onClick={addItem} className="mt-4">
-              <Plus className="mr-2 h-4 w-4" /> Add Item
+              <Plus className="mr-2 h-4 w-4" /> Añadir Artículo
             </Button>
           </CardContent>
         </Card>
@@ -174,7 +175,7 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
       <div className="space-y-6">
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline">Summary</CardTitle>
+                <CardTitle className="font-headline">Resumen</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex justify-between">
@@ -182,7 +183,7 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     <span>{formatCurrency(subtotal)}</span>
                 </div>
                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tax (10%)</span>
+                    <span className="text-muted-foreground">Impuestos (10%)</span>
                     <span>{formatCurrency(tax)}</span>
                 </div>
                 <Separator />
@@ -192,16 +193,16 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                 </div>
             </CardContent>
              <CardFooter className="flex-col gap-2 items-stretch">
-                <Button>{invoice ? "Save Changes" : "Create Invoice"}</Button>
+                <Button>{invoice ? "Guardar Cambios" : "Crear Factura"}</Button>
              </CardFooter>
         </Card>
         <Card>
             <CardHeader>
-                <CardTitle className="font-headline">Actions</CardTitle>
+                <CardTitle className="font-headline">Acciones</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-2 gap-2">
                 <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
-                <Button variant="outline"><Send className="mr-2 h-4 w-4" /> Email</Button>
+                <Button variant="outline"><Send className="mr-2 h-4 w-4" /> Correo</Button>
                 <Button variant="outline" className="col-span-2"><MessageCircle className="mr-2 h-4 w-4" /> WhatsApp</Button>
             </CardContent>
         </Card>

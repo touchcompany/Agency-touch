@@ -10,7 +10,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="font-headline">Income vs. Expense</CardTitle>
+            <CardTitle className="font-headline">Ingresos vs. Gastos</CardTitle>
           </CardHeader>
           <CardContent>
             <OverviewChart />
@@ -18,7 +18,7 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Recent Transactions</CardTitle>
+            <CardTitle className="font-headline">Transacciones Recientes</CardTitle>
           </CardHeader>
           <CardContent>
             <RecentTransactions />

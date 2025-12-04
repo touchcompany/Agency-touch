@@ -4,16 +4,37 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
+const titleTranslations: { [key: string]: string } = {
+  dashboard: "Panel",
+  transactions: "Transacciones",
+  invoices: "Facturas",
+  customers: "Clientes",
+  settings: "Configuración",
+  edit: "Editar",
+  new: "Nuevo"
+};
+
 const getTitleFromPath = (path: string) => {
   const pathParts = path.split("/").filter(Boolean);
-  if (pathParts.length < 2) return "Dashboard";
+  if (pathParts.length < 2) return titleTranslations.dashboard || "Dashboard";
+
   const lastPart = pathParts[pathParts.length - 1];
+  
   if (lastPart === 'new' && pathParts.length > 2) {
     const parent = pathParts[pathParts.length - 2];
-    return `New ${parent.charAt(0).toUpperCase() + parent.slice(1, -1)}`;
+    const translatedParent = titleTranslations[parent.slice(0, -1)] || parent.slice(0, -1);
+    return `${titleTranslations.new} ${translatedParent}`;
   }
-  return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+  
+  if (lastPart === 'edit' && pathParts.length > 3) {
+    const parent = pathParts[pathParts.length-3];
+    const translatedParent = titleTranslations[parent.slice(0, -1)] || parent.slice(0, -1);
+     return `${titleTranslations.edit} ${translatedParent}`;
+  }
+
+  return titleTranslations[lastPart] || lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
 };
+
 
 export function DashboardHeader() {
   const pathname = usePathname();

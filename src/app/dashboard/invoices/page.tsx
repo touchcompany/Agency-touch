@@ -9,11 +9,11 @@ export default function InvoicesPage() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle className="font-headline">Invoices</CardTitle>
+        <CardTitle className="font-headline">Facturas</CardTitle>
         <Button asChild>
           <Link href="/dashboard/invoices/new">
             <Plus className="mr-2 h-4 w-4" />
-            Create Invoice
+            Crear Factura
           </Link>
         </Button>
       </CardHeader>

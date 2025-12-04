@@ -15,21 +15,22 @@ type TransactionsTableProps = {
 };
 
 export function TransactionsTable({ transactions }: TransactionsTableProps) {
+  const locale = 'es-ES';
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="text-right">Amount</TableHead>
+            <TableHead>Fecha</TableHead>
+            <TableHead>Descripción</TableHead>
+            <TableHead>Categoría</TableHead>
+            <TableHead className="text-right">Monto</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {transactions.map((transaction) => (
             <TableRow key={transaction.id}>
-              <TableCell>{new Date(transaction.date).toLocaleDateString()}</TableCell>
+              <TableCell>{new Date(transaction.date).toLocaleDateString(locale)}</TableCell>
               <TableCell className="font-medium">{transaction.description}</TableCell>
               <TableCell>
                 <Badge variant="secondary">{transaction.category}</Badge>

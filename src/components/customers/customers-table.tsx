@@ -34,11 +34,11 @@ export function CustomersTable({ customers }: CustomersTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Customer</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead className="text-right">Total Spent</TableHead>
-            <TableHead className="w-[50px] text-right">Actions</TableHead>
+            <TableHead>Cliente</TableHead>
+            <TableHead>Correo Electrónico</TableHead>
+            <TableHead>Teléfono</TableHead>
+            <TableHead className="text-right">Total Gastado</TableHead>
+            <TableHead className="w-[50px] text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -60,14 +60,14 @@ export function CustomersTable({ customers }: CustomersTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
+                      <span className="sr-only">Abrir menú</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuItem>Edit Customer</DropdownMenuItem>
-                    <DropdownMenuItem>View Details</DropdownMenuItem>
+                    <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                    <DropdownMenuItem>Editar Cliente</DropdownMenuItem>
+                    <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

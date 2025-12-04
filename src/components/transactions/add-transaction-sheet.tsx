@@ -25,7 +25,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { categorizeExpenseAction } from "@/app/actions/transactions";
 
-const categories = ["Food", "Transportation", "Utilities", "Rent", "Entertainment", "Shopping", "Travel", "Salary", "Investments", "Other"] as const;
+const categories = ["Comida", "Transporte", "Servicios", "Alquiler", "Entretenimiento", "Compras", "Viajes", "Salario", "Inversiones", "Otro"] as const;
 
 export function AddTransactionSheet() {
   const [description, setDescription] = useState("");
@@ -37,8 +37,8 @@ export function AddTransactionSheet() {
     if (!description) {
       toast({
         variant: "destructive",
-        title: "Description needed",
-        description: "Please enter a description before using AI categorization.",
+        title: "Descripción necesaria",
+        description: "Por favor, introduce una descripción antes de usar la categorización con IA.",
       });
       return;
     }
@@ -48,16 +48,16 @@ export function AddTransactionSheet() {
         if (categories.includes(result.category as any)) {
             setCategory(result.category);
         } else {
-            setCategory("Other");
+            setCategory("Otro");
         }
         toast({
-          title: "AI Categorization",
-          description: `Expense categorized as "${result.category}".`,
+          title: "Categorización con IA",
+          description: `Gasto categorizado como "${result.category}".`,
         });
       } else {
         toast({
           variant: "destructive",
-          title: "AI Categorization Failed",
+          title: "Falló la categorización con IA",
           description: result.error,
         });
       }
@@ -69,50 +69,50 @@ export function AddTransactionSheet() {
       <SheetTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Add Transaction
+          Añadir Transacción
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle className="font-headline">Add New Transaction</SheetTitle>
+          <SheetTitle className="font-headline">Añadir Nueva Transacción</SheetTitle>
           <SheetDescription>
-            Record a new income or expense. Use AI to categorize expenses automatically.
+            Registra un nuevo ingreso o gasto. Usa la IA para categorizar gastos automáticamente.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="description" className="text-right">
-              Description
+              Descripción
             </Label>
             <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="amount" className="text-right">
-              Amount
+              Monto
             </Label>
             <Input id="amount" type="number" placeholder="0.00" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">
-              Type
+              Tipo
             </Label>
             <Select>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select type" />
+                <SelectValue placeholder="Selecciona el tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="expense">Expense</SelectItem>
-                <SelectItem value="income">Income</SelectItem>
+                <SelectItem value="expense">Gasto</SelectItem>
+                <SelectItem value="income">Ingreso</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="category" className="text-right">
-              Category
+              Categoría
             </Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select category" />
+                <SelectValue placeholder="Selecciona la categoría" />
               </SelectTrigger>
               <SelectContent>
                 {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
@@ -126,13 +126,13 @@ export function AddTransactionSheet() {
               ) : (
                 <Sparkles className="mr-2 h-4 w-4" />
               )}
-              Categorize with AI
+              Categorizar con IA
             </Button>
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Save Transaction</Button>
+            <Button type="submit">Guardar Transacción</Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

@@ -13,19 +13,19 @@ export function SettingsForm() {
   return (
     <form className="space-y-8">
       <div className="space-y-2">
-        <Label htmlFor="bank-details">Bank Details</Label>
+        <Label htmlFor="bank-details">Detalles Bancarios</Label>
         <Textarea
           id="bank-details"
-          placeholder="Enter your bank account number, routing number, etc."
+          placeholder="Introduce tu número de cuenta bancaria, número de ruta, etc."
           rows={4}
         />
         <p className="text-sm text-muted-foreground">
-          This information will be displayed on your invoices.
+          Esta información se mostrará en tus facturas.
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label>Company Logo</Label>
+        <Label>Logo de la Empresa</Label>
         <div className="flex items-center gap-4">
           {logo && (
             <Image
@@ -39,13 +39,13 @@ export function SettingsForm() {
           )}
           <Button variant="outline">
             <Upload className="mr-2 h-4 w-4" />
-            Upload New Logo
+            Subir Nuevo Logo
           </Button>
         </div>
       </div>
       
       <div className="flex justify-end">
-        <Button type="submit">Save Settings</Button>
+        <Button type="submit">Guardar Configuración</Button>
       </div>
     </form>
   );

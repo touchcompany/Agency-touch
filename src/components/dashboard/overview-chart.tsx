@@ -11,18 +11,18 @@ import {
 } from "recharts";
 
 const data = [
-  { name: "Jan", income: 4000, expense: 2400 },
+  { name: "Ene", income: 4000, expense: 2400 },
   { name: "Feb", income: 3000, expense: 1398 },
   { name: "Mar", income: 5000, expense: 9800 },
-  { name: "Apr", income: 2780, expense: 3908 },
+  { name: "Abr", income: 2780, expense: 3908 },
   { name: "May", income: 1890, expense: 4800 },
   { name: "Jun", income: 2390, expense: 3800 },
   { name: "Jul", income: 3490, expense: 4300 },
-  { name: "Aug", income: 3650, expense: 4100 },
+  { name: "Ago", income: 3650, expense: 4100 },
   { name: "Sep", income: 3120, expense: 3900 },
   { name: "Oct", income: 4500, expense: 5200 },
   { name: "Nov", income: 3800, expense: 4100 },
-  { name: "Dec", income: 4200, expense: 4300 },
+  { name: "Dic", income: 4200, expense: 4300 },
 ];
 
 export function OverviewChart() {
@@ -50,9 +50,15 @@ export function OverviewChart() {
           }}
           cursor={{ fill: 'hsl(var(--muted))' }}
         />
-        <Legend wrapperStyle={{ color: 'hsl(var(--foreground))' }} />
-        <Bar dataKey="income" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="expense" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+        <Legend 
+            wrapperStyle={{ color: 'hsl(var(--foreground))' }} 
+            formatter={(value, entry) => {
+                const name = value === 'income' ? 'Ingresos' : 'Gastos';
+                return <span style={{ color: entry.color }}>{name}</span>
+            }}
+        />
+        <Bar dataKey="income" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Ingresos" />
+        <Bar dataKey="expense" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Gastos" />
       </BarChart>
     </ResponsiveContainer>
   );

@@ -7,7 +7,7 @@ export default function TransactionsPage() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle className="font-headline">All Transactions</CardTitle>
+        <CardTitle className="font-headline">Todas las Transacciones</CardTitle>
         <AddTransactionSheet />
       </CardHeader>
       <CardContent>

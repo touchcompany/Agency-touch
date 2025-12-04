@@ -20,8 +20,8 @@ import { useToast } from "@/hooks/use-toast";
 import { LogIn } from "lucide-react";
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  email: z.string().email({ message: "Por favor, introduce una dirección de correo electrónico válida." }),
+  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
 });
 
 export function LoginForm() {
@@ -47,8 +47,8 @@ export function LoginForm() {
         } else {
           toast({
             variant: "destructive",
-            title: "Login Failed",
-            description: "Invalid email or password.",
+            title: "Inicio de Sesión Fallido",
+            description: "Correo electrónico o contraseña no válidos.",
           });
         }
       }, 500);
@@ -63,9 +63,9 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Correo Electrónico</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} disabled={isPending} />
+                <Input placeholder="nombre@ejemplo.com" {...field} disabled={isPending} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -76,7 +76,7 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Contraseña</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} disabled={isPending} />
               </FormControl>
@@ -85,7 +85,7 @@ export function LoginForm() {
           )}
         />
         <Button type="submit" className="w-full" disabled={isPending}>
-          {isPending ? "Signing In..." : "Sign In"}
+          {isPending ? "Iniciando Sesión..." : "Iniciar Sesión"}
           <LogIn />
         </Button>
       </form>

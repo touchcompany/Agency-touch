@@ -40,22 +40,22 @@ const menuItems = [
   {
     href: "/dashboard",
     icon: LayoutDashboard,
-    label: "Dashboard",
+    label: "Panel",
   },
   {
     href: "/dashboard/transactions",
     icon: CreditCard,
-    label: "Transactions",
+    label: "Transacciones",
   },
   {
     href: "/dashboard/invoices",
     icon: FileText,
-    label: "Invoices",
+    label: "Facturas",
   },
   {
     href: "/dashboard/customers",
     icon: Users,
-    label: "Customers",
+    label: "Clientes",
   },
 ];
 
@@ -117,7 +117,7 @@ export function DashboardSidebar() {
                   <AvatarFallback>U</AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <span className="font-medium text-sidebar-foreground">Demo User</span>
+                  <span className="font-medium text-sidebar-foreground">Usuario Demo</span>
                   <span className="text-xs text-muted-foreground">demo@financio.ai</span>
                 </div>
               </div>
@@ -125,19 +125,19 @@ export function DashboardSidebar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 mb-2" side="top" align="start">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+            <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
               <Link href="/dashboard/settings">
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>Configuración</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                <Link href="/login">
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
+                <span>Cerrar Sesión</span>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

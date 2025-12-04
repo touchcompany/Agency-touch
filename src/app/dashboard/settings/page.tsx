@@ -6,8 +6,8 @@ export default function SettingsPage() {
     <div className="mx-auto max-w-3xl">
       <Card>
         <CardHeader>
-          <CardTitle className="font-headline">Settings</CardTitle>
-          <CardDescription>Manage your company information and payment details.</CardDescription>
+          <CardTitle className="font-headline">Configuración</CardTitle>
+          <CardDescription>Gestiona la información de tu empresa y los detalles de pago.</CardDescription>
         </CardHeader>
         <CardContent>
           <SettingsForm />

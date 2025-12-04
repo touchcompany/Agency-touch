@@ -7,7 +7,7 @@ export default function CustomersPage() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle className="font-headline">Customers</CardTitle>
+        <CardTitle className="font-headline">Clientes</CardTitle>
         <AddCustomerSheet />
       </CardHeader>
       <CardContent>

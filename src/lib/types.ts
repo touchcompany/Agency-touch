@@ -4,7 +4,7 @@ export type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense';
-  category: 'Food' | 'Transportation' | 'Utilities' | 'Rent' | 'Entertainment' | 'Shopping' | 'Travel' | 'Salary' | 'Investments' | 'Other';
+  category: 'Comida' | 'Transporte' | 'Servicios' | 'Alquiler' | 'Entretenimiento' | 'Compras' | 'Viajes' | 'Salario' | 'Inversiones' | 'Otro';
 };
 
 export type InvoiceItem = {

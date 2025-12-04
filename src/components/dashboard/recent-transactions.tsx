@@ -3,21 +3,22 @@ import { formatCurrency } from "@/lib/utils";
 import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-const categoryIcons = {
-  Food: '🍔',
-  Transportation: '🚗',
-  Utilities: '💡',
-  Rent: '🏠',
-  Entertainment: '🎬',
-  Shopping: '🛍️',
-  Travel: '✈️',
-  Salary: '💼',
-  Investments: '📈',
-  Other: '📎',
+const categoryIcons: { [key: string]: string } = {
+  Comida: '🍔',
+  Transporte: '🚗',
+  Servicios: '💡',
+  Alquiler: '🏠',
+  Entretenimiento: '🎬',
+  Compras: '🛍️',
+  Viajes: '✈️',
+  Salario: '💼',
+  Inversiones: '📈',
+  Otro: '📎',
 }
 
 export function RecentTransactions() {
   const recent = mockTransactions.slice(0, 5);
+  const locale = 'es-ES';
 
   return (
     <div className="space-y-4">
@@ -33,7 +34,7 @@ export function RecentTransactions() {
               {transaction.description}
             </p>
             <p className="text-sm text-muted-foreground">
-              {new Date(transaction.date).toLocaleDateString()}
+              {new Date(transaction.date).toLocaleDateString(locale)}
             </p>
           </div>
           <div
