@@ -1,48 +1,40 @@
-import { mockTransactions } from "@/lib/data";
+import { mockPagos, mockClientes } from "@/lib/data";
 import { formatCurrency } from "@/lib/utils";
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-const categoryIcons: { [key: string]: string } = {
-  Comida: '🍔',
-  Transporte: '🚗',
-  Servicios: '💡',
-  Alquiler: '🏠',
-  Entretenimiento: '🎬',
-  Compras: '🛍️',
-  Viajes: '✈️',
-  Salario: '💼',
-  Inversiones: '📈',
-  Otro: '📎',
-}
-
-export function RecentTransactions() {
-  const recent = mockTransactions.slice(0, 5);
+export function RecentPagos() {
+  const recent = mockPagos.slice(0, 5);
   const locale = 'es-ES';
+
+  const getClientName = (clientId: string) => {
+    return mockClientes.find(c => c.id === clientId)?.nombre || "Cliente Desconocido";
+  }
+  
+  const getClientAvatar = (clientId: string) => {
+    const client = mockClientes.find(c => c.id === clientId);
+    return client?.logoUrl || `https://picsum.photos/seed/${clientId}/100/100`;
+  }
 
   return (
     <div className="space-y-4">
-      {recent.map((transaction) => (
-        <div key={transaction.id} className="flex items-center gap-4">
+      {recent.map((pago) => (
+        <div key={pago.id} className="flex items-center gap-4">
           <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-muted text-foreground">
-              {categoryIcons[transaction.category]}
-            </AvatarFallback>
+             <AvatarImage src={getClientAvatar(pago.clienteId)} data-ai-hint="person" />
+            <AvatarFallback>{getClientName(pago.clienteId).charAt(0)}</AvatarFallback>
           </Avatar>
           <div className="flex-1 space-y-1">
             <p className="text-sm font-medium leading-none">
-              {transaction.description}
+              {pago.descripcion}
             </p>
             <p className="text-sm text-muted-foreground">
-              {new Date(transaction.date).toLocaleDateString(locale)}
+              {getClientName(pago.clienteId)}
             </p>
           </div>
           <div
-            className={`font-medium ${
-              transaction.type === "income" ? "text-green-500" : "text-red-500"
-            }`}
+            className={`font-medium text-green-500`}
           >
-            {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+            +{formatCurrency(pago.monto)}
           </div>
         </div>
       ))}

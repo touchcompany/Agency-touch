@@ -7,8 +7,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
@@ -17,7 +15,6 @@ import {
   CreditCard,
   Settings,
   LogOut,
-  Sparkles,
   ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
@@ -63,6 +60,10 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
+    // Exact match for dashboard, otherwise startsWith
+    if (href === "/dashboard") {
+      return pathname === href;
+    }
     return pathname.startsWith(href);
   };
 

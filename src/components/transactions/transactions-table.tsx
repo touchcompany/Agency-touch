@@ -1,4 +1,4 @@
-import type { Transaction } from "@/lib/types";
+import type { Pago } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import {
   Table,
@@ -9,38 +9,42 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { mockClientes } from "@/lib/data";
 
-type TransactionsTableProps = {
-  transactions: Transaction[];
+type PagosTableProps = {
+  pagos: Pago[];
 };
 
-export function TransactionsTable({ transactions }: TransactionsTableProps) {
+export function PagosTable({ pagos }: PagosTableProps) {
   const locale = 'es-ES';
+  
+  const getClientName = (clientId: string) => {
+    return mockClientes.find(c => c.id === clientId)?.nombre || "N/A";
+  }
+
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Fecha</TableHead>
+            <TableHead>Cliente</TableHead>
             <TableHead>Descripción</TableHead>
-            <TableHead>Categoría</TableHead>
+            <TableHead>Método</TableHead>
             <TableHead className="text-right">Monto</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transactions.map((transaction) => (
-            <TableRow key={transaction.id}>
-              <TableCell>{new Date(transaction.date).toLocaleDateString(locale)}</TableCell>
-              <TableCell className="font-medium">{transaction.description}</TableCell>
+          {pagos.map((pago) => (
+            <TableRow key={pago.id}>
+              <TableCell>{new Date(pago.fechaPago).toLocaleDateString(locale)}</TableCell>
+              <TableCell className="font-medium">{getClientName(pago.clienteId)}</TableCell>
+              <TableCell>{pago.descripcion}</TableCell>
               <TableCell>
-                <Badge variant="secondary">{transaction.category}</Badge>
+                <Badge variant="secondary">{pago.metodoPago}</Badge>
               </TableCell>
-              <TableCell
-                className={`text-right font-medium ${
-                  transaction.type === "income" ? "text-green-500" : "text-red-500"
-                }`}
-              >
-                {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+              <TableCell className="text-right font-medium text-green-500">
+                +{formatCurrency(pago.monto)}
               </TableCell>
             </TableRow>
           ))}

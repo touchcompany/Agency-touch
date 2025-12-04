@@ -1,6 +1,6 @@
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
-import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { RecentPagos } from "@/components/dashboard/recent-pagos";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardPage() {
@@ -10,7 +10,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="font-headline">Ingresos vs. Gastos</CardTitle>
+            <CardTitle className="font-headline">Resumen de Cuentas</CardTitle>
           </CardHeader>
           <CardContent>
             <OverviewChart />
@@ -18,10 +18,10 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Transacciones Recientes</CardTitle>
+            <CardTitle className="font-headline">Pagos Recientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentTransactions />
+            <RecentPagos />
           </CardContent>
         </Card>
       </div>
