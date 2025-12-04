@@ -40,17 +40,17 @@ const menuItems = [
     label: "Panel",
   },
   {
-    href: "/dashboard/pagos",
+    href: "/dashboard/transactions",
     icon: CreditCard,
     label: "Pagos",
   },
   {
-    href: "/dashboard/cuentas",
+    href: "/dashboard/invoices",
     icon: FileText,
     label: "Cuentas",
   },
   {
-    href: "/dashboard/clientes",
+    href: "/dashboard/customers",
     icon: Users,
     label: "Clientes",
   },

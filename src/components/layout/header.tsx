@@ -6,9 +6,9 @@ import { useMemo } from "react";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
-  pagos: "Pagos",
+  transactions: "Pagos",
   invoices: "Cuentas",
-  clientes: "Clientes",
+  customers: "Clientes",
   settings: "Configuración",
   edit: "Editar",
   new: "Nueva"
