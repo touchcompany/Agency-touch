@@ -1,4 +1,4 @@
-import type { Invoice } from "@/lib/types";
+import type { Cuenta } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import {
   Table,
@@ -19,27 +19,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { mockClientes } from "@/lib/data";
 
-type InvoicesTableProps = {
-  invoices: Invoice[];
+type CuentasTableProps = {
+  cuentas: Cuenta[];
 };
 
 const statusVariant = {
-  paid: "default",
-  pending: "secondary",
-  overdue: "destructive",
+  pagada: "default",
+  pendiente: "secondary",
+  vencida: "destructive",
 } as const;
 
 const statusTranslations: { [key in keyof typeof statusVariant]: string } = {
-    paid: "Pagada",
-    pending: "Pendiente",
-    overdue: "Vencida",
+    pagada: "Pagada",
+    pendiente: "Pendiente",
+    vencida: "Vencida",
 };
 
-export function InvoicesTable({ invoices }: InvoicesTableProps) {
-  const calculateTotal = (invoice: Invoice) =>
-    invoice.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+const getClientName = (clientId: string) => {
+    return mockClientes.find(c => c.id === clientId)?.nombre || "Cliente Desconocido";
+}
 
+export function CuentasTable({ cuentas }: CuentasTableProps) {
   const locale = 'es-ES';
 
   return (
@@ -48,7 +50,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead>Estado</TableHead>
-            <TableHead>Factura</TableHead>
+            <TableHead>Nº Cuenta</TableHead>
             <TableHead>Cliente</TableHead>
             <TableHead>Fecha de Emisión</TableHead>
             <TableHead>Fecha de Vencimiento</TableHead>
@@ -57,18 +59,18 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.id}>
+          {cuentas.map((cuenta) => (
+            <TableRow key={cuenta.id}>
               <TableCell>
-                <Badge variant={statusVariant[invoice.status]} className="capitalize">
-                  {statusTranslations[invoice.status]}
+                <Badge variant={statusVariant[cuenta.status]} className="capitalize">
+                  {statusTranslations[cuenta.status]}
                 </Badge>
               </TableCell>
-              <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-              <TableCell>{invoice.customer.name}</TableCell>
-              <TableCell>{new Date(invoice.issueDate).toLocaleDateString(locale)}</TableCell>
-              <TableCell>{new Date(invoice.dueDate).toLocaleDateString(locale)}</TableCell>
-              <TableCell className="text-right">{formatCurrency(calculateTotal(invoice))}</TableCell>
+              <TableCell className="font-medium">{cuenta.numeroCuenta}</TableCell>
+              <TableCell>{getClientName(cuenta.clienteId)}</TableCell>
+              <TableCell>{new Date(cuenta.fechaEmision).toLocaleDateString(locale)}</TableCell>
+              <TableCell>{cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento).toLocaleDateString(locale) : 'N/A'}</TableCell>
+              <TableCell className="text-right">{formatCurrency(cuenta.valorTotal)}</TableCell>
                <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -79,7 +81,7 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem asChild><Link href={`/dashboard/invoices/${invoice.id}/edit`}>Editar</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild><Link href={`/dashboard/invoices/${cuenta.id}/edit`}>Editar</Link></DropdownMenuItem>
                     <DropdownMenuItem>Descargar PDF</DropdownMenuItem>
                     <DropdownMenuItem>Enviar Correo</DropdownMenuItem>
                   </DropdownMenuContent>

@@ -1,8 +1,8 @@
-import { InvoiceForm } from "@/components/invoices/invoice-form";
-import { mockCustomers, mockInvoices } from "@/lib/data";
+import { CuentaForm } from "@/components/invoices/invoice-form";
+import { mockClientes, mockCuentas } from "@/lib/data";
 
-export default function EditInvoicePage({ params }: { params: { id: string } }) {
-  const invoice = mockInvoices.find(inv => inv.id === params.id || inv.invoiceNumber === params.id);
+export default function EditCuentaPage({ params }: { params: { id: string } }) {
+  const cuenta = mockCuentas.find(inv => inv.id === params.id || inv.numeroCuenta === params.id);
   
-  return <InvoiceForm customers={mockCustomers} invoice={invoice} />;
+  return <CuentaForm clientes={mockClientes} cuenta={cuenta} />;
 }

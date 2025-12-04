@@ -7,11 +7,11 @@ import { useMemo } from "react";
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
   pagos: "Pagos",
-  cuentas: "Cuentas",
+  invoices: "Cuentas",
   clientes: "Clientes",
   settings: "Configuración",
   edit: "Editar",
-  new: "Nuevo"
+  new: "Nueva"
 };
 
 const getTitleFromPath = (path: string) => {
@@ -22,15 +22,24 @@ const getTitleFromPath = (path: string) => {
   
   if (lastPart === 'new' && pathParts.length > 2) {
     const parent = pathParts[pathParts.length - 2];
-    const singularParent = parent.endsWith('s') ? parent.slice(0, -1) : parent;
-    const translatedParent = titleTranslations[parent] || singularParent;
+    let translatedParent = titleTranslations[parent] || parent;
+    
+    // Singularize
+    if (translatedParent.endsWith('s')) {
+      translatedParent = translatedParent.slice(0, -1);
+    }
+    
     return `${titleTranslations.new} ${translatedParent}`;
   }
   
   if (lastPart === 'edit' && pathParts.length > 3) {
     const parent = pathParts[pathParts.length-3];
-    const singularParent = parent.endsWith('s') ? parent.slice(0, -1) : parent;
-    const translatedParent = titleTranslations[parent] || singularParent;
+    let translatedParent = titleTranslations[parent] || parent;
+
+    // Singularize
+    if (translatedParent.endsWith('s')) {
+      translatedParent = translatedParent.slice(0, -1);
+    }
      return `${titleTranslations.edit} ${translatedParent}`;
   }
 

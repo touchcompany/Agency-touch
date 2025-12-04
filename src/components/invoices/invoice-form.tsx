@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Customer, Invoice, InvoiceItem } from "@/lib/types";
+import type { Cliente, Cuenta, DetalleCuenta } from "@/lib/types";
 import { CalendarIcon, Plus, Trash, Upload, Download, Send, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
@@ -27,34 +27,35 @@ import { format } from "date-fns";
 import { es } from 'date-fns/locale';
 import { cn, formatCurrency } from "@/lib/utils";
 import { Separator } from "../ui/separator";
+import { Textarea } from "../ui/textarea";
 
-type InvoiceFormProps = {
-  customers: Customer[];
-  invoice?: Invoice;
+type CuentaFormProps = {
+  clientes: Cliente[];
+  cuenta?: Cuenta;
 };
 
-export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
-  const [items, setItems] = useState<Partial<InvoiceItem>[]>(invoice?.items || [{ description: "", quantity: 1, price: 0 }]);
-  const [issueDate, setIssueDate] = useState<Date | undefined>(invoice ? new Date(invoice.issueDate) : new Date());
-  const [dueDate, setDueDate] = useState<Date | undefined>(invoice ? new Date(invoice.dueDate) : new Date(new Date().setDate(new Date().getDate() + 30)));
+export function CuentaForm({ clientes, cuenta }: CuentaFormProps) {
+  const [detalle, setDetalle] = useState<Partial<DetalleCuenta>[]>(cuenta?.detalle || [{ descripcion: "", cantidad: 1, precio: 0 }]);
+  const [fechaEmision, setFechaEmision] = useState<Date | undefined>(cuenta ? new Date(cuenta.fechaEmision) : new Date());
+  const [fechaVencimiento, setFechaVencimiento] = useState<Date | undefined>(cuenta?.fechaVencimiento ? new Date(cuenta.fechaVencimiento) : new Date(new Date().setDate(new Date().getDate() + 30)));
 
-  const handleItemChange = (index: number, field: keyof InvoiceItem, value: string | number) => {
-    const newItems = [...items];
+  const handleItemChange = (index: number, field: keyof DetalleCuenta, value: string | number) => {
+    const newItems = [...detalle];
     (newItems[index] as any)[field] = value;
-    setItems(newItems);
+    setDetalle(newItems);
   };
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, price: 0 }]);
+    setDetalle([...detalle, { descripcion: "", cantidad: 1, precio: 0 }]);
   };
   
   const removeItem = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
+    const newItems = detalle.filter((_, i) => i !== index);
+    setDetalle(newItems);
   };
   
-  const subtotal = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
-  const tax = subtotal * 0.1; // Example 10% tax
+  const subtotal = detalle.reduce((sum, item) => sum + (item.precio || 0) * (item.cantidad || 0), 0);
+  const tax = subtotal * 0.19; // Example 19% tax (IVA Colombia)
   const total = subtotal + tax;
 
   return (
@@ -67,27 +68,22 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
           <CardContent className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="customer">Cliente</Label>
-              <Select defaultValue={invoice?.customer.id}>
+              <Select defaultValue={cuenta?.clienteId}>
                 <SelectTrigger id="customer">
                   <SelectValue placeholder="Selecciona un cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {customers.map((customer) => (
+                  {clientes.map((customer) => (
                     <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}
+                      {customer.nombre}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-                <Label>Logo de la Empresa</Label>
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 flex-shrink-0 rounded-md border flex items-center justify-center bg-muted">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <Button variant="outline" size="sm">Subir Logo</Button>
-                </div>
+              <Label htmlFor="descripcion">Descripción</Label>
+              <Input id="descripcion" defaultValue={cuenta?.descripcion} placeholder="Ej: Servicios de consultoría" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="issue-date">Fecha de Emisión</Label>
@@ -97,15 +93,15 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !issueDate && "text-muted-foreground"
+                      !fechaEmision && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {issueDate ? format(issueDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
+                    {fechaEmision ? format(fechaEmision, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={issueDate} onSelect={setIssueDate} initialFocus locale={es} />
+                  <Calendar mode="single" selected={fechaEmision} onSelect={setFechaEmision} initialFocus locale={es} />
                 </PopoverContent>
               </Popover>
             </div>
@@ -117,15 +113,15 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     variant={"outline"}
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !dueDate && "text-muted-foreground"
+                      !fechaVencimiento && "text-muted-foreground"
                     )}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {dueDate ? format(dueDate, "PPP", { locale: es }) : <span>Elige una fecha</span>}
+                    {fechaVencimiento ? format(fechaVencimiento, "PPP", { locale: es }) : <span>Elige una fecha</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={es} />
+                  <Calendar mode="single" selected={fechaVencimiento} onSelect={setFechaVencimiento} initialFocus locale={es} />
                 </PopoverContent>
               </Popover>
             </div>
@@ -134,31 +130,31 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Artículos de la Factura</CardTitle>
+            <CardTitle className="font-headline">Detalle de la Cuenta</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {items.map((item, index) => (
+              {detalle.map((item, index) => (
                 <div key={index} className="grid grid-cols-12 items-center gap-2">
                   <Input
                     placeholder="Descripción del artículo"
                     className="col-span-6"
-                    value={item.description}
-                    onChange={(e) => handleItemChange(index, 'description', e.target.value)}
+                    value={item.descripcion}
+                    onChange={(e) => handleItemChange(index, 'descripcion', e.target.value)}
                   />
                   <Input
                     type="number"
                     placeholder="Cant."
                     className="col-span-2"
-                    value={item.quantity}
-                    onChange={(e) => handleItemChange(index, 'quantity', parseInt(e.target.value, 10))}
+                    value={item.cantidad}
+                    onChange={(e) => handleItemChange(index, 'cantidad', parseInt(e.target.value, 10))}
                   />
                   <Input
                     type="number"
                     placeholder="Precio"
                     className="col-span-3"
-                    value={item.price}
-                    onChange={(e) => handleItemChange(index, 'price', parseFloat(e.target.value))}
+                    value={item.precio}
+                    onChange={(e) => handleItemChange(index, 'precio', parseFloat(e.target.value))}
                   />
                   <Button variant="ghost" size="icon" onClick={() => removeItem(index)} className="col-span-1">
                     <Trash className="h-4 w-4 text-red-500" />
@@ -169,6 +165,27 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
             <Button variant="outline" size="sm" onClick={addItem} className="mt-4">
               <Plus className="mr-2 h-4 w-4" /> Añadir Artículo
             </Button>
+          </CardContent>
+        </Card>
+
+         <Card>
+          <CardHeader>
+            <CardTitle className="font-headline">Observaciones y Firma</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-6">
+             <div className="space-y-2">
+                <Label htmlFor="observaciones">Observaciones</Label>
+                <Textarea id="observaciones" placeholder="Añade notas u observaciones adicionales aquí." rows={3} defaultValue={cuenta?.observaciones}/>
+            </div>
+             <div className="space-y-2">
+                <Label>Firma</Label>
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-48 flex-shrink-0 rounded-md border flex items-center justify-center bg-muted">
+                    {cuenta?.firmaUrl ? <img src={cuenta.firmaUrl} alt="Firma" className="h-full w-full object-contain" /> : <Upload className="h-6 w-6 text-muted-foreground" />}
+                  </div>
+                  <Button variant="outline" size="sm">Subir Firma</Button>
+                </div>
+            </div>
           </CardContent>
         </Card>
       </form>
@@ -183,7 +200,7 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                     <span>{formatCurrency(subtotal)}</span>
                 </div>
                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Impuestos (10%)</span>
+                    <span className="text-muted-foreground">IVA (19%)</span>
                     <span>{formatCurrency(tax)}</span>
                 </div>
                 <Separator />
@@ -193,7 +210,7 @@ export function InvoiceForm({ customers, invoice }: InvoiceFormProps) {
                 </div>
             </CardContent>
              <CardFooter className="flex-col gap-2 items-stretch">
-                <Button>{invoice ? "Guardar Cambios" : "Crear Factura"}</Button>
+                <Button>{cuenta ? "Guardar Cambios" : "Crear Cuenta de Cobro"}</Button>
              </CardFooter>
         </Card>
         <Card>
