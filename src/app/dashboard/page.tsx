@@ -1,6 +1,6 @@
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { OverviewChart } from "@/components/dashboard/overview-chart";
-import { RecentPagos } from "@/components/dashboard/recent-pagos";
+import { RecentTransactions } from "@/components/dashboard/recent-transactions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function DashboardPage() {
@@ -18,10 +18,10 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Pagos Recientes</CardTitle>
+            <CardTitle className="font-headline">Transacciones Recientes</CardTitle>
           </CardHeader>
           <CardContent>
-            <RecentPagos />
+            <RecentTransactions />
           </CardContent>
         </Card>
       </div>

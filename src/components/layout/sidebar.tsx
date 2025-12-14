@@ -42,7 +42,7 @@ const menuItems = [
   {
     href: "/dashboard/transactions",
     icon: CreditCard,
-    label: "Pagos",
+    label: "Transacciones",
   },
   {
     href: "/dashboard/invoices",
