@@ -78,3 +78,20 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
+
+// This is a placeholder type for the original Customer type from the starter project
+// It's used in customers-table.tsx to calculate total spent.
+// We will replace this with the new data model soon.
+export type Customer = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  paymentHistory: {
+    status: 'paid' | 'pending' | 'overdue';
+    items: {
+      price: number;
+      quantity: number;
+    }[];
+  }[];
+};
