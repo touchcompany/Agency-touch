@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn } from "lucide-react";
+import { useAuth } from "@/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Por favor, introduce una dirección de correo electrónico válida." }),
@@ -27,6 +29,8 @@ const formSchema = z.object({
 export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
+  const auth = useAuth();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -37,21 +41,18 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    startTransition(() => {
-      // Simulate API call
-      setTimeout(() => {
-        // In a real app, you'd handle authentication here.
-        // For this demo, we'll just redirect.
-        if (values.email === "demo@financio.ai" && values.password === "password") {
-          redirect("/dashboard");
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Inicio de Sesión Fallido",
-            description: "Correo electrónico o contraseña no válidos.",
-          });
-        }
-      }, 500);
+    startTransition(async () => {
+      try {
+        await signInWithEmailAndPassword(auth, values.email, values.password);
+        router.push("/dashboard");
+      } catch (error) {
+        console.error("Login Error", error)
+        toast({
+          variant: "destructive",
+          title: "Inicio de Sesión Fallido",
+          description: "Correo electrónico o contraseña no válidos.",
+        });
+      }
     });
   }
 
