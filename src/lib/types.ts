@@ -21,6 +21,7 @@ export type Income = {
 export type Expense = {
   id: string;
   userId: string;
+  collaboratorId?: string;
   date: string;
   amount: number;
   description: string;
@@ -57,9 +58,9 @@ export type Collaborator = {
   name: string;
   email?: string;
   phoneNumber?: string;
-  address?: string;
   createdAt: string;
 };
+
 
 export type DetalleCuenta = {
   id: string;
@@ -141,5 +142,3 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
-
-    

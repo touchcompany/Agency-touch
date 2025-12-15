@@ -1,3 +1,4 @@
+
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,9 +20,10 @@ import { LogOut, User as UserIcon } from "lucide-react";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
-  transactions: "Pagos",
+  transactions: "Transacciones",
   invoices: "Cuentas",
   customers: "Clientes",
+  collaborators: "Colaboradores",
   services: "Servicios",
   settings: "Configuración",
   edit: "Editar",

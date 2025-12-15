@@ -24,22 +24,41 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
-import type { Customer } from '@/lib/types';
+import type { Collaborator } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
+import { categorizeExpenseAction } from '@/app/actions/transactions';
 
-export function AddTransactionSheet() {
+export function AddExpenseSheet() {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  const [customerId, setCustomerId] = useState('');
+  const [collaboratorId, setCollaboratorId] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
+  const [isCategorizing, setIsCategorizing] = useState(false);
   
-  const customersQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  const collaboratorsQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
-  const { data: customers } = useCollection<Customer>(customersQuery);
+  const { data: collaborators } = useCollection<Collaborator>(collaboratorsQuery);
+
+  const handleDescriptionBlur = async () => {
+    if (description && !category) {
+      setIsCategorizing(true);
+      const result = await categorizeExpenseAction(description);
+      if (result.success && result.category) {
+        setCategory(result.category);
+      } else if (result.error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error de categorización',
+          description: result.error,
+        });
+      }
+      setIsCategorizing(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!firestore || !user || !amount || !description || !category) {
@@ -51,10 +70,10 @@ export function AddTransactionSheet() {
       return;
     }
 
-    const incomeRef = collection(firestore, 'users', user.uid, 'income');
-    addDocumentNonBlocking(incomeRef, {
+    const expensesRef = collection(firestore, 'users', user.uid, 'expenses');
+    addDocumentNonBlocking(expensesRef, {
       userId: user.uid,
-      customerId: customerId || null,
+      collaboratorId: collaboratorId || null,
       date: new Date().toISOString(),
       amount: parseFloat(amount),
       description,
@@ -62,12 +81,12 @@ export function AddTransactionSheet() {
     });
 
     toast({
-      title: 'Transacción añadida',
-      description: 'El ingreso ha sido registrado.',
+      title: 'Egreso añadido',
+      description: 'El egreso ha sido registrado.',
     });
 
     // Reset fields
-    setCustomerId('');
+    setCollaboratorId('');
     setDescription('');
     setAmount('');
     setCategory('');
@@ -78,29 +97,29 @@ export function AddTransactionSheet() {
       <SheetTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Añadir Ingreso
+          Añadir Egreso
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
           <SheetTitle className="font-headline">
-            Añadir Nuevo Ingreso
+            Añadir Nuevo Egreso
           </SheetTitle>
           <SheetDescription>
-            Registra un nuevo ingreso recibido.
+            Registra un nuevo pago o gasto realizado.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="customer" className="text-right">
-              Cliente
+            <Label htmlFor="collaborator" className="text-right">
+              Colaborador
             </Label>
-            <Select value={customerId} onValueChange={setCustomerId}>
+            <Select value={collaboratorId} onValueChange={setCollaboratorId}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un cliente" />
+                <SelectValue placeholder="Selecciona un colaborador (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                {(customers || []).map((c) => (
+                {(collaborators || []).map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>
@@ -116,7 +135,8 @@ export function AddTransactionSheet() {
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Ej: Abono a cuenta CTA-001"
+              onBlur={handleDescriptionBlur}
+              placeholder="Ej: Pago de nómina"
               className="col-span-3"
             />
           </div>
@@ -134,17 +154,23 @@ export function AddTransactionSheet() {
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="type" className="text-right">
+            <Label htmlFor="category" className="text-right">
               Categoría
             </Label>
             <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona categoría" />
+                <SelectValue placeholder={isCategorizing ? "Categorizando con IA..." : "Selecciona categoría"} />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="Comida">Comida</SelectItem>
+                <SelectItem value="Transporte">Transporte</SelectItem>
+                <SelectItem value="Servicios">Servicios</SelectItem>
+                <SelectItem value="Alquiler">Alquiler</SelectItem>
+                <SelectItem value="Entretenimiento">Entretenimiento</SelectItem>
+                <SelectItem value="Compras">Compras</SelectItem>
+                <SelectItem value="Viajes">Viajes</SelectItem>
                 <SelectItem value="Salario">Salario</SelectItem>
                 <SelectItem value="Inversiones">Inversiones</SelectItem>
-                <SelectItem value="Ventas">Ventas</SelectItem>
                 <SelectItem value="Otro">Otro</SelectItem>
               </SelectContent>
             </Select>
@@ -153,7 +179,7 @@ export function AddTransactionSheet() {
         <SheetFooter>
           <SheetClose asChild>
             <Button type="submit" onClick={handleSubmit}>
-              Guardar Ingreso
+              Guardar Egreso
             </Button>
           </SheetClose>
         </SheetFooter>
