@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -190,7 +190,7 @@ export function CuentasTable() {
                   {formatCurrency(invoice.amountDue)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Dialog onOpenChange={(open) => { if (open) { setSelectedInvoice(invoice)} else { setSelectedInvoice(null)} }}>
+                  <Dialog onOpenChange={(open) => { if (!open) { setSelectedInvoice(null)} }}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -212,7 +212,7 @@ export function CuentasTable() {
                           )}
                           <DropdownMenuSeparator />
                           <DialogTrigger asChild>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onSelect={() => setSelectedInvoice(invoice)}>
                                   <Download className="mr-2 h-4 w-4" />
                                   Ver / Descargar PDF
                               </DropdownMenuItem>

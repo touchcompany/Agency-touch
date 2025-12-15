@@ -89,46 +89,47 @@ body {
 }
 
 @media print {
-  body.printing * {
-    visibility: hidden;
-  }
-  
-  body.printing .print-only,
-  body.printing .print-only * {
-    visibility: visible;
-  }
-
-  .print-only {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-  }
-
   .print-hidden {
-    display: none !important;
-  }
-
-  .print-only {
     display: none;
   }
-  
-  @page {
-    size: A4;
-    margin: 0;
+  .print-only {
+    display: block;
   }
-  
-  body:not(.printing) .print-only {
-      display: none;
+  body > .print-hidden {
+    display: none;
   }
-  
-  body.printing .print-hidden {
-      display: none !important;
+  body > .print-only {
+    display: block;
   }
+}
 
-  body {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+@layer utilities {
+  @media print {
+    .print-hidden {
+      display: none !important;
+    }
+    body .print-hidden {
+      display: none !important;
+    }
+    body *:not(.print-only):not(.print-only *) {
+      display: none;
+    }
+    body .print-only {
+      display: block !important;
+      position: static !important;
+      width: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+    @page {
+      size: A4;
+      margin: 0;
+    }
+    body {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      margin: 0;
+      padding: 0;
+    }
   }
 }

@@ -59,7 +59,6 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const { firestore, user } = useFirebase();
   const router = useRouter();
   const { toast } = useToast();
-  const printRef = useRef<HTMLDivElement>(null);
 
   const customersQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'customers') : null),
