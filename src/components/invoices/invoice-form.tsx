@@ -49,6 +49,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
+import ReactDOMServer from 'react-dom/server';
 
 
 type CuentaFormProps = {
@@ -248,7 +249,40 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   }
 
   const handlePrint = () => {
-    window.print();
+    const invoiceElement = (
+      <InvoicePrintLayout
+        invoice={getFullCurrentInvoice()}
+        customer={clientes?.find(c => c.id === customerId)}
+        companySettings={companySettings ?? undefined}
+      />
+    );
+    const invoiceHtml = ReactDOMServer.renderToString(invoiceElement);
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Cuenta de Cobro ${getFullCurrentInvoice()?.invoiceNumber || ''}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+              body { font-family: 'Inter', sans-serif; }
+              @page { size: A4; margin: 0; }
+            </style>
+          </head>
+          <body>
+            ${invoiceHtml}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250);
+    }
   };
   
   const handleSendWhatsApp = () => {
@@ -286,14 +320,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
   return (
     <>
-      <div className="print-only">
-        <InvoicePrintLayout
-          invoice={getFullCurrentInvoice()}
-          customer={clientes?.find(c => c.id === customerId)}
-          companySettings={companySettings ?? undefined}
-        />
-      </div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print-hidden">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
         <div className="grid gap-6 lg:col-span-2">
           <Card>
             <CardHeader>
@@ -545,7 +572,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   <DialogTrigger asChild>
                     <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl print-hidden">
+                  <DialogContent className="max-w-4xl">
                       <DialogHeader>
                           <DialogTitle>Vista Previa de la Cuenta</DialogTitle>
                       </DialogHeader>

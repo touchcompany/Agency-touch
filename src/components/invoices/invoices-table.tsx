@@ -29,6 +29,7 @@ import { es } from 'date-fns/locale';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import React, { useState } from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -119,8 +120,42 @@ export function CuentasTable() {
     window.open(whatsappUrl, '_blank');
   };
   
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = (invoiceToPrint: Invoice) => {
+    const customer = customers?.find(c => c.id === invoiceToPrint.customerId);
+    const invoiceElement = (
+      <InvoicePrintLayout
+        invoice={invoiceToPrint}
+        customer={customer}
+        companySettings={companySettings ?? undefined}
+      />
+    );
+    const invoiceHtml = ReactDOMServer.renderToString(invoiceElement);
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Cuenta de Cobro ${invoiceToPrint.invoiceNumber}</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+            <style>
+              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+              body { font-family: 'Inter', sans-serif; }
+              @page { size: A4; margin: 0; }
+            </style>
+          </head>
+          <body>
+            ${invoiceHtml}
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+      }, 250); // Small delay to ensure content loads
+    }
   };
 
   if (isLoading) {
@@ -141,16 +176,7 @@ export function CuentasTable() {
 
   return (
     <>
-      <div className="print-only">
-        {selectedInvoice && (
-           <InvoicePrintLayout
-                invoice={selectedInvoice}
-                customer={customers?.find(c => c.id === selectedInvoice.customerId)}
-                companySettings={companySettings ?? undefined}
-            />
-        )}
-      </div>
-      <div className="overflow-x-auto print-hidden">
+      <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -211,12 +237,10 @@ export function CuentasTable() {
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DialogTrigger asChild>
-                              <DropdownMenuItem onSelect={() => setSelectedInvoice(invoice)}>
-                                  <Download className="mr-2 h-4 w-4" />
-                                  Ver / Descargar PDF
-                              </DropdownMenuItem>
-                          </DialogTrigger>
+                          <DropdownMenuItem onSelect={() => handlePrint(invoice)}>
+                              <Download className="mr-2 h-4 w-4" />
+                              Ver / Descargar PDF
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleSendWhatsApp(invoice)}>
                              <MessageCircle className="mr-2 h-4 w-4" />
                              Enviar por WhatsApp
@@ -227,19 +251,6 @@ export function CuentasTable() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                       <DialogContent className="max-w-4xl print-hidden">
-                          <DialogHeader>
-                              <DialogTitle>Vista Previa de la Cuenta de Cobro</DialogTitle>
-                          </DialogHeader>
-                          <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 dark:bg-gray-800">
-                              {selectedInvoice && <InvoicePrintLayout
-                                      invoice={selectedInvoice}
-                                      customer={customers?.find(c => c.id === selectedInvoice.customerId)}
-                                      companySettings={companySettings ?? undefined}
-                                  />}
-                          </div>
-                          <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
-                      </DialogContent>
                   </Dialog>
                 </TableCell>
               </TableRow>
