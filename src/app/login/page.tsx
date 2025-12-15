@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useUser } from '@/firebase';
 import {
@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 declare global {
@@ -41,11 +41,12 @@ export default function LoginPage() {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // If user is already logged in, redirect to dashboard
-  if (!isUserLoading && user) {
-    router.push('/dashboard');
-    return null; // Render nothing while redirecting
-  }
+  // Redirect if user is already logged in
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
   
   const setupRecaptcha = () => {
     if (!auth) return;
@@ -107,7 +108,15 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
-
+  
+  // While loading or if user exists (and redirect is in progress), show a loader or nothing
+  if (isUserLoading || user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
