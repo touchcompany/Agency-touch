@@ -25,7 +25,7 @@ import type { Customer, Invoice } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
-const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
+const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
   paid: 'default',
   sent: 'secondary',
   overdue: 'destructive',
@@ -123,7 +123,7 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
                 {invoices.map(invoice => (
                   <TableRow key={invoice.id}>
                     <TableCell className="font-medium">{invoice.invoiceNumber}</TableCell>
-                    <TableCell><Badge variant={statusVariant[invoice.status]}>{statusTranslations[invoice.status]}</Badge></TableCell>
+                    <TableCell><Badge variant={statusVariant[invoice.status] || 'outline'}>{statusTranslations[invoice.status]}</Badge></TableCell>
                     <TableCell>{new Date(invoice.issueDate).toLocaleDateString('es-CO')}</TableCell>
                     <TableCell>{new Date(invoice.dueDate).toLocaleDateString('es-CO')}</TableCell>
                     <TableCell className="text-right">{formatCurrency(invoice.amountDue)}</TableCell>
