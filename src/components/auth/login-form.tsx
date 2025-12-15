@@ -41,6 +41,14 @@ export function LoginForm() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!auth) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "El servicio de autenticación no está listo. Inténtalo de nuevo en un momento.",
+      });
+      return;
+    }
     startTransition(async () => {
       try {
         await signInWithEmailAndPassword(auth, values.email, values.password);
