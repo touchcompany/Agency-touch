@@ -153,11 +153,17 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
     let invoiceNumber = cuenta?.invoiceNumber;
     if (!invoiceNumber) {
-        if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
-            invoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
+      if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+        // Increment the last invoice number. Ensure it's treated as a number.
+        const lastNum = parseInt(lastInvoiceArr[0].invoiceNumber, 10);
+        if (!isNaN(lastNum)) {
+          invoiceNumber = (lastNum + 1).toString();
         } else {
-            invoiceNumber = '1104';
+          invoiceNumber = '1104'; // Fallback if parsing fails
         }
+      } else {
+        invoiceNumber = '1104'; // First invoice
+      }
     }
     
     const invoiceData = {
@@ -176,7 +182,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
     if (cuenta && cuenta.id) {
       const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', cuenta.id);
-      setDocumentNonBlocking(invoiceRef, invoiceData, { merge: true });
+      await setDocumentNonBlocking(invoiceRef, invoiceData, { merge: true });
       toast({ title: 'Cuenta actualizada', description: 'Los cambios han sido guardados.' });
     } else {
       const invoicesRef = collection(firestore, 'users', user.uid, 'invoices');
@@ -208,11 +214,12 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     
     let finalInvoiceNumber = cuenta?.invoiceNumber;
     if (!finalInvoiceNumber) {
-      if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
-        finalInvoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
-      } else {
-        finalInvoiceNumber = '1104';
-      }
+        if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+            const lastNum = parseInt(lastInvoiceArr[0].invoiceNumber, 10);
+            finalInvoiceNumber = !isNaN(lastNum) ? (lastNum + 1).toString() : '1104';
+        } else {
+            finalInvoiceNumber = '1104';
+        }
     }
 
 
@@ -241,32 +248,16 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
   return (
     <>
-      <style jsx global>{`
-        @media print {
-          body > *:not(.print-container) {
-            display: none;
-          }
-          .print-container {
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-          }
-        }
-      `}</style>
-      <div className="hidden">
-        <div className="print-container">
-           <div ref={printRef}>
-                <InvoicePrintLayout
-                    invoice={getFullCurrentInvoice()}
-                    customer={clientes?.find(c => c.id === customerId)}
-                    companySettings={companySettings ?? undefined}
-                />
-            </div>
-        </div>
+      <div className="print-container hidden print:block fixed top-0 left-0 w-full h-full bg-white z-[100]">
+         <div ref={printRef}>
+              <InvoicePrintLayout
+                  invoice={getFullCurrentInvoice()}
+                  customer={clientes?.find(c => c.id === customerId)}
+                  companySettings={companySettings ?? undefined}
+              />
+          </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print:hidden">
         <div className="grid gap-6 lg:col-span-2">
           <Card>
             <CardHeader>
@@ -522,13 +513,16 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                       <DialogHeader>
                           <DialogTitle>Vista Previa de la Cuenta</DialogTitle>
                       </DialogHeader>
-                      <div className="max-h-[70vh] overflow-auto">
-                        <InvoicePrintLayout
-                            invoice={getFullCurrentInvoice()}
-                            customer={clientes?.find(c => c.id === customerId)}
-                            companySettings={companySettings ?? undefined}
-                        />
+                      <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100">
+                        <div ref={printRef}>
+                            <InvoicePrintLayout
+                                invoice={getFullCurrentInvoice()}
+                                customer={clientes?.find(c => c.id === customerId)}
+                                companySettings={companySettings ?? undefined}
+                            />
+                        </div>
                       </div>
+                      <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
                   </DialogContent>
                </Dialog>
               <Button variant="outline" onClick={() => alert('Funcionalidad de Correo en desarrollo.')}>

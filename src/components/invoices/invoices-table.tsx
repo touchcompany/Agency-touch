@@ -10,7 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Loader2, Download } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -164,7 +164,12 @@ export function CuentasTable() {
                        </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Descargar PDF</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+                         <Download className="mr-2 h-4 w-4" />
+                         Descargar PDF
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Enviar Correo</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
