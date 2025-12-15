@@ -118,7 +118,6 @@ export function InvoicePrintLayout({ invoice, customer, companySettings }: Invoi
                     <h4 className="font-bold mb-1">Información de Pago:</h4>
                     <p>{companyDetails.paymentInfo}</p>
                 </div>
-                <p className="text-center">¡Gracias por su negocio!</p>
             </footer>
 
         </div>
