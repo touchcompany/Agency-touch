@@ -28,7 +28,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -46,7 +46,7 @@ export function CuentasTable() {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const locale = 'es-ES';
-  const printRef = useRef<HTMLDivElement>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const invoicesQuery = useMemoFirebase(() =>
     user ? collection(firestore, 'users', user.uid, 'invoices') : null
@@ -140,104 +140,113 @@ export function CuentasTable() {
   }
 
   return (
-    <div className="overflow-x-auto print:hidden">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Estado</TableHead>
-            <TableHead>Nº Cuenta</TableHead>
-            <TableHead>Cliente</TableHead>
-            <TableHead>Fecha de Emisión</TableHead>
-            <TableHead>Fecha de Vencimiento</TableHead>
-            <TableHead className="text-right">Monto</TableHead>
-            <TableHead className="w-[50px] text-right">Acciones</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {invoices.map((invoice) => (
-            <TableRow key={invoice.id}>
-              <TableCell>
-                <Badge
-                  variant={statusVariant[invoice.status]}
-                  className="capitalize"
-                >
-                  {statusTranslations[invoice.status]}
-                </Badge>
-              </TableCell>
-              <TableCell className="font-medium">
-                {invoice.invoiceNumber}
-              </TableCell>
-              <TableCell>{getClientName(invoice.customerId)}</TableCell>
-              <TableCell>
-                {new Date(invoice.issueDate).toLocaleDateString(locale)}
-              </TableCell>
-              <TableCell>
-                {invoice.dueDate
-                  ? new Date(invoice.dueDate).toLocaleDateString(locale)
-                  : 'N/A'}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatCurrency(invoice.amountDue)}
-              </TableCell>
-              <TableCell className="text-right">
-                <Dialog>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                          <span className="sr-only">Abrir menú</span>
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
-                            Editar
-                          </Link>
-                        </DropdownMenuItem>
-                        {invoice.status !== 'paid' && (
-                          <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)}>
-                            Marcar como Pagada
-                          </DropdownMenuItem>
-                        )}
-                        <DropdownMenuSeparator />
-                        <DialogTrigger asChild>
-                            <DropdownMenuItem>
-                                <Download className="mr-2 h-4 w-4" />
-                                Ver / Descargar PDF
-                            </DropdownMenuItem>
-                        </DialogTrigger>
-                        <DropdownMenuItem onClick={() => handleSendWhatsApp(invoice)}>
-                           <MessageCircle className="mr-2 h-4 w-4" />
-                           Enviar por WhatsApp
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => alert('Funcionalidad de correo en desarrollo.')}>
-                          <Mail className="mr-2 h-4 w-4" />
-                          Enviar por Correo
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                     <DialogContent className="max-w-4xl">
-                        <DialogHeader>
-                            <DialogTitle>Vista Previa de la Cuenta de Cobro</DialogTitle>
-                        </DialogHeader>
-                        <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 print-container">
-                             <div ref={printRef}>
-                                <InvoicePrintLayout
-                                    invoice={invoice}
-                                    customer={customers?.find(c => c.id === invoice.customerId)}
-                                    companySettings={companySettings ?? undefined}
-                                />
-                            </div>
-                        </div>
-                        <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
-                    </DialogContent>
-                </Dialog>
-              </TableCell>
+    <>
+      <div className="print-only">
+        {selectedInvoice && (
+           <InvoicePrintLayout
+                invoice={selectedInvoice}
+                customer={customers?.find(c => c.id === selectedInvoice.customerId)}
+                companySettings={companySettings ?? undefined}
+            />
+        )}
+      </div>
+      <div className="overflow-x-auto print-hidden">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Estado</TableHead>
+              <TableHead>Nº Cuenta</TableHead>
+              <TableHead>Cliente</TableHead>
+              <TableHead>Fecha de Emisión</TableHead>
+              <TableHead>Fecha de Vencimiento</TableHead>
+              <TableHead className="text-right">Monto</TableHead>
+              <TableHead className="w-[50px] text-right">Acciones</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {invoices.map((invoice) => (
+              <TableRow key={invoice.id}>
+                <TableCell>
+                  <Badge
+                    variant={statusVariant[invoice.status]}
+                    className="capitalize"
+                  >
+                    {statusTranslations[invoice.status]}
+                  </Badge>
+                </TableCell>
+                <TableCell className="font-medium">
+                  {invoice.invoiceNumber}
+                </TableCell>
+                <TableCell>{getClientName(invoice.customerId)}</TableCell>
+                <TableCell>
+                  {new Date(invoice.issueDate).toLocaleDateString(locale)}
+                </TableCell>
+                <TableCell>
+                  {invoice.dueDate
+                    ? new Date(invoice.dueDate).toLocaleDateString(locale)
+                    : 'N/A'}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(invoice.amountDue)}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Dialog onOpenChange={(open) => { if (open) { setSelectedInvoice(invoice)} else { setSelectedInvoice(null)} }}>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Abrir menú</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+                              Editar
+                            </Link>
+                          </DropdownMenuItem>
+                          {invoice.status !== 'paid' && (
+                            <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)}>
+                              Marcar como Pagada
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuSeparator />
+                          <DialogTrigger asChild>
+                              <DropdownMenuItem>
+                                  <Download className="mr-2 h-4 w-4" />
+                                  Ver / Descargar PDF
+                              </DropdownMenuItem>
+                          </DialogTrigger>
+                          <DropdownMenuItem onClick={() => handleSendWhatsApp(invoice)}>
+                             <MessageCircle className="mr-2 h-4 w-4" />
+                             Enviar por WhatsApp
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => alert('Funcionalidad de correo en desarrollo.')}>
+                            <Mail className="mr-2 h-4 w-4" />
+                            Enviar por Correo
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                       <DialogContent className="max-w-4xl print-hidden">
+                          <DialogHeader>
+                              <DialogTitle>Vista Previa de la Cuenta de Cobro</DialogTitle>
+                          </DialogHeader>
+                          <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 dark:bg-gray-800">
+                              {selectedInvoice && <InvoicePrintLayout
+                                      invoice={selectedInvoice}
+                                      customer={customers?.find(c => c.id === selectedInvoice.customerId)}
+                                      companySettings={companySettings ?? undefined}
+                                  />}
+                          </div>
+                          <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
+                      </DialogContent>
+                  </Dialog>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </>
   );
 }

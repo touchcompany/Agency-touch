@@ -249,14 +249,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   }
 
   const handlePrint = () => {
-    const printContents = printRef.current?.innerHTML;
-    const originalContents = document.body.innerHTML;
-    if (printContents) {
-      document.body.innerHTML = printContents;
-      window.print();
-      document.body.innerHTML = originalContents;
-      window.location.reload(); 
-    }
+    window.print();
   };
   
   const handleSendWhatsApp = () => {
@@ -294,14 +287,12 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
   return (
     <>
-      <div className="print-container hidden">
-         <div ref={printRef}>
-              <InvoicePrintLayout
-                  invoice={getFullCurrentInvoice()}
-                  customer={clientes?.find(c => c.id === customerId)}
-                  companySettings={companySettings ?? undefined}
-              />
-          </div>
+      <div className="print-only">
+        <InvoicePrintLayout
+          invoice={getFullCurrentInvoice()}
+          customer={clientes?.find(c => c.id === customerId)}
+          companySettings={companySettings ?? undefined}
+        />
       </div>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print-hidden">
         <div className="grid gap-6 lg:col-span-2">
@@ -555,18 +546,16 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   <DialogTrigger asChild>
                     <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
+                  <DialogContent className="max-w-4xl print-hidden">
                       <DialogHeader>
                           <DialogTitle>Vista Previa de la Cuenta</DialogTitle>
                       </DialogHeader>
-                      <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 print-container">
-                        <div ref={printRef}>
-                            <InvoicePrintLayout
-                                invoice={getFullCurrentInvoice()}
-                                customer={clientes?.find(c => c.id === customerId)}
-                                companySettings={companySettings ?? undefined}
-                            />
-                        </div>
+                      <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 dark:bg-gray-800">
+                        <InvoicePrintLayout
+                            invoice={getFullCurrentInvoice()}
+                            customer={clientes?.find(c => c.id === customerId)}
+                            companySettings={companySettings ?? undefined}
+                        />
                       </div>
                       <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
                   </DialogContent>

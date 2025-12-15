@@ -89,18 +89,46 @@ body {
 }
 
 @media print {
+  body.printing * {
+    visibility: hidden;
+  }
+  
+  body.printing .print-only,
+  body.printing .print-only * {
+    visibility: visible;
+  }
+
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .print-hidden {
+    display: none !important;
+  }
+
+  .print-only {
+    display: none;
+  }
+  
   @page {
     size: A4;
     margin: 0;
   }
+  
+  body:not(.printing) .print-only {
+      display: none;
+  }
+  
+  body.printing .print-hidden {
+      display: none !important;
+  }
+
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-  .print-container {
-    display: block !important;
-  }
-  .print-hidden {
-    display: none !important;
   }
 }
