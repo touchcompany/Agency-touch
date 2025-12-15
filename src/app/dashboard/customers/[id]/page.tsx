@@ -37,8 +37,9 @@ const statusTranslations: { [key: string]: string } = {
   overdue: 'Vencida',
 };
 
-export default function CustomerDetailPage({ params: { id: customerId } }: { params: { id: string } }) {
+export default function CustomerDetailPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const customerId = params.id;
 
   const customerRef = useMemoFirebase(
     () => (user ? doc(firestore, 'users', user.uid, 'customers', customerId) : null),

@@ -24,8 +24,9 @@ import type { Collaborator, Expense } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
 
-export default function CollaboratorDetailPage({ params: { id: collaboratorId } }: { params: { id: string } }) {
+export default function CollaboratorDetailPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const collaboratorId = params.id;
 
   const collaboratorRef = useMemoFirebase(
     () => (user ? doc(firestore, 'users', user.uid, 'collaborators', collaboratorId) : null),
