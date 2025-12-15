@@ -1,13 +1,42 @@
-export type Pago = {
+export type Income = {
   id: string;
-  clienteId: string;
-  cuentaId?: string;
-  monto: number;
-  fechaPago: string;
-  descripcion: string;
-  metodoPago: 'efectivo' | 'transferencia' | 'otro';
-  creadoPorIA: boolean;
-  notas?: string;
+  userId: string;
+  customerId?: string;
+  date: string;
+  amount: number;
+  description: string;
+  category: string;
+};
+
+export type Expense = {
+  id: string;
+  userId: string;
+  date: string;
+  amount: number;
+  description: string;
+  category: string;
+};
+
+export type Invoice = {
+  id: string;
+  userId: string;
+  customerId: string;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  amountDue: number;
+  status: 'sent' | 'paid' | 'overdue';
+  bankDetails?: string;
+};
+
+export type Customer = {
+  id: string;
+  userId: string;
+  name: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+  createdAt: string;
 };
 
 export type DetalleCuenta = {
@@ -56,6 +85,18 @@ export type Cliente = {
   fechaCreacion: string;
   notas?: string;
   historialCuentas: Cuenta[];
+};
+
+export type Pago = {
+  id: string;
+  clienteId: string;
+  cuentaId?: string;
+  monto: number;
+  fechaPago: string;
+  descripcion: string;
+  metodoPago: 'efectivo' | 'transferencia' | 'otro';
+  creadoPorIA: boolean;
+  notas?: string;
 };
 
 export type ConfiguracionEmpresa = {

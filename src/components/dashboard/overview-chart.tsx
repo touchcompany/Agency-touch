@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Bar,
@@ -8,27 +8,63 @@ import {
   YAxis,
   Tooltip,
   Legend,
-} from "recharts";
-
-const data = [
-  { name: "Ene", income: 4000, expense: 2400 },
-  { name: "Feb", income: 3000, expense: 1398 },
-  { name: "Mar", income: 5000, expense: 9800 },
-  { name: "Abr", income: 2780, expense: 3908 },
-  { name: "May", income: 1890, expense: 4800 },
-  { name: "Jun", income: 2390, expense: 3800 },
-  { name: "Jul", income: 3490, expense: 4300 },
-  { name: "Ago", income: 3650, expense: 4100 },
-  { name: "Sep", income: 3120, expense: 3900 },
-  { name: "Oct", income: 4500, expense: 5200 },
-  { name: "Nov", income: 3800, expense: 4100 },
-  { name: "Dic", income: 4200, expense: 4300 },
-];
+} from 'recharts';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where } from 'firebase/firestore';
+import type { Income, Expense } from '@/lib/types';
+import { useMemo } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export function OverviewChart() {
+  const { firestore, user } = useFirebase();
+
+  const incomeQuery = useMemoFirebase(() => 
+    user ? collection(firestore, 'users', user.uid, 'income') : null
+  , [firestore, user]);
+  const { data: incomeData, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
+
+  const expensesQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'expenses') : null
+  , [firestore, user]);
+  const { data: expenseData, isLoading: expenseLoading } = useCollection<Expense>(expensesQuery);
+  
+  const chartData = useMemo(() => {
+    const months = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    
+    const aggregatedData = months.map(monthName => ({
+      name: monthName,
+      income: 0,
+      expense: 0,
+    }));
+
+    (incomeData || []).forEach(item => {
+      const monthIndex = new Date(item.date).getMonth();
+      aggregatedData[monthIndex].income += item.amount;
+    });
+
+    (expenseData || []).forEach(item => {
+      const monthIndex = new Date(item.date).getMonth();
+      aggregatedData[monthIndex].expense += item.amount;
+    });
+
+    return aggregatedData;
+  }, [incomeData, expenseData]);
+
+
+  if (incomeLoading || expenseLoading) {
+    return (
+      <div className="flex h-[350px] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+  
   return (
     <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={data}>
+      <BarChart data={chartData}>
         <XAxis
           dataKey="name"
           stroke="hsl(var(--muted-foreground))"
@@ -45,20 +81,30 @@ export function OverviewChart() {
         />
         <Tooltip
           contentStyle={{
-            backgroundColor: "hsl(var(--background))",
-            borderColor: "hsl(var(--border))",
+            backgroundColor: 'hsl(var(--background))',
+            borderColor: 'hsl(var(--border))',
           }}
           cursor={{ fill: 'hsl(var(--muted))' }}
         />
-        <Legend 
-            wrapperStyle={{ color: 'hsl(var(--foreground))' }} 
-            formatter={(value, entry) => {
-                const name = value === 'income' ? 'Ingresos' : 'Gastos';
-                return <span style={{ color: entry.color }}>{name}</span>
-            }}
+        <Legend
+          wrapperStyle={{ color: 'hsl(var(--foreground))' }}
+          formatter={(value, entry) => {
+            const name = value === 'income' ? 'Ingresos' : 'Gastos';
+            return <span style={{ color: entry.color }}>{name}</span>;
+          }}
         />
-        <Bar dataKey="income" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} name="Ingresos" />
-        <Bar dataKey="expense" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} name="Gastos" />
+        <Bar
+          dataKey="income"
+          fill="hsl(var(--chart-1))"
+          radius={[4, 4, 0, 0]}
+          name="Ingresos"
+        />
+        <Bar
+          dataKey="expense"
+          fill="hsl(var(--chart-2))"
+          radius={[4, 4, 0, 0]}
+          name="Gastos"
+        />
       </BarChart>
     </ResponsiveContainer>
   );

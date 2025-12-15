@@ -1,9 +1,9 @@
-import { CuentasTable } from "@/components/invoices/invoices-table";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockCuentas } from "@/lib/data";
-import { Plus } from "lucide-react";
-import Link from "next/link";
+'use client';
+import { CuentasTable } from '@/components/invoices/invoices-table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 export default function CuentasPage() {
   return (
@@ -18,7 +18,7 @@ export default function CuentasPage() {
         </Button>
       </CardHeader>
       <CardContent>
-        <CuentasTable cuentas={mockCuentas} />
+        <CuentasTable />
       </CardContent>
     </Card>
   );

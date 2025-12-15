@@ -1,7 +1,7 @@
-import { CustomersTable } from "@/components/customers/customers-table";
-import { AddCustomerSheet } from "@/components/customers/add-customer-sheet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockClientes } from "@/lib/data";
+'use client';
+import { AddCustomerSheet } from '@/components/customers/add-customer-sheet';
+import { CustomersTable } from '@/components/customers/customers-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function CustomersPage() {
   return (
@@ -11,7 +11,7 @@ export default function CustomersPage() {
         <AddCustomerSheet />
       </CardHeader>
       <CardContent>
-        <CustomersTable customers={mockClientes} />
+        <CustomersTable />
       </CardContent>
     </Card>
   );

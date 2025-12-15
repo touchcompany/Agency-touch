@@ -1,7 +1,6 @@
-"use client";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
+'use client';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
@@ -11,20 +10,68 @@ import {
   SheetTrigger,
   SheetFooter,
   SheetClose,
-} from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Plus } from "lucide-react";
+} from '@/components/ui/sheet';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Plus } from 'lucide-react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { mockClientes } from "@/lib/data";
+} from '@/components/ui/select';
+import { useFirebase, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
+import type { Customer } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 export function AddTransactionSheet() {
+  const { firestore, user } = useFirebase();
+  const { toast } = useToast();
+
+  const [customerId, setCustomerId] = useState('');
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState('');
+  
+  const customersQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  , [firestore, user]);
+  const { data: customers } = useCollection<Customer>(customersQuery);
+
+  const handleSubmit = async () => {
+    if (!firestore || !user || !amount || !description || !category) {
+       toast({
+        variant: 'destructive',
+        title: 'Campos requeridos',
+        description: 'Por favor, completa todos los campos.',
+      });
+      return;
+    }
+
+    const incomeRef = collection(firestore, 'users', user.uid, 'income');
+    addDocumentNonBlocking(incomeRef, {
+      userId: user.uid,
+      customerId: customerId || null,
+      date: new Date().toISOString(),
+      amount: parseFloat(amount),
+      description,
+      category,
+    });
+
+    toast({
+      title: 'Transacción añadida',
+      description: 'El ingreso ha sido registrado.',
+    });
+
+    // Reset fields
+    setCustomerId('');
+    setDescription('');
+    setAmount('');
+    setCategory('');
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -35,9 +82,11 @@ export function AddTransactionSheet() {
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle className="font-headline">Añadir Nueva Transacción</SheetTitle>
+          <SheetTitle className="font-headline">
+            Añadir Nueva Transacción
+          </SheetTitle>
           <SheetDescription>
-            Registra una nueva transacción recibida. Puedes usar IA para completarla.
+            Registra un nuevo ingreso recibido.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
@@ -45,12 +94,16 @@ export function AddTransactionSheet() {
             <Label htmlFor="cliente" className="text-right">
               Cliente
             </Label>
-            <Select>
+            <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Selecciona un cliente" />
               </SelectTrigger>
               <SelectContent>
-                {mockClientes.map(c => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                {(customers || []).map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -58,33 +111,49 @@ export function AddTransactionSheet() {
             <Label htmlFor="description" className="text-right">
               Descripción
             </Label>
-            <Input id="description" placeholder="Ej: Abono a cuenta CTA-001" className="col-span-3" />
+            <Input
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Ej: Abono a cuenta CTA-001"
+              className="col-span-3"
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="amount" className="text-right">
               Monto
             </Label>
-            <Input id="amount" type="number" placeholder="0.00" className="col-span-3" />
+            <Input
+              id="amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="0.00"
+              className="col-span-3"
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="type" className="text-right">
-              Método
+              Categoría
             </Label>
-            <Select>
+            <Select value={category} onValueChange={setCategory}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona el método" />
+                <SelectValue placeholder="Selecciona categoría" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="transferencia">Transferencia</SelectItem>
-                <SelectItem value="efectivo">Efectivo</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                <SelectItem value="Salario">Salario</SelectItem>
+                <SelectItem value="Inversiones">Inversiones</SelectItem>
+                <SelectItem value="Ventas">Ventas</SelectItem>
+                <SelectItem value="Otro">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Guardar Transacción</Button>
+            <Button type="submit" onClick={handleSubmit}>
+              Guardar Transacción
+            </Button>
           </SheetClose>
         </SheetFooter>
       </SheetContent>

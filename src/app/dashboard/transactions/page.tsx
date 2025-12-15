@@ -1,7 +1,8 @@
-import { TransactionsTable } from "@/components/transactions/transactions-table";
-import { AddTransactionSheet } from "@/components/transactions/add-transaction-sheet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { mockPagos } from "@/lib/data";
+'use client';
+
+import { TransactionsTable } from '@/components/transactions/transactions-table';
+import { AddTransactionSheet } from '@/components/transactions/add-transaction-sheet';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function TransactionsPage() {
   return (
@@ -11,7 +12,7 @@ export default function TransactionsPage() {
         <AddTransactionSheet />
       </CardHeader>
       <CardContent>
-        <TransactionsTable transactions={mockPagos} />
+        <TransactionsTable />
       </CardContent>
     </Card>
   );

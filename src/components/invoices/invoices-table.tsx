@@ -1,5 +1,6 @@
-import type { Cuenta } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+'use client';
+import type { Invoice, Customer } from '@/lib/types';
+import { formatCurrency } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -7,42 +8,69 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal } from "lucide-react";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { mockClientes } from "@/lib/data";
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
-type CuentasTableProps = {
-  cuentas: Cuenta[];
+const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
+  paid: 'default',
+  sent: 'secondary',
+  overdue: 'destructive',
 };
 
-const statusVariant = {
-  pagada: "default",
-  pendiente: "secondary",
-  vencida: "destructive",
-} as const;
-
-const statusTranslations: { [key in keyof typeof statusVariant]: string } = {
-    pagada: "Pagada",
-    pendiente: "Pendiente",
-    vencida: "Vencida",
+const statusTranslations: { [key: string]: string } = {
+  paid: 'Pagada',
+  sent: 'Pendiente',
+  overdue: 'Vencida',
 };
 
-const getClientName = (clientId: string) => {
-    return mockClientes.find(c => c.id === clientId)?.nombre || "Cliente Desconocido";
-}
-
-export function CuentasTable({ cuentas }: CuentasTableProps) {
+export function CuentasTable() {
+  const { firestore, user } = useFirebase();
   const locale = 'es-ES';
+
+  const invoicesQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'invoices') : null
+  , [firestore, user]);
+  const { data: invoices, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
+
+  const customersQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  , [firestore, user]);
+  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
+
+  const getClientName = (customerId: string) => {
+    if (!customers) return '...';
+    return customers.find((c) => c.id === customerId)?.name || 'Cliente Desconocido';
+  };
+  
+  const isLoading = invoicesLoading || customersLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!invoices || invoices.length === 0) {
+    return (
+      <div className="text-center p-8 text-muted-foreground">
+        No hay cuentas todavía. ¡Crea una para empezar!
+      </div>
+    );
+  }
 
   return (
     <div className="overflow-x-auto">
@@ -59,19 +87,32 @@ export function CuentasTable({ cuentas }: CuentasTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {cuentas.map((cuenta) => (
-            <TableRow key={cuenta.id}>
+          {invoices.map((invoice) => (
+            <TableRow key={invoice.id}>
               <TableCell>
-                <Badge variant={statusVariant[cuenta.status]} className="capitalize">
-                  {statusTranslations[cuenta.status]}
+                <Badge
+                  variant={statusVariant[invoice.status]}
+                  className="capitalize"
+                >
+                  {statusTranslations[invoice.status]}
                 </Badge>
               </TableCell>
-              <TableCell className="font-medium">{cuenta.numeroCuenta}</TableCell>
-              <TableCell>{getClientName(cuenta.clienteId)}</TableCell>
-              <TableCell>{new Date(cuenta.fechaEmision).toLocaleDateString(locale)}</TableCell>
-              <TableCell>{cuenta.fechaVencimiento ? new Date(cuenta.fechaVencimiento).toLocaleDateString(locale) : 'N/A'}</TableCell>
-              <TableCell className="text-right">{formatCurrency(cuenta.valorTotal)}</TableCell>
-               <TableCell className="text-right">
+              <TableCell className="font-medium">
+                {invoice.invoiceNumber}
+              </TableCell>
+              <TableCell>{getClientName(invoice.customerId)}</TableCell>
+              <TableCell>
+                {new Date(invoice.issueDate).toLocaleDateString(locale)}
+              </TableCell>
+              <TableCell>
+                {invoice.dueDate
+                  ? new Date(invoice.dueDate).toLocaleDateString(locale)
+                  : 'N/A'}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(invoice.amountDue)}
+              </TableCell>
+              <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -81,7 +122,11 @@ export function CuentasTable({ cuentas }: CuentasTableProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem asChild><Link href={`/dashboard/invoices/${cuenta.id}/edit`}>Editar</Link></DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/invoices/${invoice.id}/edit`}>
+                        Editar
+                      </Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Descargar PDF</DropdownMenuItem>
                     <DropdownMenuItem>Enviar Correo</DropdownMenuItem>
                   </DropdownMenuContent>

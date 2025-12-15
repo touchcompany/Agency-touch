@@ -1,5 +1,6 @@
-import type { Pago } from "@/lib/types";
-import { formatCurrency } from "@/lib/utils";
+'use client';
+import type { Income, Customer } from '@/lib/types';
+import { formatCurrency } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -7,19 +8,49 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { mockClientes } from "@/lib/data";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
 
-type TransactionsTableProps = {
-  transactions: Pago[];
-};
 
-export function TransactionsTable({ transactions }: TransactionsTableProps) {
+export function TransactionsTable() {
+  const { firestore, user } = useFirebase();
   const locale = 'es-ES';
+
+  const incomeQuery = useMemoFirebase(() =>
+    user ? query(collection(firestore, 'users', user.uid, 'income'), orderBy('date', 'desc')) : null
+  , [firestore, user]);
+  const { data: income, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
+
+  const customersQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  , [firestore, user]);
+  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
+
+  const getClientName = (customerId?: string) => {
+    if (!customerId) return 'N/A';
+    if (!customers) return '...';
+    return customers.find((c) => c.id === customerId)?.name || 'N/A';
+  };
+
+  const isLoading = incomeLoading || customersLoading;
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
   
-  const getClientName = (clientId: string) => {
-    return mockClientes.find(c => c.id === clientId)?.nombre || "N/A";
+  if (!income || income.length === 0) {
+      return (
+        <div className="text-center p-8 text-muted-foreground">
+            No hay transacciones todavía. ¡Añade una para empezar!
+        </div>
+      )
   }
 
   return (
@@ -30,21 +61,25 @@ export function TransactionsTable({ transactions }: TransactionsTableProps) {
             <TableHead>Fecha</TableHead>
             <TableHead>Cliente</TableHead>
             <TableHead>Descripción</TableHead>
-            <TableHead>Método</TableHead>
+            <TableHead>Categoría</TableHead>
             <TableHead className="text-right">Monto</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {transactions.map((pago) => (
-            <TableRow key={pago.id}>
-              <TableCell>{new Date(pago.fechaPago).toLocaleDateString(locale)}</TableCell>
-              <TableCell className="font-medium">{getClientName(pago.clienteId)}</TableCell>
-              <TableCell>{pago.descripcion}</TableCell>
+          {income.map((item) => (
+            <TableRow key={item.id}>
               <TableCell>
-                <Badge variant="secondary">{pago.metodoPago}</Badge>
+                {new Date(item.date).toLocaleDateString(locale)}
+              </TableCell>
+              <TableCell className="font-medium">
+                {getClientName(item.customerId)}
+              </TableCell>
+              <TableCell>{item.description}</TableCell>
+              <TableCell>
+                <Badge variant="secondary">{item.category}</Badge>
               </TableCell>
               <TableCell className="text-right font-medium text-green-500">
-                +{formatCurrency(pago.monto)}
+                +{formatCurrency(item.amount)}
               </TableCell>
             </TableRow>
           ))}
