@@ -23,14 +23,14 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
-import type { Collaborator } from '@/lib/types';
+import type { Customer } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 export function AddTransactionSheet() {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  const [collaboratorId, setCollaboratorId] = useState('');
+  const [customerId, setCustomerId] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
@@ -38,7 +38,7 @@ export function AddTransactionSheet() {
   const collaboratorsQuery = useMemoFirebase(() =>
     user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
-  const { data: collaborators } = useCollection<Collaborator>(collaboratorsQuery);
+  const { data: collaborators } = useCollection<Customer>(collaboratorsQuery);
 
   const handleSubmit = async () => {
     if (!firestore || !user || !amount || !description || !category) {
@@ -53,7 +53,7 @@ export function AddTransactionSheet() {
     const incomeRef = collection(firestore, 'users', user.uid, 'income');
     addDocumentNonBlocking(incomeRef, {
       userId: user.uid,
-      collaboratorId: collaboratorId || null,
+      customerId: customerId || null,
       date: new Date().toISOString(),
       amount: parseFloat(amount),
       description,
@@ -66,7 +66,7 @@ export function AddTransactionSheet() {
     });
 
     // Reset fields
-    setCollaboratorId('');
+    setCustomerId('');
     setDescription('');
     setAmount('');
     setCategory('');
@@ -94,7 +94,7 @@ export function AddTransactionSheet() {
             <Label htmlFor="collaborator" className="text-right">
               Colaborador
             </Label>
-            <Select value={collaboratorId} onValueChange={setCollaboratorId}>
+            <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Selecciona un colaborador" />
               </SelectTrigger>

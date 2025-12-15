@@ -25,7 +25,7 @@ export function TransactionsTable() {
   const { data: income, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
 
   const customersQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'customers') : null
+    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
   const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
 
@@ -59,7 +59,7 @@ export function TransactionsTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Fecha</TableHead>
-            <TableHead>Cliente</TableHead>
+            <TableHead>Colaborador</TableHead>
             <TableHead>Descripción</TableHead>
             <TableHead>Categoría</TableHead>
             <TableHead className="text-right">Monto</TableHead>
