@@ -29,7 +29,7 @@ export function InvoicePrintLayout({ invoice, customer, companySettings }: Invoi
     const total = subtotal;
 
     return (
-        <div className="bg-white text-gray-800 p-10 font-sans text-sm relative" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
+        <div className="bg-white text-gray-800 p-10 font-sans text-sm" style={{ width: '210mm', height: 'auto', margin: '0 auto', boxShadow: 'none', pageBreakInside: 'avoid' }}>
             <header className="flex justify-between items-start pb-8 border-b-2 border-gray-200">
                 <div className="w-2/3">
                     <div className="flex items-center gap-4">
@@ -117,7 +117,7 @@ export function InvoicePrintLayout({ invoice, customer, companySettings }: Invoi
                     )}
                      <div className="mt-4">
                         <h4 className="font-bold mb-1">Información de Pago:</h4>
-                        <p>{companyDetails.paymentInfo}</p>
+                        <p className="whitespace-pre-wrap">{companyDetails.paymentInfo}</p>
                     </div>
                 </div>
             </footer>
