@@ -6,10 +6,10 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
-import type { Invoice, Income } from '@/lib/types';
+import { collection } from 'firebase/firestore';
+import type { Invoice, Income, Expense } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
-import { Users, FileText, Banknote, Loader2 } from 'lucide-react';
+import { Users, Banknote, ArrowDownCircle, Loader2 } from 'lucide-react';
 import { useMemo } from 'react';
 
 export function StatsCards() {
@@ -25,22 +25,25 @@ export function StatsCards() {
   , [firestore, user]);
   const { data: invoicesData, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
 
-  const { totalPagado, totalPendiente, totalFacturado } = useMemo(() => {
+  const expensesQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'expenses') : null
+  , [firestore, user]);
+  const { data: expenseData, isLoading: expensesLoading } = useCollection<Expense>(expensesQuery);
+
+  const { totalPagado, totalEgresos, totalFacturado } = useMemo(() => {
     const totalPagado = (incomeData || []).reduce((sum, p) => sum + p.amount, 0);
 
-    const totalPendiente = (invoicesData || [])
-      .filter((c) => c.status === 'pendiente' || c.status === 'vencida')
-      .reduce((sum, c) => sum + c.amountDue, 0);
+    const totalEgresos = (expenseData || []).reduce((sum, e) => sum + e.amount, 0);
 
     const totalFacturado = (invoicesData || []).reduce(
       (sum, c) => sum + c.amountDue,
       0
     );
 
-    return { totalPagado, totalPendiente, totalFacturado };
-  }, [incomeData, invoicesData]);
+    return { totalPagado, totalEgresos, totalFacturado };
+  }, [incomeData, invoicesData, expenseData]);
 
-  const isLoading = incomeLoading || invoicesLoading;
+  const isLoading = incomeLoading || invoicesLoading || expensesLoading;
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -65,20 +68,20 @@ export function StatsCards() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            Pendiente de Cobro
+            Total Egresos
           </CardTitle>
-          <FileText className="h-4 w-4 text-orange-500" />
+          <ArrowDownCircle className="h-4 w-4 text-red-500" />
         </CardHeader>
         <CardContent>
           {isLoading ? (
             <Loader2 className="h-6 w-6 animate-spin" />
           ) : (
             <div className="text-2xl font-bold">
-              {formatCurrency(totalPendiente)}
+              {formatCurrency(totalEgresos)}
             </div>
           )}
           <p className="text-xs text-muted-foreground">
-            Total en cuentas por pagar
+            Suma de todos los gastos
           </p>
         </CardContent>
       </Card>
