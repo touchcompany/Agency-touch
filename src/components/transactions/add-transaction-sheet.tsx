@@ -23,22 +23,22 @@ import {
 } from '@/components/ui/select';
 import { useFirebase, useCollection, addDocumentNonBlocking, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
-import type { Customer } from '@/lib/types';
+import type { Collaborator } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 
 export function AddTransactionSheet() {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
 
-  const [customerId, setCustomerId] = useState('');
+  const [collaboratorId, setCollaboratorId] = useState('');
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   
-  const customersQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  const collaboratorsQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
-  const { data: customers } = useCollection<Customer>(customersQuery);
+  const { data: collaborators } = useCollection<Collaborator>(collaboratorsQuery);
 
   const handleSubmit = async () => {
     if (!firestore || !user || !amount || !description || !category) {
@@ -53,7 +53,7 @@ export function AddTransactionSheet() {
     const incomeRef = collection(firestore, 'users', user.uid, 'income');
     addDocumentNonBlocking(incomeRef, {
       userId: user.uid,
-      customerId: customerId || null,
+      collaboratorId: collaboratorId || null,
       date: new Date().toISOString(),
       amount: parseFloat(amount),
       description,
@@ -66,7 +66,7 @@ export function AddTransactionSheet() {
     });
 
     // Reset fields
-    setCustomerId('');
+    setCollaboratorId('');
     setDescription('');
     setAmount('');
     setCategory('');
@@ -83,7 +83,7 @@ export function AddTransactionSheet() {
       <SheetContent>
         <SheetHeader>
           <SheetTitle className="font-headline">
-            Añadir Nueva Transacción
+            Añadir Nuevo Ingreso
           </SheetTitle>
           <SheetDescription>
             Registra un nuevo ingreso recibido.
@@ -91,15 +91,15 @@ export function AddTransactionSheet() {
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="cliente" className="text-right">
-              Cliente
+            <Label htmlFor="collaborator" className="text-right">
+              Colaborador
             </Label>
-            <Select value={customerId} onValueChange={setCustomerId}>
+            <Select value={collaboratorId} onValueChange={setCollaboratorId}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un cliente" />
+                <SelectValue placeholder="Selecciona un colaborador" />
               </SelectTrigger>
               <SelectContent>
-                {(customers || []).map((c) => (
+                {(collaborators || []).map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>
