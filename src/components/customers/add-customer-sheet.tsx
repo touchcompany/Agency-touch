@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import type { Service } from '@/lib/types';
+import { Separator } from '../ui/separator';
 
 
 export function AddCustomerSheet() {
@@ -102,121 +104,108 @@ export function AddCustomerSheet() {
         <SheetHeader>
           <SheetTitle className="font-headline">Añadir Nuevo Cliente</SheetTitle>
           <SheetDescription>
-            Añade un nuevo cliente a tu base de datos y configura la facturación recurrente si es necesario.
+            Añade un nuevo cliente y configura la facturación recurrente si es necesario.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Nombre
-            </Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Nombre del Cliente"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="nit" className="text-right">
-              NIT
-            </Label>
-            <Input
-              id="nit"
-              value={nit}
-              onChange={(e) => setNit(e.target.value)}
-              placeholder="Número de NIT"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Correo
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="cliente@ejemplo.com"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Teléfono
-            </Label>
-            <Input
-              id="phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              placeholder="555-0123"
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="address" className="text-right">
-              Dirección
-            </Label>
-            <Input
-              id="address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              placeholder="123 Calle Principal"
-              className="col-span-3"
-            />
+          <div className="space-y-4">
+              <div>
+                <Label htmlFor="name">Nombre</Label>
+                <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nombre del Cliente"
+                />
+            </div>
+             <div>
+                <Label htmlFor="nit">NIT</Label>
+                <Input
+                id="nit"
+                value={nit}
+                onChange={(e) => setNit(e.target.value)}
+                placeholder="Número de NIT"
+                />
+            </div>
+             <div>
+                <Label htmlFor="email">Correo</Label>
+                <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="cliente@ejemplo.com"
+                />
+            </div>
+             <div>
+                <Label htmlFor="phone">Teléfono</Label>
+                <Input
+                id="phone"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="555-0123"
+                />
+            </div>
+             <div>
+                <Label htmlFor="address">Dirección</Label>
+                <Input
+                id="address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="123 Calle Principal"
+                />
+            </div>
           </div>
           
-          <div className="col-span-4 my-4 h-px bg-border" />
+          <Separator className="my-4" />
 
-          <div className="grid grid-cols-4 items-center gap-4">
-             <Label htmlFor="monthly-billing" className="text-right col-span-3">
-               Facturación Mensual Automática
-             </Label>
-             <Switch
-                id="monthly-billing"
-                checked={isMonthly}
-                onCheckedChange={setIsMonthly}
-             />
+          <div className="space-y-4 rounded-lg border p-4">
+            <div className="flex flex-row items-center justify-between">
+              <Label htmlFor="monthly-billing" className="flex flex-col space-y-1">
+                <span>Facturación Mensual Automática</span>
+                <span className="font-normal leading-snug text-muted-foreground">
+                    Activa para generar cuentas de cobro automáticamente.
+                </span>
+              </Label>
+              <Switch
+                  id="monthly-billing"
+                  checked={isMonthly}
+                  onCheckedChange={setIsMonthly}
+              />
+            </div>
+
+            {isMonthly && (
+                <div className="space-y-4 pt-4 border-t">
+                    <div>
+                        <Label htmlFor="invoice-day">Día de Facturación (1-31)</Label>
+                        <Input
+                        id="invoice-day"
+                        type="number"
+                        min="1"
+                        max="31"
+                        value={invoiceDay}
+                        onChange={(e) => setInvoiceDay(e.target.value)}
+                        placeholder="Ej: 15"
+                        />
+                    </div>
+                    <div>
+                        <Label htmlFor="default-service">Servicio por Defecto</Label>
+                        <Select value={defaultServiceId} onValueChange={setDefaultServiceId}>
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecciona un servicio" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {(services || []).map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                                {service.name}
+                            </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+                </div>
+            )}
           </div>
-
-          {isMonthly && (
-            <>
-               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="invoice-day" className="text-right">
-                  Día del Mes
-                </Label>
-                <Input
-                  id="invoice-day"
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={invoiceDay}
-                  onChange={(e) => setInvoiceDay(e.target.value)}
-                  placeholder="Ej: 15"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="default-service" className="text-right">
-                  Servicio por Defecto
-                </Label>
-                 <Select value={defaultServiceId} onValueChange={setDefaultServiceId}>
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Selecciona un servicio" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(services || []).map((service) => (
-                      <SelectItem key={service.id} value={service.id}>
-                        {service.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </>
-          )}
 
         </div>
         <SheetFooter>

@@ -11,6 +11,7 @@ import type { Collaborator } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Separator } from '../ui/separator';
 
 interface CollaboratorFormProps {
   collaborator: Collaborator;
@@ -113,73 +114,78 @@ export function CollaboratorForm({ collaborator }: CollaboratorFormProps) {
           placeholder="555-0123"
         />
       </div>
-       <div className="col-span-4 my-4 h-px bg-border" />
+      
+      <Separator className="my-4" />
 
-        <div className="space-y-2 flex items-center justify-between rounded-lg border p-3 shadow-sm">
-            <div className="space-y-0.5">
-                <Label htmlFor="monthly-payment">Pagos Mensuales Automáticos</Label>
-                <p className="text-xs text-muted-foreground">
+      <div className="space-y-4 rounded-lg border p-4">
+        <div className="flex flex-row items-center justify-between">
+            <Label htmlFor="monthly-payment" className="flex flex-col space-y-1">
+                <span>Pagos Mensuales Automáticos</span>
+                <span className="font-normal leading-snug text-muted-foreground">
                     Activa para generar pagos de nómina automáticamente.
-                </p>
-            </div>
+                </span>
+            </Label>
             <Switch
                 id="monthly-payment"
                 checked={isMonthly}
                 onCheckedChange={setIsMonthly}
             />
         </div>
-      {isMonthly && (
-        <div className="grid gap-4 mt-4">
-           <div className="grid gap-2">
-            <Label htmlFor="payment-day">
-              Día del Mes para Pagar (1-31)
-            </Label>
-            <Input
-              id="payment-day"
-              type="number"
-              min="1"
-              max="31"
-              value={paymentDay}
-              onChange={(e) => setPaymentDay(e.target.value)}
-              placeholder="Ej: 15 o 30"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="default-payment-amount">
-              Monto Fijo del Pago
-            </Label>
-             <Input
-                id="default-payment-amount"
+
+        {isMonthly && (
+          <div className="space-y-4 pt-4 border-t">
+            <div className="grid gap-2">
+              <Label htmlFor="payment-day">
+                Día del Mes para Pagar (1-31)
+              </Label>
+              <Input
+                id="payment-day"
                 type="number"
-                value={defaultPaymentAmount}
-                onChange={(e) => setDefaultPaymentAmount(e.target.value)}
-                placeholder="Monto del pago mensual"
-            />
-          </div>
-           <div className="grid gap-2">
-                <Label htmlFor="default-payment-desc">Descripción por Defecto</Label>
-                <Input
-                  id="default-payment-desc"
-                  value={defaultPaymentDescription}
-                  onChange={(e) => setDefaultPaymentDescription(e.target.value)}
-                />
+                min="1"
+                max="31"
+                value={paymentDay}
+                onChange={(e) => setPaymentDay(e.target.value)}
+                placeholder="Ej: 15 o 30"
+              />
             </div>
             <div className="grid gap-2">
-                <Label htmlFor="default-payment-category">Categoría por Defecto</Label>
-                 <Select value={defaultPaymentCategory} onValueChange={setDefaultPaymentCategory}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Salario">Salario</SelectItem>
-                    <SelectItem value="Servicios">Servicios</SelectItem>
-                    <SelectItem value="Comisiones">Comisiones</SelectItem>
-                    <SelectItem value="Otro">Otro</SelectItem>
-                  </SelectContent>
-                </Select>
+              <Label htmlFor="default-payment-amount">
+                Monto Fijo del Pago
+              </Label>
+              <Input
+                  id="default-payment-amount"
+                  type="number"
+                  value={defaultPaymentAmount}
+                  onChange={(e) => setDefaultPaymentAmount(e.target.value)}
+                  placeholder="Monto del pago mensual"
+              />
             </div>
-        </div>
-      )}
+            <div className="grid gap-2">
+                  <Label htmlFor="default-payment-desc">Descripción por Defecto</Label>
+                  <Input
+                    id="default-payment-desc"
+                    value={defaultPaymentDescription}
+                    onChange={(e) => setDefaultPaymentDescription(e.target.value)}
+                  />
+              </div>
+              <div className="grid gap-2">
+                  <Label htmlFor="default-payment-category">Categoría por Defecto</Label>
+                  <Select value={defaultPaymentCategory} onValueChange={setDefaultPaymentCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona categoría" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Salario">Salario</SelectItem>
+                      <SelectItem value="Servicios">Servicios</SelectItem>
+                      <SelectItem value="Comisiones">Comisiones</SelectItem>
+                      <SelectItem value="Otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+              </div>
+          </div>
+        )}
+      </div>
+
       <div className="flex justify-end gap-2 mt-6">
          <Button variant="outline" onClick={() => router.push('/dashboard/collaborators')}>
             Cancelar

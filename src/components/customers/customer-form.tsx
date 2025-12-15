@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,7 @@ import type { Customer, Service } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { Switch } from '../ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Separator } from '../ui/separator';
 
 interface CustomerFormProps {
   customer: Customer;
@@ -135,57 +137,59 @@ export function CustomerForm({ customer }: CustomerFormProps) {
         />
       </div>
 
-       <div className="col-span-4 my-4 h-px bg-border" />
+       <Separator className="my-4" />
+       
+        <div className="space-y-4 rounded-lg border p-4">
+          <div className="flex flex-row items-center justify-between">
+              <Label htmlFor="monthly-billing" className="flex flex-col space-y-1">
+                  <span>Facturación Mensual Automática</span>
+                  <span className="font-normal leading-snug text-muted-foreground">
+                      Activa para generar cuentas de cobro automáticamente.
+                  </span>
+              </Label>
+              <Switch
+                  id="monthly-billing"
+                  checked={isMonthly}
+                  onCheckedChange={setIsMonthly}
+              />
+          </div>
 
-        <div className="space-y-2 flex items-center justify-between rounded-lg border p-3 shadow-sm">
-            <div className="space-y-0.5">
-                <Label htmlFor="monthly-billing">Facturación Mensual Automática</Label>
-                <p className="text-xs text-muted-foreground">
-                    Activa para generar cuentas de cobro automáticamente.
-                </p>
+        {isMonthly && (
+          <div className="space-y-4 pt-4 border-t">
+            <div className="grid gap-2">
+              <Label htmlFor="invoice-day">
+                Día del Mes para Facturar (1-31)
+              </Label>
+              <Input
+                id="invoice-day"
+                type="number"
+                min="1"
+                max="31"
+                value={invoiceDay}
+                onChange={(e) => setInvoiceDay(e.target.value)}
+                placeholder="Ej: 15"
+              />
             </div>
-            <Switch
-                id="monthly-billing"
-                checked={isMonthly}
-                onCheckedChange={setIsMonthly}
-            />
-        </div>
-
-      {isMonthly && (
-        <div className="grid gap-4 mt-4">
-           <div className="grid gap-2">
-            <Label htmlFor="invoice-day">
-              Día del Mes para Facturar (1-31)
-            </Label>
-            <Input
-              id="invoice-day"
-              type="number"
-              min="1"
-              max="31"
-              value={invoiceDay}
-              onChange={(e) => setInvoiceDay(e.target.value)}
-              placeholder="Ej: 15"
-            />
+            <div className="grid gap-2">
+              <Label htmlFor="default-service">
+                Servicio por Defecto para Facturar
+              </Label>
+              <Select value={defaultServiceId} onValueChange={setDefaultServiceId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecciona un servicio" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(services || []).map((service) => (
+                    <SelectItem key={service.id} value={service.id}>
+                      {service.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="default-service">
-              Servicio por Defecto para Facturar
-            </Label>
-             <Select value={defaultServiceId} onValueChange={setDefaultServiceId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecciona un servicio" />
-              </SelectTrigger>
-              <SelectContent>
-                {(services || []).map((service) => (
-                  <SelectItem key={service.id} value={service.id}>
-                    {service.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
 
       <div className="flex justify-end gap-2 mt-6">
