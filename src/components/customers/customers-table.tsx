@@ -1,4 +1,4 @@
-import type { Customer } from "@/lib/types";
+import type { Cliente } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 import {
   Table,
@@ -20,14 +20,14 @@ import { MoreHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 type CustomersTableProps = {
-  customers: Customer[];
+  customers: Cliente[];
 };
 
 export function CustomersTable({ customers }: CustomersTableProps) {
-  const calculateTotalSpent = (customer: Customer) =>
-    customer.paymentHistory
-        .filter(inv => inv.status === 'paid')
-        .reduce((sum, inv) => sum + inv.items.reduce((itemSum, item) => itemSum + item.price * item.quantity, 0), 0);
+  const calculateTotalSpent = (customer: Cliente) =>
+    customer.historialCuentas
+      .filter((cuenta) => cuenta.status === 'pagada')
+      .reduce((sum, cuenta) => sum + cuenta.valorTotal, 0);
 
   return (
     <div className="overflow-x-auto">
@@ -48,13 +48,13 @@ export function CustomersTable({ customers }: CustomersTableProps) {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                      <AvatarImage src={`https://picsum.photos/seed/${customer.id}/100/100`} data-ai-hint="person" />
-                    <AvatarFallback>{customer.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{customer.nombre.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <span className="font-medium">{customer.name}</span>
+                  <span className="font-medium">{customer.nombre}</span>
                 </div>
               </TableCell>
               <TableCell>{customer.email}</TableCell>
-              <TableCell>{customer.phone}</TableCell>
+              <TableCell>{customer.whatsapp}</TableCell>
               <TableCell className="text-right">{formatCurrency(calculateTotalSpent(customer))}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
