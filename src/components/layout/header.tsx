@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User as UserIcon } from "lucide-react";
+import Link from "next/link";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
@@ -106,9 +107,11 @@ export function DashboardHeader() {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user.phoneNumber || 'Mi Cuenta'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled>
-              <UserIcon className="mr-2 h-4 w-4" />
-              Perfil
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/settings">
+                <UserIcon className="mr-2 h-4 w-4" />
+                Perfil
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
