@@ -4,10 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFirebase, useUser } from '@/firebase';
 import {
-  getAuth,
-  signInWithPhoneNumber,
   RecaptchaVerifier,
   ConfirmationResult,
+  signInWithPhoneNumber,
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,21 +40,29 @@ export default function LoginPage() {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if user is already logged in
   useEffect(() => {
     if (!isUserLoading && user) {
       router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
-  
+
   const setupRecaptcha = () => {
-    if (!auth) return;
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+    if (!auth) return null;
+    // Cleanup previous verifier if it exists
+    if (window.recaptchaVerifier) {
+      window.recaptchaVerifier.clear();
+    }
+    const recaptchaContainer = document.getElementById('recaptcha-container');
+    if (!recaptchaContainer) return null;
+
+    const verifier = new RecaptchaVerifier(auth, recaptchaContainer, {
       size: 'invisible',
       callback: (response: any) => {
         // reCAPTCHA solved, allow signInWithPhoneNumber.
+        // This callback is usually executed automatically for invisible reCAPTCHA.
       },
     });
+    return verifier;
   };
 
   const handleSendCode = async () => {
@@ -64,12 +71,16 @@ export default function LoginPage() {
       return;
     }
     
-    // Add Colombian country code if not present
     const formattedPhoneNumber = phoneNumber.startsWith('+57') ? phoneNumber : `+57${phoneNumber}`;
 
     setIsLoading(true);
-    setupRecaptcha();
-    const appVerifier = window.recaptchaVerifier!;
+    const appVerifier = setupRecaptcha();
+    
+    if (!appVerifier) {
+        toast({ title: 'Error', description: 'No se pudo configurar el verificador de reCAPTCHA.', variant: 'destructive' });
+        setIsLoading(false);
+        return;
+    }
     
     try {
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhoneNumber, appVerifier);
@@ -78,14 +89,17 @@ export default function LoginPage() {
       toast({ title: 'Código enviado', description: 'Revisa tus mensajes para el código de verificación.' });
     } catch (error: any) {
       console.error('Error sending SMS:', error);
+      // This will display the "auth/operation-not-allowed" error to the user
       toast({ title: 'Error al enviar código', description: error.message, variant: 'destructive' });
-      // Reset reCAPTCHA if it fails
-      if (window.recaptchaVerifier) {
-        window.recaptchaVerifier.render().then((widgetId) => {
+      // Reset reCAPTCHA on failure
+      appVerifier.render().then((widgetId) => {
+        // @ts-ignore
+        if (window.grecaptcha) {
           // @ts-ignore
           grecaptcha.reset(widgetId);
-        });
-      }
+        }
+      }).catch(console.error);
+
     } finally {
       setIsLoading(false);
     }
@@ -109,8 +123,7 @@ export default function LoginPage() {
     }
   };
   
-  // While loading or if user exists (and redirect is in progress), show a loader or nothing
-  if (isUserLoading || user) {
+  if (isUserLoading || (!isUserLoading && user)) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -168,11 +181,11 @@ export default function LoginPage() {
         <CardFooter>
           {!isCodeSent ? (
             <Button className="w-full" onClick={handleSendCode} disabled={isLoading}>
-              {isLoading ? 'Enviando...' : 'Enviar Código'}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Enviar Código'}
             </Button>
           ) : (
             <Button className="w-full" onClick={handleVerifyCode} disabled={isLoading}>
-              {isLoading ? 'Verificando...' : 'Verificar e Ingresar'}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Verificar e Ingresar'}
             </Button>
           )}
         </CardFooter>
