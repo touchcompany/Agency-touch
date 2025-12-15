@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +9,8 @@ import { doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Collaborator } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { Switch } from '../ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface CollaboratorFormProps {
   collaborator: Collaborator;
@@ -22,10 +25,22 @@ export function CollaboratorForm({ collaborator }: CollaboratorFormProps) {
   const [email, setEmail] = useState(collaborator.email || '');
   const [phone, setPhone] = useState(collaborator.phoneNumber || '');
 
+  const [isMonthly, setIsMonthly] = useState(collaborator.isMonthly || false);
+  const [paymentDay, setPaymentDay] = useState(collaborator.paymentDay?.toString() || '');
+  const [defaultPaymentAmount, setDefaultPaymentAmount] = useState(collaborator.defaultPaymentAmount?.toString() || '');
+  const [defaultPaymentDescription, setDefaultPaymentDescription] = useState(collaborator.defaultPaymentDescription || 'Nómina Mensual');
+  const [defaultPaymentCategory, setDefaultPaymentCategory] = useState(collaborator.defaultPaymentCategory || 'Salario');
+
+
   useEffect(() => {
     setName(collaborator.name);
     setEmail(collaborator.email || '');
     setPhone(collaborator.phoneNumber || '');
+    setIsMonthly(collaborator.isMonthly || false);
+    setPaymentDay(collaborator.paymentDay?.toString() || '');
+    setDefaultPaymentAmount(collaborator.defaultPaymentAmount?.toString() || '');
+    setDefaultPaymentDescription(collaborator.defaultPaymentDescription || 'Nómina Mensual');
+    setDefaultPaymentCategory(collaborator.defaultPaymentCategory || 'Salario');
   }, [collaborator]);
 
   const handleSubmit = async () => {
@@ -53,6 +68,11 @@ export function CollaboratorForm({ collaborator }: CollaboratorFormProps) {
       name,
       email,
       phoneNumber: phone,
+      isMonthly,
+      paymentDay: isMonthly ? parseInt(paymentDay) : null,
+      defaultPaymentAmount: isMonthly ? parseFloat(defaultPaymentAmount) : null,
+      defaultPaymentDescription: isMonthly ? defaultPaymentDescription : null,
+      defaultPaymentCategory: isMonthly ? defaultPaymentCategory : null,
     }, { merge: true });
 
     toast({
@@ -93,7 +113,74 @@ export function CollaboratorForm({ collaborator }: CollaboratorFormProps) {
           placeholder="555-0123"
         />
       </div>
-      <div className="flex justify-end gap-2">
+       <div className="col-span-4 my-4 h-px bg-border" />
+
+        <div className="space-y-2 flex items-center justify-between rounded-lg border p-3 shadow-sm">
+            <div className="space-y-0.5">
+                <Label htmlFor="monthly-payment">Pagos Mensuales Automáticos</Label>
+                <p className="text-xs text-muted-foreground">
+                    Activa para generar pagos de nómina automáticamente.
+                </p>
+            </div>
+            <Switch
+                id="monthly-payment"
+                checked={isMonthly}
+                onCheckedChange={setIsMonthly}
+            />
+        </div>
+      {isMonthly && (
+        <div className="grid gap-4 mt-4">
+           <div className="grid gap-2">
+            <Label htmlFor="payment-day">
+              Día del Mes para Pagar (1-31)
+            </Label>
+            <Input
+              id="payment-day"
+              type="number"
+              min="1"
+              max="31"
+              value={paymentDay}
+              onChange={(e) => setPaymentDay(e.target.value)}
+              placeholder="Ej: 15 o 30"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="default-payment-amount">
+              Monto Fijo del Pago
+            </Label>
+             <Input
+                id="default-payment-amount"
+                type="number"
+                value={defaultPaymentAmount}
+                onChange={(e) => setDefaultPaymentAmount(e.target.value)}
+                placeholder="Monto del pago mensual"
+            />
+          </div>
+           <div className="grid gap-2">
+                <Label htmlFor="default-payment-desc">Descripción por Defecto</Label>
+                <Input
+                  id="default-payment-desc"
+                  value={defaultPaymentDescription}
+                  onChange={(e) => setDefaultPaymentDescription(e.target.value)}
+                />
+            </div>
+            <div className="grid gap-2">
+                <Label htmlFor="default-payment-category">Categoría por Defecto</Label>
+                 <Select value={defaultPaymentCategory} onValueChange={setDefaultPaymentCategory}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Salario">Salario</SelectItem>
+                    <SelectItem value="Servicios">Servicios</SelectItem>
+                    <SelectItem value="Comisiones">Comisiones</SelectItem>
+                    <SelectItem value="Otro">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+        </div>
+      )}
+      <div className="flex justify-end gap-2 mt-6">
          <Button variant="outline" onClick={() => router.push('/dashboard/collaborators')}>
             Cancelar
          </Button>

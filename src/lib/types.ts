@@ -1,5 +1,6 @@
 
 
+
 export type Service = {
   id: string;
   userId: string;
@@ -65,6 +66,11 @@ export type Collaborator = {
   email?: string;
   phoneNumber?: string;
   createdAt: string;
+  isMonthly?: boolean;
+  paymentDay?: number;
+  defaultPaymentAmount?: number;
+  defaultPaymentDescription?: string;
+  defaultPaymentCategory?: string;
 };
 
 

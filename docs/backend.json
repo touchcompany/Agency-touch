@@ -82,6 +82,60 @@
         "name"
       ]
     },
+    "Collaborator": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Collaborator",
+      "type": "object",
+      "description": "Represents a collaborator who receives payments.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Collaborator entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Collaborator)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the collaborator."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email address of the collaborator.",
+          "format": "email"
+        },
+        "phoneNumber": {
+          "type": "string",
+          "description": "Phone number of the collaborator."
+        },
+        "isMonthly": {
+          "type": "boolean",
+          "description": "Flag to indicate if the collaborator has recurring monthly payments."
+        },
+        "paymentDay": {
+          "type": "number",
+          "description": "The day of the month (1-31) to generate the recurring payment."
+        },
+        "defaultPaymentAmount": {
+          "type": "number",
+          "description": "The default amount for the recurring monthly payment."
+        },
+        "defaultPaymentDescription": {
+          "type": "string",
+          "description": "The default description for the recurring payment (e.g., 'Monthly Payroll')."
+        },
+        "defaultPaymentCategory": {
+          "type": "string",
+          "description": "The default category for the recurring payment (e.g., 'Salary')."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name"
+      ]
+    },
     "Invoice": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Invoice",
@@ -328,6 +382,26 @@
             {
               "name": "customerId",
               "description": "The unique identifier of the customer."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/collaborators/{collaboratorId}",
+        "definition": {
+          "entityName": "Collaborator",
+          "schema": {
+            "$ref": "#/backend/entities/Collaborator"
+          },
+          "description": "Stores collaborator information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "collaboratorId",
+              "description": "The unique identifier of the collaborator."
             }
           ]
         }
