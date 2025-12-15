@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, Loader2 } from 'lucide-react';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import Link from 'next/link';
 
 export function ServicesTable() {
   const { firestore, user } = useFirebase();
@@ -74,7 +75,9 @@ export function ServicesTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem>Editar Servicio</DropdownMenuItem>
+                     <DropdownMenuItem asChild>
+                       <Link href={`/dashboard/services/${service.id}/edit`}>Editar Servicio</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Eliminar</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -86,5 +89,3 @@ export function ServicesTable() {
     </div>
   );
 }
-
-    

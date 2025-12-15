@@ -1,7 +1,6 @@
 'use client';
 import { formatCurrency } from "@/lib/utils";
-import type { Customer, Invoice, Service, DetalleCuenta } from "@/lib/types";
-import Image from "next/image";
+import type { Customer, Invoice } from "@/lib/types";
 import { Separator } from "../ui/separator";
 
 interface InvoicePrintLayoutProps {
@@ -9,12 +8,16 @@ interface InvoicePrintLayoutProps {
     customer: Customer | undefined;
 }
 
+// TODO: Fetch this data from Firestore settings
 const companyDetails = {
-    name: 'FinancioAI',
+    name: 'touch+',
     address: 'Calle Falsa 123, Springfield',
     phone: '+57 300 123 4567',
-    email: 'contacto@financioai.co',
-    logo: '/logo-placeholder.png'
+    email: 'contacto@touchplus.co',
+    nit: '900.123.456-7',
+    whatsapp: '+57 317 398 0133',
+    paymentInfo: 'Cuenta de Ahorros Bancolombia No. 123-456789-00',
+    logo: '/logo-placeholder.png' // You might want to get this from settings too
 }
 
 
@@ -31,9 +34,10 @@ export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProp
             <header className="flex justify-between items-start pb-8 border-b-2 border-gray-200">
                 <div className="w-2/3">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">{companyDetails.name}</h1>
+                    <p>NIT: {companyDetails.nit}</p>
                     <p>{companyDetails.address}</p>
-                    <p>{companyDetails.phone}</p>
-                    <p>{companyDetails.email}</p>
+                    <p>WhatsApp: {companyDetails.whatsapp}</p>
+                    <p>Email: {companyDetails.email}</p>
                 </div>
                 <div className="w-1/3 text-right">
                     <h2 className="text-3xl font-bold text-gray-500 uppercase">Cuenta de Cobro</h2>
@@ -43,17 +47,18 @@ export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProp
 
             <section className="grid grid-cols-2 gap-8 my-8">
                 <div>
-                    <h3 className="text-gray-500 font-semibold mb-2">CLIENTE:</h3>
+                    <h3 className="text-gray-500 font-semibold mb-2 uppercase text-xs">Cliente:</h3>
                     <p className="font-bold text-lg">{customer.name}</p>
-                    <p>{customer.address}</p>
-                    <p>{customer.phoneNumber}</p>
-                    <p>{customer.email}</p>
+                    {customer.nit && <p>NIT: {customer.nit}</p>}
+                    {customer.address && <p>{customer.address}</p>}
+                    {customer.phoneNumber && <p>{customer.phoneNumber}</p>}
+                    {customer.email && <p>{customer.email}</p>}
                 </div>
                 <div className="text-right">
-                    <h3 className="text-gray-500 font-semibold mb-2">FECHA DE EMISIÓN:</h3>
-                    <p className="font-medium">{new Date(invoice.issueDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <h3 className="text-gray-500 font-semibold mt-4 mb-2">FECHA DE VENCIMIENTO:</h3>
-                    <p className="font-medium">{new Date(invoice.dueDate).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <h3 className="text-gray-500 font-semibold mb-2 uppercase text-xs">Fecha de Emisión:</h3>
+                    <p className="font-medium">{new Date(invoice.issueDate).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <h3 className="text-gray-500 font-semibold mt-4 mb-2 uppercase text-xs">Fecha de Vencimiento:</h3>
+                    <p className="font-medium">{new Date(invoice.dueDate).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                 </div>
             </section>
             
@@ -81,7 +86,7 @@ export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProp
             </section>
 
              <section className="flex justify-end mt-8">
-                <div className="w-full max-w-xs">
+                <div className="w-full max-w-sm">
                     <div className="flex justify-between py-2">
                         <span className="font-semibold text-gray-600">Subtotal:</span>
                         <span className="font-semibold">{formatCurrency(subtotal)}</span>
@@ -104,7 +109,7 @@ export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProp
                 )}
                  <div className="mb-4">
                     <h4 className="font-bold mb-1">Información de Pago:</h4>
-                    <p>Cuenta de Ahorros Bancolombia No. 123-456789-00 a nombre de FinancioAI S.A.S. (NIT: 900.123.456-7)</p>
+                    <p>{companyDetails.paymentInfo}</p>
                 </div>
                 <p className="text-center">¡Gracias por su negocio!</p>
             </footer>

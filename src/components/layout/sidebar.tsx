@@ -72,7 +72,7 @@ export function DashboardSidebar() {
               <Sparkles className="h-5 w-5" />
             </div>
             <h1 className="font-headline text-xl font-bold text-foreground">
-              FinancioAI
+              touch+
             </h1>
           </Link>
         </div>

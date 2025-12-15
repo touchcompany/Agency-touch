@@ -55,6 +55,10 @@ export default function LoginPage() {
     const recaptchaContainer = document.getElementById('recaptcha-container');
     if (!recaptchaContainer) return null;
 
+    // Ensure the container is empty before rendering
+    recaptchaContainer.innerHTML = '';
+
+
     const verifier = new RecaptchaVerifier(auth, recaptchaContainer, {
       size: 'invisible',
       callback: (response: any) => {
@@ -140,7 +144,7 @@ export default function LoginPage() {
             <div className="p-2 bg-primary text-primary-foreground rounded-md">
               <Sparkles className="h-6 w-6" />
             </div>
-            <h1 className="font-headline text-2xl font-bold">FinancioAI</h1>
+            <h1 className="font-headline text-2xl font-bold">touch+</h1>
           </div>
           <CardTitle className="text-2xl">
             {isCodeSent ? 'Verificar Código' : 'Iniciar Sesión'}
