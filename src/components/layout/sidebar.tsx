@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   SidebarHeader,
@@ -6,7 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
   Users,
@@ -14,35 +14,35 @@ import {
   CreditCard,
   Sparkles,
   Wrench,
-} from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+} from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const menuItems = [
   {
-    href: "/dashboard",
+    href: '/dashboard',
     icon: LayoutDashboard,
-    label: "Panel",
+    label: 'Panel',
   },
   {
-    href: "/dashboard/transactions",
+    href: '/dashboard/transactions',
     icon: CreditCard,
-    label: "Transacciones",
+    label: 'Transacciones',
   },
   {
-    href: "/dashboard/invoices",
+    href: '/dashboard/invoices',
     icon: FileText,
-    label: "Cuentas",
+    label: 'Cuentas',
   },
   {
-    href: "/dashboard/customers",
+    href: '/dashboard/customers',
     icon: Users,
-    label: "Clientes",
+    label: 'Colaboradores',
   },
   {
-    href: "/dashboard/services",
+    href: '/dashboard/services',
     icon: Wrench,
-    label: "Servicios",
+    label: 'Servicios',
   },
 ];
 
@@ -50,7 +50,7 @@ export function DashboardSidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
-    if (href === "/dashboard") {
+    if (href === '/dashboard') {
       return pathname === href;
     }
     return pathname.startsWith(href);
@@ -61,8 +61,8 @@ export function DashboardSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className='p-2 bg-primary text-primary-foreground rounded-md'>
-                <Sparkles className="h-5 w-5" />
+            <div className="p-2 bg-primary text-primary-foreground rounded-md">
+              <Sparkles className="h-5 w-5" />
             </div>
             <h1 className="font-headline text-xl font-bold text-foreground">
               FinancioAI
@@ -74,18 +74,16 @@ export function DashboardSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive(item.href)}
-                  tooltip={{ children: item.label, side: "right" }}
-                >
-                  <a>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </a>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.href)}
+                tooltip={{ children: item.label, side: 'right' }}
+              >
+                <Link href={item.href}>
+                  <item.icon />
+                  <span>{item.label}</span>
+                </Link>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
@@ -93,5 +91,3 @@ export function DashboardSidebar() {
     </>
   );
 }
-
-    
