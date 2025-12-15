@@ -96,13 +96,21 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const [fechaVencimiento, setFechaVencimiento] = useState<Date | undefined>(
     cuenta?.dueDate
       ? new Date(cuenta.dueDate)
-      : new Date(new Date().setDate(new Date().getDate() + 30))
+      : undefined
   );
   const [observaciones, setObservaciones] = useState(
     (cuenta as any)?.observaciones || ''
   );
   const [firmaUrl, setFirmaUrl] = useState((cuenta as any)?.firmaUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (fechaEmision && !cuenta?.dueDate) { // Solo auto-rellena si no es una cuenta existente
+        const newDueDate = new Date(fechaEmision);
+        newDueDate.setDate(newDueDate.getDate() + 5);
+        setFechaVencimiento(newDueDate);
+    }
+  }, [fechaEmision, cuenta?.dueDate]);
 
 
   const handleItemChange = (

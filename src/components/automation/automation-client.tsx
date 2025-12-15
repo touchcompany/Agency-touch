@@ -52,8 +52,9 @@ export function AutomationClient() {
     }
 
     setIsGenerating(true);
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
     let generatedCount = 0;
 
     const invoicesRef = collection(firestore, 'users', user.uid, 'invoices');
@@ -70,7 +71,9 @@ export function AutomationClient() {
     }
 
     for (const customer of recurringCustomers) {
-        const invoiceDate = new Date(currentYear, currentMonth, customer.invoiceDay || 1);
+        if (!customer.invoiceDay) continue;
+
+        const invoiceDate = new Date(currentYear, currentMonth, customer.invoiceDay);
         
         // Check if an invoice for this customer and month already exists
         const existingInvoiceQuery = query(invoicesRef, 
@@ -97,12 +100,15 @@ export function AutomationClient() {
 
         lastInvoiceNumber++;
 
+        const dueDate = new Date(invoiceDate);
+        dueDate.setDate(dueDate.getDate() + 5);
+
         const newInvoice = {
             userId: user.uid,
             customerId: customer.id,
             invoiceNumber: lastInvoiceNumber.toString(),
             issueDate: invoiceDate.toISOString(),
-            dueDate: new Date(invoiceDate.setDate(invoiceDate.getDate() + 30)).toISOString(),
+            dueDate: dueDate.toISOString(),
             detalle: [{
                 id: service.id,
                 descripcion: service.name,
