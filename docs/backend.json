@@ -196,6 +196,40 @@
         "description",
         "category"
       ]
+    },
+    "Service": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Service",
+      "type": "object",
+      "description": "Represents a service or product offered by the user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Service entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Service)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the service."
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the service."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the service."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "price"
+      ]
     }
   },
   "auth": {
@@ -301,8 +335,29 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/services/{serviceId}",
+        "definition": {
+          "entityName": "Service",
+          "schema": {
+            "$ref": "#/backend/entities/Service"
+          },
+          "description": "Stores service information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "serviceId",
+              "description": "The unique identifier of the service."
+            }
+          ]
+        }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for FinancioAI, focusing on authorization independence and clear access patterns. User data is stored under `/users/{userId}`, ensuring private user data. Each user owns their customers, invoices, income, and expenses, which are stored in subcollections under the user's document (`/users/{userId}/customers/{customerId}`, `/users/{userId}/invoices/{invoiceId}`, `/users/{userId}/income/{incomeId}`, `/users/{userId}/expenses/{expenseId}`). This path-based ownership simplifies security rules and avoids complex hierarchical authorization.  This approach allows for simple and efficient security rules based on `request.auth.uid`. Authorization Independence is achieved since access control is implicitly based on the user's ID derived from the authentication, removing the necessity for `get()` calls in security rules. QAPs are supported via structural segregation - data with different access needs (user-specific data) are stored in separate collections, enabling secure list operations within the user's own data without exposing it to others."
+    "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for FinancioAI, focusing on authorization independence and clear access patterns. User data is stored under `/users/{userId}`, ensuring private user data. Each user owns their customers, invoices, income, expenses, and services which are stored in subcollections under the user's document. This path-based ownership simplifies security rules and avoids complex hierarchical authorization.  This approach allows for simple and efficient security rules based on `request.auth.uid`. Authorization Independence is achieved since access control is implicitly based on the user's ID derived from the authentication, removing the necessity for `get()` calls in security rules. QAPs are supported via structural segregation - data with different access needs (user-specific data) are stored in separate collections, enabling secure list operations within the user's own data without exposing it to others."
   }
 }
+    

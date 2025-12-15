@@ -51,14 +51,6 @@ type CuentaFormProps = {
   cuenta?: Invoice;
 };
 
-// Mock data for services, will be replaced by firebase call
-const mockServices: Service[] = [
-    { id: '1', name: 'Diseño Web', description: 'Servicio completo de diseño y desarrollo web.', price: 1500 },
-    { id: '2', name: 'Consultoría SEO', description: 'Optimización para motores de búsqueda.', price: 500 },
-    { id: '3', name: 'Mantenimiento Web', description: 'Mantenimiento mensual del sitio web.', price: 200 },
-];
-
-
 export function CuentaForm({ cuenta }: CuentaFormProps) {
   const { firestore, user } = useFirebase();
   const router = useRouter();
@@ -69,6 +61,12 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     [firestore, user]
   );
   const { data: clientes } = useCollection<Customer>(customersQuery);
+
+  const servicesQuery = useMemoFirebase(
+    () => (user ? collection(firestore, 'users', user.uid, 'services') : null),
+    [firestore, user]
+  );
+  const { data: services } = useCollection<Service>(servicesQuery);
 
   const lastInvoiceQuery = useMemoFirebase(
     () => user ? query(collection(firestore, 'users', user.uid, 'invoices'), orderBy('invoiceNumber', 'desc'), limit(1)) : null,
@@ -107,7 +105,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   };
   
   const handleServiceSelect = (index: number, serviceId: string) => {
-    const service = mockServices.find(s => s.id === serviceId);
+    const service = services?.find(s => s.id === serviceId);
     if(service) {
         const newItems = [...detalle];
         newItems[index].descripcion = service.name;
@@ -311,17 +309,29 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   className="grid grid-cols-12 items-center gap-2"
                 >
                   <div className="col-span-6">
-                    <Select onValueChange={(value) => handleServiceSelect(index, value)}>
+                     <Select onValueChange={(value) => handleServiceSelect(index, value)}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecciona o describe un servicio"/>
+                        <SelectValue placeholder="Selecciona un servicio"/>
                       </SelectTrigger>
                       <SelectContent>
-                        {mockServices.map(service => (
+                        {(services || []).map(service => (
                           <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
+                   <Input
+                    placeholder="Descripción"
+                    className="col-span-6"
+                    value={item.descripcion}
+                    onChange={(e) =>
+                      handleItemChange(
+                        index,
+                        'descripcion',
+                        e.target.value
+                      )
+                    }
+                  />
                   <Input
                     type="number"
                     placeholder="Cant."
@@ -460,3 +470,5 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     </div>
   );
 }
+
+    

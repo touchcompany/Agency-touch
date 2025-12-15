@@ -1,6 +1,7 @@
 
 export type Service = {
   id: string;
+  userId: string;
   name: string;
   description: string;
   price: number;
@@ -129,3 +130,5 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
+
+    

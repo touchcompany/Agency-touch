@@ -13,6 +13,7 @@ import {
   FileText,
   CreditCard,
   Sparkles,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -37,6 +38,11 @@ const menuItems = [
     href: "/dashboard/customers",
     icon: Users,
     label: "Clientes",
+  },
+  {
+    href: "/dashboard/services",
+    icon: Wrench,
+    label: "Servicios",
   },
 ];
 
@@ -87,3 +93,5 @@ export function DashboardSidebar() {
     </>
   );
 }
+
+    

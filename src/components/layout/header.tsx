@@ -9,6 +9,7 @@ const titleTranslations: { [key: string]: string } = {
   transactions: "Pagos",
   invoices: "Cuentas",
   customers: "Clientes",
+  services: "Servicios",
   settings: "Configuración",
   edit: "Editar",
   new: "Nueva"
@@ -61,3 +62,5 @@ export function DashboardHeader() {
     </header>
   );
 }
+
+    
