@@ -143,14 +143,18 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
         return;
     }
 
-    let invoiceNumber = '1104';
-    if(lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
-        invoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
+    let invoiceNumber = cuenta?.invoiceNumber;
+    if (!invoiceNumber) {
+        if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+            invoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
+        } else {
+            invoiceNumber = '1104';
+        }
     }
     
     const invoiceData = {
         userId: user.uid,
-        invoiceNumber: cuenta?.invoiceNumber || invoiceNumber,
+        invoiceNumber: invoiceNumber,
         customerId,
         descripcion,
         issueDate: fechaEmision?.toISOString(),
@@ -162,19 +166,18 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
         status: cuenta?.status || 'sent',
     };
 
-    if (cuenta) {
+    if (cuenta && cuenta.id) {
       // Update existing invoice
       const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', cuenta.id);
       setDocumentNonBlocking(invoiceRef, invoiceData, { merge: true });
       toast({ title: 'Cuenta actualizada', description: 'Los cambios han sido guardados.' });
-      router.push('/dashboard/invoices');
     } else {
       // Create new invoice
       const invoicesRef = collection(firestore, 'users', user.uid, 'invoices');
       await addDocumentNonBlocking(invoicesRef, invoiceData);
       toast({ title: 'Cuenta creada', description: 'La nueva cuenta ha sido guardada.' });
-      router.push('/dashboard/invoices');
     }
+    router.push('/dashboard/invoices');
   };
   
   const handleFirmaUploadClick = () => {
@@ -199,12 +202,20 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const getFullCurrentInvoice = (): Invoice | undefined => {
     if (!user) return undefined;
     
-    const invoiceNumber = cuenta?.invoiceNumber || (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber ? (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString() : '1104');
+    let finalInvoiceNumber = cuenta?.invoiceNumber;
+    if (!finalInvoiceNumber) {
+      if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+        finalInvoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
+      } else {
+        finalInvoiceNumber = '1104';
+      }
+    }
+
 
     return {
       id: cuenta?.id || 'temp-id',
       userId: user.uid,
-      invoiceNumber: invoiceNumber,
+      invoiceNumber: finalInvoiceNumber,
       customerId,
       descripcion,
       issueDate: fechaEmision?.toISOString() || new Date().toISOString(),
@@ -326,7 +337,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   key={index}
                   className="grid grid-cols-12 items-center gap-2"
                 >
-                  <div className="col-span-6">
+                  <div className="col-span-11 sm:col-span-5">
                      <Select onValueChange={(value) => handleServiceSelect(index, value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona un servicio"/>
@@ -340,7 +351,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   </div>
                    <Input
                     placeholder="Descripción"
-                    className="col-span-6"
+                    className="col-span-11 sm:col-span-6"
                     value={item.descripcion}
                     onChange={(e) =>
                       handleItemChange(
@@ -353,7 +364,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   <Input
                     type="number"
                     placeholder="Cant."
-                    className="col-span-2"
+                    className="col-span-5 sm:col-span-2"
                     value={item.cantidad}
                     onChange={(e) =>
                       handleItemChange(
@@ -366,7 +377,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   <Input
                     type="number"
                     placeholder="Precio"
-                    className="col-span-3"
+                    className="col-span-6 sm:col-span-3"
                     value={item.precio}
                     onChange={(e) =>
                       handleItemChange(
