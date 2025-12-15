@@ -51,6 +51,8 @@ export type Customer = {
   phoneNumber?: string;
   address?: string;
   createdAt: string;
+  nit?: string;
+  logoUrl?: string;
 };
 
 export type Collaborator = {

@@ -55,6 +55,7 @@ export function CustomersTable() {
         <TableHeader>
           <TableRow>
             <TableHead>Cliente</TableHead>
+            <TableHead>NIT</TableHead>
             <TableHead>Correo Electrónico</TableHead>
             <TableHead>Teléfono</TableHead>
             <TableHead className="text-right">Total Gastado</TableHead>
@@ -68,8 +69,8 @@ export function CustomersTable() {
                 <div className="flex items-center gap-3">
                   <Avatar className="h-9 w-9">
                     <AvatarImage
-                      src={`https://picsum.photos/seed/${customer.id}/100/100`}
-                      data-ai-hint="person"
+                      src={customer.logoUrl || `https://picsum.photos/seed/${customer.id}/100/100`}
+                      data-ai-hint="logo"
                     />
                     <AvatarFallback>
                       {customer.name?.charAt(0) ?? ''}
@@ -78,6 +79,7 @@ export function CustomersTable() {
                   <span className="font-medium">{customer.name}</span>
                 </div>
               </TableCell>
+              <TableCell>{customer.nit}</TableCell>
               <TableCell>{customer.email}</TableCell>
               <TableCell>{customer.phoneNumber}</TableCell>
               <TableCell className="text-right">

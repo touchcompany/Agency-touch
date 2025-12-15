@@ -54,6 +54,14 @@
         "address": {
           "type": "string",
           "description": "Address of the customer."
+        },
+        "nit": {
+          "type": "string",
+          "description": "Tax identification number for the customer."
+        },
+        "logoUrl": {
+            "type": "string",
+            "description": "URL of the customer's logo."
         }
       },
       "required": [

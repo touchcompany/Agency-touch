@@ -14,7 +14,7 @@ import {
   FileText,
   CreditCard,
   Sparkles,
-  Wrench,
+  Presentation,
   Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -48,7 +48,7 @@ const menuItems = [
   },
   {
     href: '/dashboard/services',
-    icon: Wrench,
+    icon: Presentation,
     label: 'Servicios',
   },
 ];

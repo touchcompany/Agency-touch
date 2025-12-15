@@ -26,6 +26,7 @@ export function AddCustomerSheet() {
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [nit, setNit] = useState('');
 
   const handleSubmit = async () => {
     if (!firestore || !user) {
@@ -53,6 +54,7 @@ export function AddCustomerSheet() {
       email,
       phoneNumber: phone,
       address,
+      nit,
       createdAt: new Date().toISOString(),
     });
 
@@ -66,6 +68,7 @@ export function AddCustomerSheet() {
     setEmail('');
     setPhone('');
     setAddress('');
+    setNit('');
   };
 
   return (
@@ -93,6 +96,18 @@ export function AddCustomerSheet() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Nombre del Cliente"
+              className="col-span-3"
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="nit" className="text-right">
+              NIT
+            </Label>
+            <Input
+              id="nit"
+              value={nit}
+              onChange={(e) => setNit(e.target.value)}
+              placeholder="Número de NIT"
               className="col-span-3"
             />
           </div>
