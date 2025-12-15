@@ -108,15 +108,17 @@ export function InvoicePrintLayout({ invoice, customer, companySettings }: Invoi
             
             <footer className="absolute bottom-10 left-10 right-10 text-xs text-gray-500">
                 <Separator className="mb-4" />
-                {invoice.observaciones && (
-                    <div className="mb-4">
-                        <h4 className="font-bold mb-1">Observaciones:</h4>
-                        <p>{invoice.observaciones}</p>
+                 <div className="space-y-4">
+                     {invoice.observaciones && (
+                        <div>
+                            <h4 className="font-bold mb-1">Observaciones:</h4>
+                            <p>{invoice.observaciones}</p>
+                        </div>
+                    )}
+                     <div>
+                        <h4 className="font-bold mb-1">Información de Pago:</h4>
+                        <p>{companyDetails.paymentInfo}</p>
                     </div>
-                )}
-                 <div className="mb-4">
-                    <h4 className="font-bold mb-1">Información de Pago:</h4>
-                    <p>{companyDetails.paymentInfo}</p>
                 </div>
             </footer>
 
