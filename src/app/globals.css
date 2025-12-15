@@ -97,4 +97,10 @@ body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
+  .print-container {
+    display: block !important;
+  }
+  .print-hidden {
+    display: none !important;
+  }
 }

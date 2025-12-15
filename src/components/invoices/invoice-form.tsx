@@ -105,7 +105,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (fechaEmision && !cuenta?.dueDate) { // Solo auto-rellena si no es una cuenta existente
+    if (fechaEmision && !cuenta?.dueDate) { 
         const newDueDate = new Date(fechaEmision);
         newDueDate.setDate(newDueDate.getDate() + 5);
         setFechaVencimiento(newDueDate);
@@ -162,15 +162,14 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     let invoiceNumber = cuenta?.invoiceNumber;
     if (!invoiceNumber) {
       if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
-        // Increment the last invoice number. Ensure it's treated as a number.
         const lastNum = parseInt(lastInvoiceArr[0].invoiceNumber, 10);
         if (!isNaN(lastNum)) {
           invoiceNumber = (lastNum + 1).toString();
         } else {
-          invoiceNumber = '1104'; // Fallback if parsing fails
+          invoiceNumber = '1104'; 
         }
       } else {
-        invoiceNumber = '1104'; // First invoice
+        invoiceNumber = '1104'; 
       }
     }
     
@@ -250,7 +249,14 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   }
 
   const handlePrint = () => {
-    window.print();
+    const printContents = printRef.current?.innerHTML;
+    const originalContents = document.body.innerHTML;
+    if (printContents) {
+      document.body.innerHTML = printContents;
+      window.print();
+      document.body.innerHTML = originalContents;
+      window.location.reload(); 
+    }
   };
   
   const handleSendWhatsApp = () => {
@@ -288,7 +294,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
   return (
     <>
-      <div className="print-container hidden print:block fixed top-0 left-0 w-full h-full bg-white z-[100]">
+      <div className="print-container hidden">
          <div ref={printRef}>
               <InvoicePrintLayout
                   invoice={getFullCurrentInvoice()}
@@ -297,7 +303,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
               />
           </div>
       </div>
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print:hidden">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 print-hidden">
         <div className="grid gap-6 lg:col-span-2">
           <Card>
             <CardHeader>
@@ -553,7 +559,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                       <DialogHeader>
                           <DialogTitle>Vista Previa de la Cuenta</DialogTitle>
                       </DialogHeader>
-                      <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100">
+                      <div className="max-h-[70vh] overflow-auto p-4 bg-gray-100 print-container">
                         <div ref={printRef}>
                             <InvoicePrintLayout
                                 invoice={getFullCurrentInvoice()}
