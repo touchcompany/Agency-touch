@@ -61,8 +61,25 @@ const getTitleFromPath = (path: string) => {
     }
      return `${titleTranslations.edit} ${translatedParent}`;
   }
+  
+  if (titleTranslations[lastPart]) {
+    return titleTranslations[lastPart];
+  }
+  
+  // If no direct translation, check if it's an ID (if it looks like one)
+  // This is a simple check, can be improved
+  if(pathParts.length > 2 && lastPart.length > 10) { // Assume long strings are IDs
+    const parent = pathParts[pathParts.length-2];
+    let translatedParent = titleTranslations[parent] || parent;
+     // Singularize
+    if (translatedParent.endsWith('s')) {
+      translatedParent = translatedParent.slice(0, -1);
+    }
+    return `Detalle de ${translatedParent}`;
+  }
 
-  return titleTranslations[lastPart] || lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
+
+  return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
 };
 
 
@@ -90,7 +107,7 @@ export function DashboardHeader() {
       <div className="md:hidden">
         <SidebarTrigger />
       </div>
-      <h1 className="font-headline flex-1 text-2xl font-bold text-foreground">{title}</h1>
+      <h1 className="font-headline flex-1 text-xl sm:text-2xl font-bold text-foreground">{title}</h1>
       
       {user && (
          <DropdownMenu>

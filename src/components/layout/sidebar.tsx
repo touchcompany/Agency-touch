@@ -16,6 +16,7 @@ import {
   Briefcase,
   Presentation,
   Bot,
+  Settings,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -56,6 +57,11 @@ const menuItems = [
     href: '/dashboard/automation',
     icon: Bot,
     label: 'Automatización'
+  },
+    {
+    href: '/dashboard/settings',
+    icon: Settings,
+    label: 'Configuración'
   }
 ];
 

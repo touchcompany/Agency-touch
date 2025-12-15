@@ -252,6 +252,38 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const handlePrint = () => {
     window.print();
   };
+  
+  const handleSendWhatsApp = () => {
+    const currentInvoice = getFullCurrentInvoice();
+    const customer = clientes?.find(c => c.id === customerId);
+
+    if (!customer || !customer.phoneNumber) {
+      toast({
+        variant: "destructive",
+        title: "Falta número de teléfono",
+        description: "Este cliente no tiene un número de WhatsApp registrado.",
+      });
+      return;
+    }
+    
+    if (!currentInvoice) {
+        toast({
+            variant: "destructive",
+            title: "Faltan datos",
+            description: "No se pudo obtener la información de la cuenta.",
+          });
+        return;
+    }
+
+    const dueDateFormatted = currentInvoice.dueDate
+      ? format(new Date(currentInvoice.dueDate), 'PPP', { locale: es })
+      : 'N/A';
+
+    const message = `Hola ${customer.name}, te envío la cuenta de cobro No. *${currentInvoice.invoiceNumber}* por un valor de *${formatCurrency(currentInvoice.amountDue)}*. La fecha de vencimiento es el ${dueDateFormatted}. ¡Gracias!`;
+    const whatsappUrl = `https://wa.me/${customer.phoneNumber}?text=${encodeURIComponent(message)}`;
+
+    window.open(whatsappUrl, '_blank');
+  };
 
 
   return (
@@ -370,7 +402,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                     key={index}
                     className="grid grid-cols-12 items-center gap-2"
                   >
-                    <div className="col-span-11 sm:col-span-5">
+                    <div className="col-span-12 sm:col-span-5">
                        <Select onValueChange={(value) => handleServiceSelect(index, value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Selecciona un servicio"/>
@@ -384,7 +416,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                     </div>
                      <Input
                       placeholder="Descripción"
-                      className="col-span-11 sm:col-span-6"
+                      className="col-span-12 sm:col-span-6"
                       value={item.descripcion}
                       onChange={(e) =>
                         handleItemChange(
@@ -397,7 +429,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                     <Input
                       type="number"
                       placeholder="Cant."
-                      className="col-span-5 sm:col-span-2"
+                      className="col-span-4 sm:col-span-2"
                       value={item.cantidad}
                       onChange={(e) =>
                         handleItemChange(
@@ -410,7 +442,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                     <Input
                       type="number"
                       placeholder="Precio"
-                      className="col-span-6 sm:col-span-3"
+                      className="col-span-5 sm:col-span-3"
                       value={item.precio}
                       onChange={(e) =>
                         handleItemChange(
@@ -424,7 +456,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                       variant="ghost"
                       size="icon"
                       onClick={() => removeItem(index)}
-                      className="col-span-1"
+                      className="col-span-3 sm:col-span-1"
                     >
                       <Trash className="h-4 w-4 text-red-500" />
                     </Button>
@@ -486,7 +518,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
             </CardContent>
           </Card>
         </div>
-        <div className="space-y-6">
+        <div className="space-y-6 lg:sticky lg:top-20">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Resumen</CardTitle>
@@ -536,7 +568,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
               <Button variant="outline" onClick={() => alert('Funcionalidad de Correo en desarrollo.')}>
                 <Send className="mr-2 h-4 w-4" /> Correo
               </Button>
-              <Button variant="outline" className="col-span-2" onClick={() => alert('Funcionalidad de WhatsApp en desarrollo.')}>
+              <Button variant="outline" className="col-span-2" onClick={handleSendWhatsApp}>
                 <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
               </Button>
             </CardContent>
