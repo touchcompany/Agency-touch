@@ -53,6 +53,9 @@ export type Customer = {
   createdAt: string;
   nit?: string;
   logoUrl?: string;
+  isMonthly?: boolean;
+  invoiceDay?: number;
+  defaultServiceId?: string;
 };
 
 export type Collaborator = {

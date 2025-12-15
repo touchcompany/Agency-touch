@@ -29,7 +29,8 @@ const titleTranslations: { [key: string]: string } = {
   services: "Servicios",
   settings: "Configuración",
   edit: "Editar",
-  new: "Nueva"
+  new: "Nueva",
+  automation: "Automatización",
 };
 
 const getTitleFromPath = (path: string) => {

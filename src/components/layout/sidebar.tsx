@@ -15,6 +15,7 @@ import {
   CreditCard,
   Briefcase,
   Presentation,
+  Bot,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -51,6 +52,11 @@ const menuItems = [
     icon: Presentation,
     label: 'Servicios',
   },
+  {
+    href: '/dashboard/automation',
+    icon: Bot,
+    label: 'Automatización'
+  }
 ];
 
 export function DashboardSidebar() {

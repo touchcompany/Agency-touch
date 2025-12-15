@@ -62,6 +62,18 @@
         "logoUrl": {
             "type": "string",
             "description": "URL of the customer's logo."
+        },
+        "isMonthly": {
+          "type": "boolean",
+          "description": "Flag to indicate if the customer has recurring monthly billing."
+        },
+        "invoiceDay": {
+          "type": "number",
+          "description": "The day of the month (1-31) to generate the recurring invoice."
+        },
+        "defaultServiceId": {
+          "type": "string",
+          "description": "The ID of the default service to use for recurring invoices."
         }
       },
       "required": [

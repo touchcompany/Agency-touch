@@ -3,11 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
-import { useFirebase, setDocumentNonBlocking } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { useFirebase, setDocumentNonBlocking, useCollection, useMemoFirebase } from '@/firebase';
+import { doc, collection } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import type { Customer } from '@/lib/types';
+import type { Customer, Service } from '@/lib/types';
 import { useRouter } from 'next/navigation';
+import { Switch } from '../ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 interface CustomerFormProps {
   customer: Customer;
@@ -24,12 +26,24 @@ export function CustomerForm({ customer }: CustomerFormProps) {
   const [address, setAddress] = useState(customer.address || '');
   const [nit, setNit] = useState(customer.nit || '');
 
+  const [isMonthly, setIsMonthly] = useState(customer.isMonthly || false);
+  const [invoiceDay, setInvoiceDay] = useState(customer.invoiceDay?.toString() || '');
+  const [defaultServiceId, setDefaultServiceId] = useState(customer.defaultServiceId || '');
+
+  const servicesQuery = useMemoFirebase(() => (
+    user ? collection(firestore, 'users', user.uid, 'services') : null
+  ), [firestore, user]);
+  const { data: services } = useCollection<Service>(servicesQuery);
+
   useEffect(() => {
     setName(customer.name);
     setEmail(customer.email || '');
     setPhone(customer.phoneNumber || '');
     setAddress(customer.address || '');
     setNit(customer.nit || '');
+    setIsMonthly(customer.isMonthly || false);
+    setInvoiceDay(customer.invoiceDay?.toString() || '');
+    setDefaultServiceId(customer.defaultServiceId || '');
   }, [customer]);
 
   const handleSubmit = async () => {
@@ -59,6 +73,9 @@ export function CustomerForm({ customer }: CustomerFormProps) {
       phoneNumber: phone,
       address,
       nit,
+      isMonthly,
+      invoiceDay: isMonthly ? parseInt(invoiceDay) : null,
+      defaultServiceId: isMonthly ? defaultServiceId : null,
     }, { merge: true });
 
     toast({
@@ -117,7 +134,61 @@ export function CustomerForm({ customer }: CustomerFormProps) {
           placeholder="123 Calle Principal"
         />
       </div>
-      <div className="flex justify-end gap-2">
+
+       <div className="col-span-4 my-4 h-px bg-border" />
+
+        <div className="space-y-2 flex items-center justify-between rounded-lg border p-3 shadow-sm">
+            <div className="space-y-0.5">
+                <Label htmlFor="monthly-billing">Facturación Mensual Automática</Label>
+                <p className="text-xs text-muted-foreground">
+                    Activa para generar cuentas de cobro automáticamente.
+                </p>
+            </div>
+            <Switch
+                id="monthly-billing"
+                checked={isMonthly}
+                onCheckedChange={setIsMonthly}
+            />
+        </div>
+
+      {isMonthly && (
+        <div className="grid gap-4 mt-4">
+           <div className="grid gap-2">
+            <Label htmlFor="invoice-day">
+              Día del Mes para Facturar (1-31)
+            </Label>
+            <Input
+              id="invoice-day"
+              type="number"
+              min="1"
+              max="31"
+              value={invoiceDay}
+              onChange={(e) => setInvoiceDay(e.target.value)}
+              placeholder="Ej: 15"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="default-service">
+              Servicio por Defecto para Facturar
+            </Label>
+             <Select value={defaultServiceId} onValueChange={setDefaultServiceId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecciona un servicio" />
+              </SelectTrigger>
+              <SelectContent>
+                {(services || []).map((service) => (
+                  <SelectItem key={service.id} value={service.id}>
+                    {service.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
+
+
+      <div className="flex justify-end gap-2 mt-6">
          <Button variant="outline" onClick={() => router.push('/dashboard/customers')}>
             Cancelar
          </Button>
