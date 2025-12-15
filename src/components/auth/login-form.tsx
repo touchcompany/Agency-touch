@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn } from "lucide-react";
-import { useAuth } from "@/firebase";
+import { useAuth, useUser } from "@/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 const formSchema = z.object({
@@ -30,7 +30,14 @@ export function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const auth = useAuth();
+  const { user, isUserLoading } = useUser();
   const router = useRouter();
+
+  useEffect(() => {
+    if (!isUserLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,6 +69,10 @@ export function LoginForm() {
         });
       }
     });
+  }
+
+  if (isUserLoading || user) {
+    return <div className="flex justify-center items-center p-8">Cargando...</div>;
   }
 
   return (
