@@ -1,5 +1,5 @@
 'use client';
-import type { Cliente } from '@/lib/types';
+import type { Customer } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import {
   Table,
@@ -25,13 +25,13 @@ import { collection } from 'firebase/firestore';
 export function CustomersTable() {
   const { firestore, user } = useFirebase();
 
-  const customersQuery = useMemoFirebase(() => 
-    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  const collaboratorsQuery = useMemoFirebase(() => 
+    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
-  const { data: customers, isLoading } = useCollection<Cliente>(customersQuery);
+  const { data: collaborators, isLoading } = useCollection<Customer>(collaboratorsQuery);
 
   // TODO: Add calculation for total spent from invoices
-  const calculateTotalSpent = (customer: Cliente) => 0;
+  const calculateTotalSpent = (customer: Customer) => 0;
 
   if (isLoading) {
     return (
@@ -41,10 +41,10 @@ export function CustomersTable() {
     );
   }
 
-  if (!customers || customers.length === 0) {
+  if (!collaborators || collaborators.length === 0) {
     return (
       <div className="text-center p-8 text-muted-foreground">
-        No hay clientes todavía. ¡Añade uno para empezar!
+        No hay colaboradores todavía. ¡Añade uno para empezar!
       </div>
     );
   }
@@ -54,7 +54,7 @@ export function CustomersTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Cliente</TableHead>
+            <TableHead>Colaborador</TableHead>
             <TableHead>Correo Electrónico</TableHead>
             <TableHead>Teléfono</TableHead>
             <TableHead className="text-right">Total Gastado</TableHead>
@@ -62,7 +62,7 @@ export function CustomersTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {customers.map((customer) => (
+          {collaborators.map((customer) => (
             <TableRow key={customer.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export function CustomersTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem>Editar Cliente</DropdownMenuItem>
+                    <DropdownMenuItem>Editar Colaborador</DropdownMenuItem>
                     <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

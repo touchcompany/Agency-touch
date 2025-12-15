@@ -56,11 +56,11 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const router = useRouter();
   const { toast } = useToast();
 
-  const customersQuery = useMemoFirebase(
-    () => (user ? collection(firestore, 'users', user.uid, 'customers') : null),
+  const collaboratorsQuery = useMemoFirebase(
+    () => (user ? collection(firestore, 'users', user.uid, 'collaborators') : null),
     [firestore, user]
   );
-  const { data: clientes } = useCollection<Customer>(customersQuery);
+  const { data: clientes } = useCollection<Customer>(collaboratorsQuery);
 
   const servicesQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'services') : null),
@@ -207,14 +207,14 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
       <div className="grid gap-6 lg:col-span-2">
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline">Cliente y Fechas</CardTitle>
+            <CardTitle className="font-headline">Colaborador y Fechas</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="customer">Cliente</Label>
+              <Label htmlFor="customer">Colaborador</Label>
               <Select value={customerId} onValueChange={setCustomerId}>
                 <SelectTrigger id="customer">
-                  <SelectValue placeholder="Selecciona un cliente" />
+                  <SelectValue placeholder="Selecciona un colaborador" />
                 </SelectTrigger>
                 <SelectContent>
                   {(clientes || []).map((customer) => (
@@ -470,5 +470,3 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     </div>
   );
 }
-
-    

@@ -41,13 +41,13 @@ export function AddCustomerSheet() {
       toast({
         variant: 'destructive',
         title: 'Campo requerido',
-        description: 'El nombre del cliente es obligatorio.',
+        description: 'El nombre del colaborador es obligatorio.',
       });
       return;
     }
 
-    const customersRef = collection(firestore, 'users', user.uid, 'customers');
-    addDocumentNonBlocking(customersRef, {
+    const collaboratorsRef = collection(firestore, 'users', user.uid, 'collaborators');
+    addDocumentNonBlocking(collaboratorsRef, {
       userId: user.uid,
       name,
       email,
@@ -57,8 +57,8 @@ export function AddCustomerSheet() {
     });
 
     toast({
-      title: 'Cliente añadido',
-      description: `${name} ha sido añadido a tu lista de clientes.`,
+      title: 'Colaborador añadido',
+      description: `${name} ha sido añadido a tu lista de colaboradores.`,
     });
 
     // Reset fields
@@ -73,14 +73,14 @@ export function AddCustomerSheet() {
       <SheetTrigger asChild>
         <Button>
           <Plus className="mr-2 h-4 w-4" />
-          Añadir Cliente
+          Añadir Colaborador
         </Button>
       </SheetTrigger>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle className="font-headline">Añadir Nuevo Cliente</SheetTitle>
+          <SheetTitle className="font-headline">Añadir Nuevo Colaborador</SheetTitle>
           <SheetDescription>
-            Añade un nuevo cliente a tu base de datos.
+            Añade un nuevo colaborador a tu base de datos.
           </SheetDescription>
         </SheetHeader>
         <div className="grid gap-4 py-4">
@@ -92,7 +92,7 @@ export function AddCustomerSheet() {
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nombre del Cliente"
+              placeholder="Nombre del Colaborador"
               className="col-span-3"
             />
           </div>
@@ -105,7 +105,7 @@ export function AddCustomerSheet() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="cliente@ejemplo.com"
+              placeholder="colaborador@ejemplo.com"
               className="col-span-3"
             />
           </div>
@@ -137,7 +137,7 @@ export function AddCustomerSheet() {
         <SheetFooter>
           <SheetClose asChild>
             <Button type="submit" onClick={handleSubmit}>
-              Guardar Cliente
+              Guardar Colaborador
             </Button>
           </SheetClose>
         </SheetFooter>

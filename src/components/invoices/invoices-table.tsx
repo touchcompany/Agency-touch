@@ -44,14 +44,14 @@ export function CuentasTable() {
   , [firestore, user]);
   const { data: invoices, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
 
-  const customersQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'customers') : null
+  const collaboratorsQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
   , [firestore, user]);
-  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
+  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(collaboratorsQuery);
 
   const getClientName = (customerId: string) => {
     if (!customers) return '...';
-    return customers.find((c) => c.id === customerId)?.name || 'Cliente Desconocido';
+    return customers.find((c) => c.id === customerId)?.name || 'Colaborador Desconocido';
   };
   
   const isLoading = invoicesLoading || customersLoading;
@@ -79,7 +79,7 @@ export function CuentasTable() {
           <TableRow>
             <TableHead>Estado</TableHead>
             <TableHead>Nº Cuenta</TableHead>
-            <TableHead>Cliente</TableHead>
+            <TableHead>Colaborador</TableHead>
             <TableHead>Fecha de Emisión</TableHead>
             <TableHead>Fecha de Vencimiento</TableHead>
             <TableHead className="text-right">Monto</TableHead>
