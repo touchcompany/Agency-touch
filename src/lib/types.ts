@@ -72,6 +72,15 @@ export type DetalleCuenta = {
   precio: number;
 };
 
+export type CompanySettings = {
+    id: 'company';
+    companyName: string;
+    companyNit: string;
+    companyWhatsapp: string;
+    paymentDetails: string;
+    logoUrl?: string;
+}
+
 export type Cuenta = {
   id: string;
   numeroCuenta: string;

@@ -6,6 +6,9 @@ import { FirebaseClientProvider } from '@/firebase';
 export const metadata: Metadata = {
   title: 'touch+',
   description: 'Gestión de finanzas personales con IA',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

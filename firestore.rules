@@ -173,6 +173,16 @@ service cloud.firestore {
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
+
+       /**
+       * @description Manages company settings for a specific user.
+       * @path /users/{userId}/settings/{docId}
+       * @allow (read, write) A user can read and write to their own settings document.
+       * @principle Enforces that users can only manage their own company settings.
+       */
+      match /settings/{docId} {
+        allow read, write: if isOwner(userId);
+      }
     }
   }
 }

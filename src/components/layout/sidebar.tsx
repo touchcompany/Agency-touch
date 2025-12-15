@@ -13,12 +13,12 @@ import {
   Users,
   FileText,
   CreditCard,
-  Sparkles,
-  Presentation,
   Briefcase,
+  Presentation,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 const menuItems = [
   {
@@ -68,8 +68,8 @@ export function DashboardSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="p-2 bg-primary text-primary-foreground rounded-md">
-              <Sparkles className="h-5 w-5" />
+            <div className="p-1 bg-primary rounded-md">
+                <Image src="/favicon.svg" alt="touch+ logo" width={28} height={28} />
             </div>
             <h1 className="font-headline text-xl font-bold text-foreground">
               touch+

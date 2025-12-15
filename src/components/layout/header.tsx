@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
@@ -98,10 +99,8 @@ export function DashboardHeader() {
               size="icon"
               className="overflow-hidden rounded-full"
             >
-              <Avatar>
-                 <AvatarImage src={user.photoURL ?? undefined} alt="Avatar" />
-                 <AvatarFallback>{getInitials(user.phoneNumber)}</AvatarFallback>
-              </Avatar>
+               <Image src="/favicon.svg" alt="touch+ logo" width={40} height={40} />
+
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

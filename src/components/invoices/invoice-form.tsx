@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Customer, Invoice, DetalleCuenta, Service } from '@/lib/types';
+import type { Customer, Invoice, DetalleCuenta, Service, CompanySettings } from '@/lib/types';
 import {
   CalendarIcon,
   Plus,
@@ -39,6 +39,7 @@ import { Textarea } from '../ui/textarea';
 import {
   useFirebase,
   useCollection,
+  useDoc,
   useMemoFirebase,
   addDocumentNonBlocking,
   setDocumentNonBlocking,
@@ -58,6 +59,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const { firestore, user } = useFirebase();
   const router = useRouter();
   const { toast } = useToast();
+  const printRef = useRef<HTMLDivElement>(null);
 
   const customersQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'customers') : null),
@@ -70,6 +72,12 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     [firestore, user]
   );
   const { data: services } = useCollection<Service>(servicesQuery);
+
+  const settingsRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid, 'settings', 'company') : null),
+    [firestore, user]
+  );
+  const { data: companySettings } = useDoc<CompanySettings>(settingsRef);
 
   const lastInvoiceQuery = useMemoFirebase(
     () => user ? query(collection(firestore, 'users', user.uid, 'invoices'), orderBy('invoiceNumber', 'desc'), limit(1)) : null,
@@ -167,12 +175,10 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     };
 
     if (cuenta && cuenta.id) {
-      // Update existing invoice
       const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', cuenta.id);
       setDocumentNonBlocking(invoiceRef, invoiceData, { merge: true });
       toast({ title: 'Cuenta actualizada', description: 'Los cambios han sido guardados.' });
     } else {
-      // Create new invoice
       const invoicesRef = collection(firestore, 'users', user.uid, 'invoices');
       await addDocumentNonBlocking(invoicesRef, invoiceData);
       toast({ title: 'Cuenta creada', description: 'La nueva cuenta ha sido guardada.' });
@@ -187,9 +193,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Placeholder for upload logic
       console.log("File selected:", file.name);
-      // In a real app, you would upload this file to Firebase Storage and get a URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setFirmaUrl(e.target?.result as string);
@@ -230,276 +234,313 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     };
   }
 
+  const handlePrint = () => {
+    window.print();
+  };
+
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-      <div className="grid gap-6 lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Cliente y Fechas</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="customer">Cliente</Label>
-              <Select value={customerId} onValueChange={setCustomerId}>
-                <SelectTrigger id="customer">
-                  <SelectValue placeholder="Selecciona un cliente" />
-                </SelectTrigger>
-                <SelectContent>
-                  {(clientes || []).map((customer) => (
-                    <SelectItem key={customer.id} value={customer.id}>
-                      {customer.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+    <>
+      <style jsx global>{`
+        @media print {
+          body > *:not(.print-container) {
+            display: none;
+          }
+          .print-container {
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+          }
+        }
+      `}</style>
+      <div className="hidden">
+        <div className="print-container">
+           <div ref={printRef}>
+                <InvoicePrintLayout
+                    invoice={getFullCurrentInvoice()}
+                    customer={clientes?.find(c => c.id === customerId)}
+                    companySettings={companySettings ?? undefined}
+                />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="descripcion">Descripción</Label>
-              <Input
-                id="descripcion"
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                placeholder="Ej: Servicios de consultoría"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="issue-date">Fecha de Emisión</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !fechaEmision && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fechaEmision ? (
-                      format(fechaEmision, 'PPP', { locale: es })
-                    ) : (
-                      <span>Elige una fecha</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={fechaEmision}
-                    onSelect={setFechaEmision}
-                    initialFocus
-                    locale={es}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="due-date">Fecha de Vencimiento</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant={'outline'}
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !fechaVencimiento && 'text-muted-foreground'
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {fechaVencimiento ? (
-                      format(fechaVencimiento, 'PPP', { locale: es })
-                    ) : (
-                      <span>Elige una fecha</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={fechaVencimiento}
-                    onSelect={setFechaVencimiento}
-                    initialFocus
-                    locale={es}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Detalle de la Cuenta</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {detalle.map((item, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-12 items-center gap-2"
-                >
-                  <div className="col-span-11 sm:col-span-5">
-                     <Select onValueChange={(value) => handleServiceSelect(index, value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecciona un servicio"/>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(services || []).map(service => (
-                          <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                   <Input
-                    placeholder="Descripción"
-                    className="col-span-11 sm:col-span-6"
-                    value={item.descripcion}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        'descripcion',
-                        e.target.value
-                      )
-                    }
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Cant."
-                    className="col-span-5 sm:col-span-2"
-                    value={item.cantidad}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        'cantidad',
-                        parseInt(e.target.value, 10)
-                      )
-                    }
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Precio"
-                    className="col-span-6 sm:col-span-3"
-                    value={item.precio}
-                    onChange={(e) =>
-                      handleItemChange(
-                        index,
-                        'precio',
-                        parseFloat(e.target.value)
-                      )
-                    }
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(index)}
-                    className="col-span-1"
-                  >
-                    <Trash className="h-4 w-4 text-red-500" />
-                  </Button>
-                </div>
-              ))}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addItem}
-              className="mt-4"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Añadir Servicio
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Observaciones y Firma</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="observaciones">Observaciones</Label>
-              <Textarea
-                id="observaciones"
-                placeholder="Añade notas u observaciones adicionales aquí."
-                rows={3}
-                value={observaciones}
-                onChange={(e) => setObservaciones(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>Firma</Label>
-              <div className="flex items-center gap-4">
-                <div className="flex h-16 w-48 flex-shrink-0 items-center justify-center rounded-md border bg-muted">
-                  {firmaUrl ? (
-                    <img
-                      src={firmaUrl}
-                      alt="Firma"
-                      className="h-full w-full object-contain"
-                    />
-                  ) : (
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                  )}
-                </div>
-                <Button variant="outline" size="sm" onClick={handleFirmaUploadClick}>
-                  Subir Firma
-                </Button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  className="hidden"
-                  accept="image/*"
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:col-span-2">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Cliente y Fechas</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="customer">Cliente</Label>
+                <Select value={customerId} onValueChange={setCustomerId}>
+                  <SelectTrigger id="customer">
+                    <SelectValue placeholder="Selecciona un cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(clientes || []).map((customer) => (
+                      <SelectItem key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="descripcion">Descripción</Label>
+                <Input
+                  id="descripcion"
+                  value={descripcion}
+                  onChange={(e) => setDescripcion(e.target.value)}
+                  placeholder="Ej: Servicios de consultoría"
                 />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="space-y-2">
+                <Label htmlFor="issue-date">Fecha de Emisión</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !fechaEmision && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {fechaEmision ? (
+                        format(fechaEmision, 'PPP', { locale: es })
+                      ) : (
+                        <span>Elige una fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={fechaEmision}
+                      onSelect={setFechaEmision}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="due-date">Fecha de Vencimiento</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={'outline'}
+                      className={cn(
+                        'w-full justify-start text-left font-normal',
+                        !fechaVencimiento && 'text-muted-foreground'
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {fechaVencimiento ? (
+                        format(fechaVencimiento, 'PPP', { locale: es })
+                      ) : (
+                        <span>Elige una fecha</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={fechaVencimiento}
+                      onSelect={setFechaVencimiento}
+                      initialFocus
+                      locale={es}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Detalle de la Cuenta</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {detalle.map((item, index) => (
+                  <div
+                    key={index}
+                    className="grid grid-cols-12 items-center gap-2"
+                  >
+                    <div className="col-span-11 sm:col-span-5">
+                       <Select onValueChange={(value) => handleServiceSelect(index, value)}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un servicio"/>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(services || []).map(service => (
+                            <SelectItem key={service.id} value={service.id}>{service.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                     <Input
+                      placeholder="Descripción"
+                      className="col-span-11 sm:col-span-6"
+                      value={item.descripcion}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          'descripcion',
+                          e.target.value
+                        )
+                      }
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Cant."
+                      className="col-span-5 sm:col-span-2"
+                      value={item.cantidad}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          'cantidad',
+                          parseInt(e.target.value, 10)
+                        )
+                      }
+                    />
+                    <Input
+                      type="number"
+                      placeholder="Precio"
+                      className="col-span-6 sm:col-span-3"
+                      value={item.precio}
+                      onChange={(e) =>
+                        handleItemChange(
+                          index,
+                          'precio',
+                          parseFloat(e.target.value)
+                        )
+                      }
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeItem(index)}
+                      className="col-span-1"
+                    >
+                      <Trash className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={addItem}
+                className="mt-4"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Añadir Servicio
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Observaciones y Firma</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="observaciones">Observaciones</Label>
+                <Textarea
+                  id="observaciones"
+                  placeholder="Añade notas u observaciones adicionales aquí."
+                  rows={3}
+                  value={observaciones}
+                  onChange={(e) => setObservaciones(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Firma</Label>
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-48 flex-shrink-0 items-center justify-center rounded-md border bg-muted">
+                    {firmaUrl ? (
+                      <img
+                        src={firmaUrl}
+                        alt="Firma"
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                    )}
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleFirmaUploadClick}>
+                    Subir Firma
+                  </Button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    className="hidden"
+                    accept="image/*"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Resumen</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>{formatCurrency(subtotal)}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total</span>
+                <span>{formatCurrency(total)}</span>
+              </div>
+            </CardContent>
+            <CardFooter className="flex-col items-stretch gap-2">
+              <Button onClick={handleSave}>
+                {cuenta ? 'Guardar Cambios' : 'Crear Cuenta de Cobro'}
+              </Button>
+            </CardFooter>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Acciones</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+               <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                      <DialogHeader>
+                          <DialogTitle>Vista Previa de la Cuenta</DialogTitle>
+                      </DialogHeader>
+                      <div className="max-h-[70vh] overflow-auto">
+                        <InvoicePrintLayout
+                            invoice={getFullCurrentInvoice()}
+                            customer={clientes?.find(c => c.id === customerId)}
+                            companySettings={companySettings ?? undefined}
+                        />
+                      </div>
+                  </DialogContent>
+               </Dialog>
+              <Button variant="outline" onClick={() => alert('Funcionalidad de Correo en desarrollo.')}>
+                <Send className="mr-2 h-4 w-4" /> Correo
+              </Button>
+              <Button variant="outline" className="col-span-2" onClick={() => alert('Funcionalidad de WhatsApp en desarrollo.')}>
+                <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Resumen</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Subtotal</span>
-              <span>{formatCurrency(subtotal)}</span>
-            </div>
-            <Separator />
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total</span>
-              <span>{formatCurrency(total)}</span>
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col items-stretch gap-2">
-            <Button onClick={handleSave}>
-              {cuenta ? 'Guardar Cambios' : 'Crear Cuenta de Cobro'}
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Acciones</CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl">
-                 <DialogHeader>
-                   <DialogTitle>Vista Previa de Cuenta</DialogTitle>
-                 </DialogHeader>
-                 <InvoicePrintLayout invoice={getFullCurrentInvoice()} customer={clientes?.find(c => c.id === customerId)} />
-              </DialogContent>
-            </Dialog>
-            <Button variant="outline" onClick={() => alert('Funcionalidad de Correo en desarrollo.')}>
-              <Send className="mr-2 h-4 w-4" /> Correo
-            </Button>
-            <Button variant="outline" className="col-span-2" onClick={() => alert('Funcionalidad de WhatsApp en desarrollo.')}>
-              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    </>
   );
 }

@@ -1,29 +1,28 @@
 'use client';
 import { formatCurrency } from "@/lib/utils";
-import type { Customer, Invoice } from "@/lib/types";
+import type { Customer, Invoice, CompanySettings } from "@/lib/types";
 import { Separator } from "../ui/separator";
+import Image from "next/image";
 
 interface InvoicePrintLayoutProps {
     invoice: Invoice | undefined;
     customer: Customer | undefined;
+    companySettings: CompanySettings | undefined;
 }
 
-// TODO: Fetch this data from Firestore settings
-const companyDetails = {
-    name: 'touch+',
-    address: 'Calle Falsa 123, Springfield',
-    phone: '+57 300 123 4567',
-    email: 'contacto@touchplus.co',
-    nit: '900.123.456-7',
-    whatsapp: '+57 317 398 0133',
-    paymentInfo: 'Cuenta de Ahorros Bancolombia No. 123-456789-00',
-    logo: '/logo-placeholder.png' // You might want to get this from settings too
-}
-
-
-export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProps) {
+export function InvoicePrintLayout({ invoice, customer, companySettings }: InvoicePrintLayoutProps) {
     if (!invoice || !customer) {
         return <div className="p-10 text-center">Faltan datos de la cuenta o del cliente.</div>
+    }
+
+    const companyDetails = {
+        name: companySettings?.companyName || 'touch+',
+        address: 'Dirección no configurada',
+        phone: companySettings?.companyWhatsapp || 'WhatsApp no configurado',
+        email: 'contacto@touchplus.co',
+        nit: companySettings?.companyNit || 'NIT no configurado',
+        paymentInfo: companySettings?.paymentDetails || 'Datos de pago no configurados',
+        logo: companySettings?.logoUrl || '/favicon.svg'
     }
 
     const subtotal = invoice.detalle?.reduce((sum, item) => sum + (item.precio || 0) * (item.cantidad || 0), 0) || 0;
@@ -33,11 +32,19 @@ export function InvoicePrintLayout({ invoice, customer }: InvoicePrintLayoutProp
         <div className="bg-white text-gray-800 p-10 font-sans text-sm" style={{ width: '210mm', minHeight: '297mm', margin: '0 auto' }}>
             <header className="flex justify-between items-start pb-8 border-b-2 border-gray-200">
                 <div className="w-2/3">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">{companyDetails.name}</h1>
-                    <p>NIT: {companyDetails.nit}</p>
-                    <p>{companyDetails.address}</p>
-                    <p>WhatsApp: {companyDetails.whatsapp}</p>
-                    <p>Email: {companyDetails.email}</p>
+                    <div className="flex items-center gap-4">
+                         {companyDetails.logo && <Image src={companyDetails.logo} alt="Company Logo" width={60} height={60} />}
+                        <div>
+                             <h1 className="text-3xl font-bold text-gray-900 mb-2">{companyDetails.name}</h1>
+                             <p>NIT: {companyDetails.nit}</p>
+                        </div>
+                    </div>
+                   
+                    <div className="mt-4">
+                        <p>{companyDetails.address}</p>
+                        <p>WhatsApp: {companyDetails.phone}</p>
+                        <p>Email: {companyDetails.email}</p>
+                    </div>
                 </div>
                 <div className="w-1/3 text-right">
                     <h2 className="text-3xl font-bold text-gray-500 uppercase">Cuenta de Cobro</h2>
