@@ -1,9 +1,8 @@
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { usePathname, useRouter } from "next/navigation";
-import { useMemo, useEffect } from "react";
-import { useUser } from "@/firebase";
+import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 
 const titleTranslations: { [key: string]: string } = {
   dashboard: "Panel",
@@ -51,14 +50,6 @@ const getTitleFromPath = (path: string) => {
 export function DashboardHeader() {
   const pathname = usePathname();
   const title = useMemo(() => getTitleFromPath(pathname), [pathname]);
-  const { user, isUserLoading } = useUser();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push('/login');
-    }
-  }, [user, isUserLoading, router]);
 
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">

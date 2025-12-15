@@ -3,7 +3,6 @@
 import {
   SidebarHeader,
   SidebarContent,
-  SidebarFooter,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -13,24 +12,10 @@ import {
   Users,
   FileText,
   CreditCard,
-  Settings,
-  LogOut,
-  ChevronDown,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { useAuth, useUser } from "@/firebase";
-import { signOut } from "firebase/auth";
 
 const menuItems = [
   {
@@ -57,12 +42,6 @@ const menuItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
-  const auth = useAuth();
-  const { user } = useUser();
-
-  const handleLogout = async () => {
-    await signOut(auth);
-  }
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -105,42 +84,6 @@ export function DashboardSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        {user && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center justify-between rounded-lg p-2 text-left text-sm hover:bg-sidebar-accent">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL ?? `https://picsum.photos/seed/${user.uid}/100/100`} data-ai-hint="person" />
-                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col">
-                    <span className="font-medium text-sidebar-foreground">{user.displayName || "Usuario"}</span>
-                    <span className="text-xs text-muted-foreground">{user.email}</span>
-                  </div>
-                </div>
-                <ChevronDown className="h-4 w-4 text-muted-foreground" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56 mb-2" side="top" align="start">
-              <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/settings">
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Configuración</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Cerrar Sesión</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </SidebarFooter>
     </>
   );
 }
