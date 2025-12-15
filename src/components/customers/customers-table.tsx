@@ -21,6 +21,7 @@ import { MoreHorizontal, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import Link from 'next/link';
 
 export function CustomersTable() {
   const { firestore, user } = useFirebase();
@@ -95,7 +96,9 @@ export function CustomersTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem>Editar Cliente</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/customers/${customer.id}/edit`}>Editar Cliente</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
