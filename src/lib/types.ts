@@ -16,6 +16,7 @@ export type Income = {
   amount: number;
   description: string;
   category: string;
+  invoiceId?: string;
 };
 
 export type Expense = {

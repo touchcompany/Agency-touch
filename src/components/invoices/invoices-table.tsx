@@ -16,12 +16,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
+import { useToast } from '@/hooks/use-toast';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -37,6 +39,7 @@ const statusTranslations: { [key: string]: string } = {
 
 export function CuentasTable() {
   const { firestore, user } = useFirebase();
+  const { toast } = useToast();
   const locale = 'es-ES';
 
   const invoicesQuery = useMemoFirebase(() =>
@@ -55,6 +58,34 @@ export function CuentasTable() {
   };
   
   const isLoading = invoicesLoading || customersLoading;
+
+  const handleMarkAsPaid = async (invoice: Invoice) => {
+    if (!firestore || !user) {
+      toast({ title: "Error", description: "No autenticado", variant: "destructive" });
+      return;
+    }
+
+    // 1. Update invoice status
+    const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', invoice.id);
+    setDocumentNonBlocking(invoiceRef, { status: 'paid' }, { merge: true });
+
+    // 2. Create a new income transaction
+    const incomeRef = collection(firestore, 'users', user.uid, 'income');
+    addDocumentNonBlocking(incomeRef, {
+      userId: user.uid,
+      customerId: invoice.customerId,
+      date: new Date().toISOString(),
+      amount: invoice.amountDue,
+      description: `Pago de la cuenta #${invoice.invoiceNumber}`,
+      category: 'Ventas',
+      invoiceId: invoice.id,
+    });
+
+    toast({
+      title: "Cuenta Actualizada",
+      description: `La cuenta #${invoice.invoiceNumber} ha sido marcada como pagada.`,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -127,6 +158,12 @@ export function CuentasTable() {
                         Editar
                       </Link>
                     </DropdownMenuItem>
+                    {invoice.status !== 'paid' && (
+                       <DropdownMenuItem onClick={() => handleMarkAsPaid(invoice)}>
+                         Marcar como Pagada
+                       </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem>Descargar PDF</DropdownMenuItem>
                     <DropdownMenuItem>Enviar Correo</DropdownMenuItem>
                   </DropdownMenuContent>

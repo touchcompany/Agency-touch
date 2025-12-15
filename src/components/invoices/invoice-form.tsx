@@ -46,6 +46,9 @@ import {
 import { collection, doc, query, orderBy, limit } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { InvoicePrintLayout } from './invoice-print-layout';
+
 
 type CuentaFormProps = {
   cuenta?: Invoice;
@@ -141,14 +144,13 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     }
 
     let invoiceNumber = '1104';
-    if(lastInvoiceArr && lastInvoiceArr.length > 0) {
+    if(lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
         invoiceNumber = (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString();
     }
     
-    if (cuenta) {
-      // Update existing invoice
-      const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', cuenta.id);
-      setDocumentNonBlocking(invoiceRef, {
+    const invoiceData = {
+        userId: user.uid,
+        invoiceNumber: cuenta?.invoiceNumber || invoiceNumber,
         customerId,
         descripcion,
         issueDate: fechaEmision?.toISOString(),
@@ -157,26 +159,19 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
         amountDue: total,
         observaciones,
         firmaUrl,
-        status: cuenta.status,
-      }, { merge: true });
+        status: cuenta?.status || 'sent',
+    };
+
+    if (cuenta) {
+      // Update existing invoice
+      const invoiceRef = doc(firestore, 'users', user.uid, 'invoices', cuenta.id);
+      setDocumentNonBlocking(invoiceRef, invoiceData, { merge: true });
       toast({ title: 'Cuenta actualizada', description: 'Los cambios han sido guardados.' });
       router.push('/dashboard/invoices');
     } else {
       // Create new invoice
       const invoicesRef = collection(firestore, 'users', user.uid, 'invoices');
-      await addDocumentNonBlocking(invoicesRef, {
-        userId: user.uid,
-        invoiceNumber,
-        customerId,
-        descripcion,
-        issueDate: fechaEmision?.toISOString(),
-        dueDate: fechaVencimiento?.toISOString(),
-        detalle,
-        amountDue: total,
-        observaciones,
-        firmaUrl,
-        status: 'sent', // default status
-      });
+      await addDocumentNonBlocking(invoicesRef, invoiceData);
       toast({ title: 'Cuenta creada', description: 'La nueva cuenta ha sido guardada.' });
       router.push('/dashboard/invoices');
     }
@@ -200,6 +195,30 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
       toast({ title: 'Imagen cargada', description: 'La imagen de la firma se ha cargado localmente.'});
     }
   };
+  
+  const getFullCurrentInvoice = (): Invoice | undefined => {
+    if (!user) return undefined;
+    
+    const invoiceNumber = cuenta?.invoiceNumber || (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber ? (parseInt(lastInvoiceArr[0].invoiceNumber) + 1).toString() : '1104');
+
+    return {
+      id: cuenta?.id || 'temp-id',
+      userId: user.uid,
+      invoiceNumber: invoiceNumber,
+      customerId,
+      descripcion,
+      issueDate: fechaEmision?.toISOString() || new Date().toISOString(),
+      dueDate: fechaVencimiento?.toISOString() || new Date().toISOString(),
+      amountDue: total,
+      status: cuenta?.status || 'sent',
+      detalle: detalle as DetalleCuenta[],
+      // @ts-ignore
+      observaciones,
+      // @ts-ignore
+      firmaUrl,
+    };
+  }
+
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -450,9 +469,17 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
             <CardTitle className="font-headline">Acciones</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-2">
-            <Button variant="outline" onClick={() => alert('Funcionalidad de PDF en desarrollo.')}>
-              <Download className="mr-2 h-4 w-4" /> PDF
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline"><Download className="mr-2 h-4 w-4" /> PDF</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl">
+                 <DialogHeader>
+                   <DialogTitle>Vista Previa de Cuenta</DialogTitle>
+                 </DialogHeader>
+                 <InvoicePrintLayout invoice={getFullCurrentInvoice()} customer={clientes?.find(c => c.id === customerId)} />
+              </DialogContent>
+            </Dialog>
             <Button variant="outline" onClick={() => alert('Funcionalidad de Correo en desarrollo.')}>
               <Send className="mr-2 h-4 w-4" /> Correo
             </Button>
