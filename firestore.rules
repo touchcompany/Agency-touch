@@ -85,13 +85,13 @@ service cloud.firestore {
       allow delete: if isExistingOwner(userId);
 
       /**
-       * @description Manages customers owned by a specific user.
-       * @path /users/{userId}/customers/{customerId}
-       * @allow (create) An authenticated user with UID 'user_abc' creating a customer in their own subcollection `/users/user_abc/customers/cust_123`.
-       * @deny (get) A user with UID 'user_xyz' attempting to read a customer from `/users/user_abc/customers/cust_123`.
+       * @description Manages collaborators owned by a specific user.
+       * @path /users/{userId}/collaborators/{collaboratorId}
+       * @allow (create) An authenticated user with UID 'user_abc' creating a collaborator in their own subcollection `/users/user_abc/collaborators/collab_123`.
+       * @deny (get) A user with UID 'user_xyz' attempting to read a collaborator from `/users/user_abc/collaborators/collab_123`.
        * @principle Enforces strict data siloing; a user can only manage resources within their own subcollections.
        */
-      match /customers/{customerId} {
+      match /collaborators/{collaboratorId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
@@ -161,4 +161,3 @@ service cloud.firestore {
     }
   }
 }
-    
