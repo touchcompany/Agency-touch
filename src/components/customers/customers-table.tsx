@@ -25,10 +25,10 @@ import { collection } from 'firebase/firestore';
 export function CustomersTable() {
   const { firestore, user } = useFirebase();
 
-  const collaboratorsQuery = useMemoFirebase(() => 
-    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
+  const customersQuery = useMemoFirebase(() => 
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
   , [firestore, user]);
-  const { data: collaborators, isLoading } = useCollection<Customer>(collaboratorsQuery);
+  const { data: customers, isLoading } = useCollection<Customer>(customersQuery);
 
   // TODO: Add calculation for total spent from invoices
   const calculateTotalSpent = (customer: Customer) => 0;
@@ -41,10 +41,10 @@ export function CustomersTable() {
     );
   }
 
-  if (!collaborators || collaborators.length === 0) {
+  if (!customers || customers.length === 0) {
     return (
       <div className="text-center p-8 text-muted-foreground">
-        No hay colaboradores todavía. ¡Añade uno para empezar!
+        No hay clientes todavía. ¡Añade uno para empezar!
       </div>
     );
   }
@@ -54,7 +54,7 @@ export function CustomersTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Colaborador</TableHead>
+            <TableHead>Cliente</TableHead>
             <TableHead>Correo Electrónico</TableHead>
             <TableHead>Teléfono</TableHead>
             <TableHead className="text-right">Total Gastado</TableHead>
@@ -62,7 +62,7 @@ export function CustomersTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {collaborators.map((customer) => (
+          {customers.map((customer) => (
             <TableRow key={customer.id}>
               <TableCell>
                 <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export function CustomersTable() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-                    <DropdownMenuItem>Editar Colaborador</DropdownMenuItem>
+                    <DropdownMenuItem>Editar Cliente</DropdownMenuItem>
                     <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

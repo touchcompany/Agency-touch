@@ -35,10 +35,10 @@ export function AddTransactionSheet() {
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   
-  const collaboratorsQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
+  const customersQuery = useMemoFirebase(() =>
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
   , [firestore, user]);
-  const { data: collaborators } = useCollection<Customer>(collaboratorsQuery);
+  const { data: customers } = useCollection<Customer>(customersQuery);
 
   const handleSubmit = async () => {
     if (!firestore || !user || !amount || !description || !category) {
@@ -91,15 +91,15 @@ export function AddTransactionSheet() {
         </SheetHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="collaborator" className="text-right">
-              Colaborador
+            <Label htmlFor="customer" className="text-right">
+              Cliente
             </Label>
             <Select value={customerId} onValueChange={setCustomerId}>
               <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Selecciona un colaborador" />
+                <SelectValue placeholder="Selecciona un cliente" />
               </SelectTrigger>
               <SelectContent>
-                {(collaborators || []).map((c) => (
+                {(customers || []).map((c) => (
                   <SelectItem key={c.id} value={c.id}>
                     {c.name}
                   </SelectItem>

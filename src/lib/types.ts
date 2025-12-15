@@ -1,4 +1,5 @@
 
+
 export type Service = {
   id: string;
   userId: string;
@@ -41,6 +42,16 @@ export type Invoice = {
 };
 
 export type Customer = {
+  id: string;
+  userId: string;
+  name: string;
+  email?: string;
+  phoneNumber?: string;
+  address?: string;
+  createdAt: string;
+};
+
+export type Collaborator = {
   id: string;
   userId: string;
   name: string;

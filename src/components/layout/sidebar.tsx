@@ -14,6 +14,7 @@ import {
   CreditCard,
   Sparkles,
   Wrench,
+  Briefcase,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -37,6 +38,11 @@ const menuItems = [
   {
     href: '/dashboard/customers',
     icon: Users,
+    label: 'Clientes',
+  },
+  {
+    href: '/dashboard/collaborators',
+    icon: Briefcase,
     label: 'Colaboradores',
   },
   {

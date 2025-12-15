@@ -15,14 +15,14 @@ export function RecentTransactions() {
   , [firestore, user]);
   const { data: recentIncome, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
 
-  const collaboratorsQuery = useMemoFirebase(() => 
-    user ? collection(firestore, 'users', user.uid, 'collaborators') : null
+  const customersQuery = useMemoFirebase(() => 
+    user ? collection(firestore, 'users', user.uid, 'customers') : null
   , [firestore, user]);
-  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(collaboratorsQuery);
+  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
 
   const getClientName = (customerId?: string) => {
-    if (!customerId || !customers) return 'Colaborador Desconocido';
-    return customers.find((c) => c.id === customerId)?.name || 'Colaborador Desconocido';
+    if (!customerId || !customers) return 'Cliente Desconocido';
+    return customers.find((c) => c.id === customerId)?.name || 'Cliente Desconocido';
   };
 
   const getClientAvatar = (customerId?: string) => {

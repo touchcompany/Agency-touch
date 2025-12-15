@@ -10,6 +10,7 @@ import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from "lucide-react";
+import { AddCollaboratorSheet } from "@/components/collaborators/add-collaborator-sheet";
 
 export default function DashboardLayout({
   children,
