@@ -1,3 +1,11 @@
+
+export type Service = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+};
+
 export type Income = {
   id: string;
   userId: string;
@@ -27,6 +35,8 @@ export type Invoice = {
   amountDue: number;
   status: 'sent' | 'paid' | 'overdue';
   bankDetails?: string;
+  detalle?: DetalleCuenta[];
+  descripcion?: string;
 };
 
 export type Customer = {

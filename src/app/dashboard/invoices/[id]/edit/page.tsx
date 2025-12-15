@@ -11,7 +11,7 @@ export default function EditCuentaPage({ params }: { params: { id: string } }) {
   const invoiceRef = useMemoFirebase(
     () =>
       user
-        ? (doc(firestore, 'users', user.uid, 'invoices', params.id) as any)
+        ? (doc(firestore, 'users', user.uid, 'invoices', params.id))
         : null,
     [firestore, user, params.id]
   );
@@ -25,5 +25,5 @@ export default function EditCuentaPage({ params }: { params: { id: string } }) {
     );
   }
 
-  return <CuentaForm cuenta={invoice as any} />;
+  return <CuentaForm cuenta={invoice as Invoice} />;
 }
