@@ -1,4 +1,3 @@
-
 'use client';
 import type { Collaborator } from '@/lib/types';
 import {
@@ -90,7 +89,9 @@ export function CollaboratorsTable() {
                     <DropdownMenuItem asChild>
                        <Link href={`/dashboard/collaborators/${collaborator.id}/edit`}>Editar Colaborador</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                       <Link href={`/dashboard/collaborators/${collaborator.id}`}>Ver Detalles</Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>

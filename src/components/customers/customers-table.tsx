@@ -99,7 +99,9 @@ export function CustomersTable() {
                     <DropdownMenuItem asChild>
                       <Link href={`/dashboard/customers/${customer.id}/edit`}>Editar Cliente</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>Ver Detalles</DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/dashboard/customers/${customer.id}`}>Ver Detalles</Link>
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </TableCell>
