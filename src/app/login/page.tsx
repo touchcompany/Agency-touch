@@ -19,8 +19,10 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sparkles, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
+
 
 declare global {
   interface Window {
@@ -140,10 +142,8 @@ export default function LoginPage() {
        <div id="recaptcha-container"></div>
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex items-center gap-2">
-            <div className="p-2 bg-primary text-primary-foreground rounded-md">
-              <Sparkles className="h-6 w-6" />
-            </div>
+           <div className="mx-auto mb-4 flex items-center justify-center gap-2">
+            <Image src="/favicon.svg" alt="touch+ logo" width={32} height={32} />
             <h1 className="font-headline text-2xl font-bold">touch+</h1>
           </div>
           <CardTitle className="text-2xl">

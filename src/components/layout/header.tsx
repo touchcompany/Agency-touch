@@ -113,11 +113,11 @@ export function DashboardHeader() {
          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="outline"
+              variant="ghost"
               size="icon"
               className="overflow-hidden rounded-full"
             >
-               <Image src="/favicon.svg" alt="touch+ logo" width={40} height={40} />
+               <Image src="/favicon.svg" alt="touch+ logo" width={28} height={28} />
 
             </Button>
           </DropdownMenuTrigger>
