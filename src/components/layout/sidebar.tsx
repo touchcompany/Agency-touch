@@ -80,7 +80,7 @@ export function DashboardSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="p-1 bg-primary rounded-md">
+            <div className="p-1 rounded-md">
                 <Image src="/favicon.svg" alt="touch+ logo" width={28} height={28} />
             </div>
             <h1 className="font-headline text-xl font-bold text-foreground">
