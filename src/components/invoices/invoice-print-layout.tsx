@@ -1,28 +1,28 @@
 'use client';
 import { formatCurrency } from "@/lib/utils";
-import type { Customer, Invoice, CompanySettings } from "@/lib/types";
+import type { Customer, Invoice, CompanyProfile } from "@/lib/types";
 import { Separator } from "../ui/separator";
 import Image from "next/image";
 
 interface InvoicePrintLayoutProps {
     invoice: Invoice | undefined;
     customer: Customer | undefined;
-    companySettings: CompanySettings | undefined;
+    companyProfile: CompanyProfile | undefined;
 }
 
-export function InvoicePrintLayout({ invoice, customer, companySettings }: InvoicePrintLayoutProps) {
-    if (!invoice || !customer) {
-        return <div className="p-10 text-center">Faltan datos de la cuenta o del cliente.</div>
+export function InvoicePrintLayout({ invoice, customer, companyProfile }: InvoicePrintLayoutProps) {
+    if (!invoice || !customer || !companyProfile) {
+        return <div className="p-10 text-center">Faltan datos de la cuenta, del cliente o del perfil de empresa.</div>
     }
 
     const companyDetails = {
-        name: companySettings?.companyName || 'touch+',
+        name: companyProfile?.companyName || 'Nombre no configurado',
         address: 'Dirección no configurada',
-        phone: companySettings?.companyWhatsapp || 'WhatsApp no configurado',
+        phone: companyProfile?.companyWhatsapp || 'WhatsApp no configurado',
         email: 'contacto@touchplus.co',
-        nit: companySettings?.companyNit || 'NIT no configurado',
-        paymentInfo: companySettings?.paymentDetails || 'Datos de pago no configurados',
-        logo: companySettings?.logoUrl || '/favicon.svg'
+        nit: companyProfile?.companyNit || 'NIT no configurado',
+        paymentInfo: companyProfile?.paymentDetails || 'Datos de pago no configurados',
+        logo: companyProfile?.logoUrl || '/favicon.svg'
     }
 
     const subtotal = invoice.detalle?.reduce((sum, item) => sum + (item.precio || 0) * (item.cantidad || 0), 0) || 0;
@@ -117,7 +117,7 @@ export function InvoicePrintLayout({ invoice, customer, companySettings }: Invoi
                     )}
                      <div className="mt-4">
                         <h4 className="font-bold mb-1">Información de Pago:</h4>
-                        <p className="whitespace-pre-wrap">{companyDetails.paymentInfo}</p>
+                        <p className="whitespace-pre-wrap">{companyProfile.paymentDetails}</p>
                     </div>
                 </div>
             </footer>

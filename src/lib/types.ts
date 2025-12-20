@@ -1,6 +1,7 @@
 
 
 
+
 export type Service = {
   id: string;
   userId: string;
@@ -42,6 +43,7 @@ export type Invoice = {
   bankDetails?: string;
   detalle?: DetalleCuenta[];
   descripcion?: string;
+  companyProfileId?: string;
 };
 
 export type Customer = {
@@ -81,6 +83,18 @@ export type DetalleCuenta = {
   precio: number;
 };
 
+export type CompanyProfile = {
+    id: string;
+    userId: string;
+    profileName: string;
+    companyName: string;
+    companyNit: string;
+    companyWhatsapp: string;
+    paymentDetails: string;
+    logoUrl?: string;
+}
+
+// Deprecated, use CompanyProfile instead
 export type CompanySettings = {
     id: 'company';
     companyName: string;

@@ -8,22 +8,20 @@ import { Upload } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useFirebase, setDocumentNonBlocking, useDoc, useMemoFirebase } from "@/firebase";
-import { doc } from "firebase/firestore";
-import type { CompanySettings } from "@/lib/types";
-import { Loader2 } from "lucide-react";
+import { useFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
+import { doc, collection } from "firebase/firestore";
+import type { CompanyProfile } from "@/lib/types";
 
+interface CompanyProfileFormProps {
+  profile?: CompanyProfile;
+  onSave: () => void;
+}
 
-export function SettingsForm() {
+export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps) {
     const { firestore, user } = useFirebase();
     const { toast } = useToast();
     
-    const settingsRef = useMemoFirebase(
-        () => (user ? doc(firestore, 'users', user.uid, 'settings', 'company') : null),
-        [firestore, user]
-    );
-    const { data: initialSettings, isLoading } = useDoc<CompanySettings>(settingsRef);
-    
+    const [profileName, setProfileName] = useState('');
     const [companyName, setCompanyName] = useState('');
     const [companyNit, setCompanyNit] = useState('');
     const [companyWhatsapp, setCompanyWhatsapp] = useState('');
@@ -32,14 +30,23 @@ export function SettingsForm() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if(initialSettings) {
-            setCompanyName(initialSettings.companyName || 'touch+');
-            setCompanyNit(initialSettings.companyNit || '');
-            setCompanyWhatsapp(initialSettings.companyWhatsapp || '');
-            setPaymentDetails(initialSettings.paymentDetails || '');
-            setLogoUrl(initialSettings.logoUrl || '/favicon.svg');
+        if(profile) {
+            setProfileName(profile.profileName || '');
+            setCompanyName(profile.companyName || '');
+            setCompanyNit(profile.companyNit || '');
+            setCompanyWhatsapp(profile.companyWhatsapp || '');
+            setPaymentDetails(profile.paymentDetails || '');
+            setLogoUrl(profile.logoUrl || '/favicon.svg');
+        } else {
+            // Reset form for new profile
+            setProfileName('');
+            setCompanyName('');
+            setCompanyNit('');
+            setCompanyWhatsapp('');
+            setPaymentDetails('');
+            setLogoUrl('/favicon.svg');
         }
-    }, [initialSettings]);
+    }, [profile]);
 
     const handleLogoUploadClick = () => {
         fileInputRef.current?.click();
@@ -53,20 +60,23 @@ export function SettingsForm() {
                 setLogoUrl(e.target?.result as string);
             };
             reader.readAsDataURL(file);
-            // NOTE: In a real app, you'd upload to Firebase Storage and get a URL.
-            // For now, we are using the base64 data URI which might be very long.
             toast({ title: 'Logo actualizado', description: 'El nuevo logo se ha cargado (localmente).' });
         }
     };
 
     const handleSaveChanges = () => {
-        if (!settingsRef) {
+        if (!user || !firestore) {
             toast({ title: "Error", description: "No se puede guardar la configuración. Intenta de nuevo.", variant: 'destructive'});
             return;
         }
+         if (!profileName || !companyName || !companyNit) {
+            toast({ title: "Campos requeridos", description: "El nombre del perfil, nombre de la empresa y NIT son obligatorios.", variant: 'destructive' });
+            return;
+        }
 
-        const settingsData: CompanySettings = {
-            id: 'company',
+        const profileData = {
+            userId: user.uid,
+            profileName,
             companyName,
             companyNit,
             companyWhatsapp,
@@ -74,37 +84,53 @@ export function SettingsForm() {
             logoUrl
         };
 
-        setDocumentNonBlocking(settingsRef, settingsData, { merge: true });
-
-        toast({ title: "Configuración guardada", description: "Los cambios se han guardado exitosamente." });
-    }
-    
-    if (isLoading) {
-      return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin" /></div>
+        if (profile?.id) {
+            const profileRef = doc(firestore, 'users', user.uid, 'companyProfiles', profile.id);
+            setDocumentNonBlocking(profileRef, profileData, { merge: true });
+            toast({ title: "Perfil actualizado", description: "Los cambios se han guardado exitosamente." });
+        } else {
+            const profilesRef = collection(firestore, 'users', user.uid, 'companyProfiles');
+            addDocumentNonBlocking(profilesRef, profileData);
+            toast({ title: "Perfil creado", description: "El nuevo perfil de empresa ha sido creado." });
+        }
+        onSave();
     }
 
     return (
-        <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
+        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); handleSaveChanges(); }}>
+             <div className="space-y-2">
+                <Label htmlFor="profile-name">Nombre del Perfil</Label>
+                <Input
+                    id="profile-name"
+                    value={profileName}
+                    onChange={(e) => setProfileName(e.target.value)}
+                    placeholder="Ej: Mi Empresa, Perfil Hermana"
+                />
+                 <p className="text-sm text-muted-foreground">
+                    Un nombre para identificar este perfil en la aplicación.
+                </p>
+            </div>
             <div className="space-y-2">
-                <Label htmlFor="company-name">Nombre de la Empresa</Label>
+                <Label htmlFor="company-name">Nombre de la Empresa o Persona</Label>
                 <Input
                     id="company-name"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Nombre que aparecerá en la factura"
                 />
             </div>
 
             <div className="space-y-2">
-                <Label htmlFor="company-nit">NIT de la Empresa</Label>
+                <Label htmlFor="company-nit">NIT o Cédula</Label>
                 <Input
                     id="company-nit"
                     value={companyNit}
                     onChange={(e) => setCompanyNit(e.target.value)}
-                    placeholder="Escribe el NIT de tu empresa"
+                    placeholder="Escribe el NIT o Cédula"
                 />
             </div>
              <div className="space-y-2">
-                <Label htmlFor="company-whatsapp">WhatsApp de la Empresa</Label>
+                <Label htmlFor="company-whatsapp">WhatsApp de Contacto</Label>
                 <Input
                     id="company-whatsapp"
                     value={companyWhatsapp}
@@ -128,7 +154,7 @@ export function SettingsForm() {
             </div>
 
             <div className="space-y-2">
-                <Label>Logo de la Empresa</Label>
+                <Label>Logo</Label>
                 <div className="flex items-center gap-4">
                     <Image
                         src={logoUrl}
@@ -152,7 +178,7 @@ export function SettingsForm() {
             </div>
 
             <div className="flex justify-end">
-                <Button type="submit">Guardar Configuración</Button>
+                <Button type="submit">Guardar Perfil</Button>
             </div>
         </form>
     );

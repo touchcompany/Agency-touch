@@ -1,5 +1,5 @@
 'use client';
-import type { Invoice, Customer, CompanySettings } from '@/lib/types';
+import type { Invoice, Customer, CompanyProfile } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import {
   Table,
@@ -21,14 +21,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useFirebase, useCollection, useDoc, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
-import React, { useState } from 'react';
+import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
@@ -47,7 +46,6 @@ export function CuentasTable() {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const locale = 'es-ES';
-  const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
 
   const invoicesQuery = useMemoFirebase(() =>
     user ? collection(firestore, 'users', user.uid, 'invoices') : null
@@ -59,18 +57,19 @@ export function CuentasTable() {
   , [firestore, user]);
   const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
 
-  const settingsRef = useMemoFirebase(
-    () => (user ? doc(firestore, 'users', user.uid, 'settings', 'company') : null),
+  const companyProfilesQuery = useMemoFirebase(
+    () => (user ? collection(firestore, 'users', user.uid, 'companyProfiles') : null),
     [firestore, user]
   );
-  const { data: companySettings } = useDoc<CompanySettings>(settingsRef);
+  const { data: companyProfiles, isLoading: profilesLoading } = useCollection<CompanyProfile>(companyProfilesQuery);
+
 
   const getClientName = (customerId: string) => {
     if (!customers) return '...';
     return customers.find((c) => c.id === customerId)?.name || 'Cliente Desconocido';
   };
   
-  const isLoading = invoicesLoading || customersLoading;
+  const isLoading = invoicesLoading || customersLoading || profilesLoading;
 
   const handleMarkAsPaid = async (invoice: Invoice) => {
     if (!firestore || !user) {
@@ -122,13 +121,14 @@ export function CuentasTable() {
   
   const handlePrint = (invoiceToPrint: Invoice) => {
     const customer = customers?.find(c => c.id === invoiceToPrint.customerId);
-    const invoiceElement = (
-      <InvoicePrintLayout
-        invoice={invoiceToPrint}
-        customer={customer}
-        companySettings={companySettings ?? undefined}
-      />
-    );
+    const companyProfile = companyProfiles?.find(p => p.id === invoiceToPrint.companyProfileId);
+    
+    if (!customer || !companyProfile) {
+        toast({ title: "Error", description: "Faltan datos de cliente o perfil de empresa.", variant: "destructive" });
+        return;
+    }
+
+    const invoiceElement = <InvoicePrintLayout invoice={invoiceToPrint} customer={customer} companyProfile={companyProfile} />;
     const invoiceHtml = ReactDOMServer.renderToString(invoiceElement);
 
     const printWindow = window.open('', '_blank');
@@ -154,7 +154,7 @@ export function CuentasTable() {
       setTimeout(() => {
         printWindow.print();
         printWindow.close();
-      }, 250); // Small delay to ensure content loads
+      }, 250);
     }
   };
 
@@ -216,7 +216,6 @@ export function CuentasTable() {
                   {formatCurrency(invoice.amountDue)}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Dialog onOpenChange={(open) => { if (!open) { setSelectedInvoice(null)} }}>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -251,7 +250,6 @@ export function CuentasTable() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                  </Dialog>
                 </TableCell>
               </TableRow>
             ))}

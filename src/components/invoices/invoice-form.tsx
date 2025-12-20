@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import type { Customer, Invoice, DetalleCuenta, Service, CompanySettings } from '@/lib/types';
+import type { Customer, Invoice, DetalleCuenta, Service, CompanyProfile } from '@/lib/types';
 import {
   CalendarIcon,
   Plus,
@@ -39,7 +39,6 @@ import { Textarea } from '../ui/textarea';
 import {
   useFirebase,
   useCollection,
-  useDoc,
   useMemoFirebase,
   addDocumentNonBlocking,
   setDocumentNonBlocking,
@@ -47,7 +46,6 @@ import {
 import { collection, doc, query, orderBy, limit } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import ReactDOMServer from 'react-dom/server';
 
@@ -73,11 +71,12 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   );
   const { data: services } = useCollection<Service>(servicesQuery);
 
-  const settingsRef = useMemoFirebase(
-    () => (user ? doc(firestore, 'users', user.uid, 'settings', 'company') : null),
+  const companyProfilesQuery = useMemoFirebase(
+    () => (user ? collection(firestore, 'users', user.uid, 'companyProfiles') : null),
     [firestore, user]
   );
-  const { data: companySettings } = useDoc<CompanySettings>(settingsRef);
+  const { data: companyProfiles } = useCollection<CompanyProfile>(companyProfilesQuery);
+
 
   const lastInvoiceQuery = useMemoFirebase(
     () => user ? query(collection(firestore, 'users', user.uid, 'invoices'), orderBy('invoiceNumber', 'desc'), limit(1)) : null,
@@ -86,6 +85,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const { data: lastInvoiceArr } = useCollection<Invoice>(lastInvoiceQuery);
 
   const [customerId, setCustomerId] = useState(cuenta?.customerId || '');
+  const [companyProfileId, setCompanyProfileId] = useState(cuenta?.companyProfileId || '');
   const [descripcion, setDescripcion] = useState(cuenta?.descripcion || '');
   const [detalle, setDetalle] = useState<Partial<DetalleCuenta>[]>(
     cuenta?.detalle || [{ descripcion: '', cantidad: 1, precio: 0 }]
@@ -158,6 +158,10 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
         toast({ title: 'Error', description: 'Por favor, selecciona un cliente.', variant: 'destructive' });
         return;
     }
+     if (!companyProfileId) {
+        toast({ title: 'Error', description: 'Por favor, selecciona un perfil de empresa.', variant: 'destructive' });
+        return;
+    }
 
     let invoiceNumber = cuenta?.invoiceNumber;
     if (!invoiceNumber) {
@@ -177,6 +181,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
         userId: user.uid,
         invoiceNumber: invoiceNumber,
         customerId,
+        companyProfileId,
         descripcion,
         issueDate: fechaEmision?.toISOString(),
         dueDate: fechaVencimiento?.toISOString(),
@@ -235,6 +240,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
       userId: user.uid,
       invoiceNumber: finalInvoiceNumber,
       customerId,
+      companyProfileId,
       descripcion,
       issueDate: fechaEmision?.toISOString() || new Date().toISOString(),
       dueDate: fechaVencimiento?.toISOString() || new Date().toISOString(),
@@ -248,42 +254,44 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     };
   }
 
-  const handlePrint = () => {
-    const invoiceElement = (
-      <InvoicePrintLayout
-        invoice={getFullCurrentInvoice()}
-        customer={clientes?.find(c => c.id === customerId)}
-        companySettings={companySettings ?? undefined}
-      />
-    );
+ const handlePrint = () => {
+    const currentInvoice = getFullCurrentInvoice();
+    const customer = clientes?.find(c => c.id === customerId);
+    const companyProfile = companyProfiles?.find(p => p.id === companyProfileId);
+    
+    if (!currentInvoice || !customer || !companyProfile) {
+        toast({ title: "Error", description: "Faltan datos para generar el PDF.", variant: "destructive" });
+        return;
+    }
+
+    const invoiceElement = <InvoicePrintLayout invoice={currentInvoice} customer={customer} companyProfile={companyProfile} />;
     const invoiceHtml = ReactDOMServer.renderToString(invoiceElement);
 
     const printWindow = window.open('', '_blank');
     if (printWindow) {
-      printWindow.document.write(`
-        <html>
-          <head>
-            <title>Cuenta de Cobro ${getFullCurrentInvoice()?.invoiceNumber || ''}</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-              @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-              body { font-family: 'Inter', sans-serif; }
-              @page { size: A4; margin: 0; }
-            </style>
-          </head>
-          <body>
-            ${invoiceHtml}
-          </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.focus();
-      setTimeout(() => {
-        printWindow.print();
-        printWindow.close();
-      }, 250);
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Cuenta de Cobro ${currentInvoice.invoiceNumber}</title>
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                        body { font-family: 'Inter', sans-serif; }
+                        @page { size: A4; margin: 0; }
+                    </style>
+                </head>
+                <body>${invoiceHtml}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+            printWindow.print();
+            printWindow.close();
+        }, 250);
     }
-  };
+};
+
   
   const handleSendWhatsApp = () => {
     const currentInvoice = getFullCurrentInvoice();
@@ -327,6 +335,21 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
               <CardTitle className="font-headline">Cliente y Fechas</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
+               <div className="space-y-2">
+                <Label htmlFor="companyProfile">Perfil de Empresa (Emisor)</Label>
+                <Select value={companyProfileId} onValueChange={setCompanyProfileId}>
+                  <SelectTrigger id="companyProfile">
+                    <SelectValue placeholder="Selecciona un perfil emisor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(companyProfiles || []).map((profile) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.profileName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="customer">Cliente</Label>
                 <Select value={customerId} onValueChange={setCustomerId}>
@@ -351,6 +374,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                   placeholder="Ej: Servicios de consultoría"
                 />
               </div>
+               <div />
               <div className="space-y-2">
                 <Label htmlFor="issue-date">Fecha de Emisión</Label>
                 <Popover>
@@ -580,7 +604,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                         <InvoicePrintLayout
                             invoice={getFullCurrentInvoice()}
                             customer={clientes?.find(c => c.id === customerId)}
-                            companySettings={companySettings ?? undefined}
+                            companyProfile={companyProfiles?.find(p => p.id === companyProfileId)}
                         />
                       </div>
                       <Button onClick={handlePrint} className="mt-4">Imprimir / Guardar PDF</Button>
