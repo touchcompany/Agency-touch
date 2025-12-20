@@ -23,9 +23,10 @@ import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import type { Collaborator, Expense } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
+import { use } from 'react';
 
-export default function CollaboratorDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function CollaboratorDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { firestore, user } = useFirebase();
 
   const collaboratorRef = useMemoFirebase(

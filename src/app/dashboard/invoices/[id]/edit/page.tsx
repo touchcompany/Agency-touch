@@ -4,9 +4,10 @@ import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import type { Invoice } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
+import { use } from 'react';
 
-export default function EditCuentaPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditCuentaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { firestore, user } = useFirebase();
 
   const invoiceRef = useMemoFirebase(

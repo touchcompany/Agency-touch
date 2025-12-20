@@ -5,9 +5,10 @@ import { doc } from 'firebase/firestore';
 import type { Collaborator } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { use } from 'react';
 
-export default function EditCollaboratorPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function EditCollaboratorPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { firestore, user } = useFirebase();
 
   const collaboratorRef = useMemoFirebase(

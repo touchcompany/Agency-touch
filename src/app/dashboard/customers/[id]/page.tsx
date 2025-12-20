@@ -24,6 +24,7 @@ import { doc, collection, query, where, orderBy } from 'firebase/firestore';
 import type { Customer, Invoice } from '@/lib/types';
 import { formatCurrency } from '@/lib/utils';
 import Link from 'next/link';
+import { use } from 'react';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
   paid: 'default',
@@ -37,8 +38,8 @@ const statusTranslations: { [key: string]: string } = {
   overdue: 'Vencida',
 };
 
-export default function CustomerDetailPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { firestore, user } = useFirebase();
 
   const customerRef = useMemoFirebase(
