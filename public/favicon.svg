@@ -1,7 +1,17 @@
-<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="100" height="100" rx="20" fill="black"/>
-<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="60" fill="white">
-    <tspan x="28" y="68">t</tspan>
-    <tspan x="55" y="68" font-size="50" fill="#a8a29e">+</tspan>
-</text>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="40" height="40" rx="8" fill="black"/>
+<g clip-path="url(#clip0_303_2)">
+<path d="M12.924 10.592H10.212V28H12.924V19.988H18.732V17.588H12.924V12.914H19.092V10.592H12.924Z" fill="white"/>
+<path d="M22.1818 28H24.8938V10.592H22.1818V28Z" fill="white"/>
+<path d="M27.5342 13.04V10.592H35.8862V13.04C34.9262 13.04 34.0742 13.04 33.3302 13.04V28H30.6182V13.04C29.5862 13.04 28.5542 13.04 27.5342 13.04Z" fill="white"/>
+<circle cx="31.98" cy="18" r="1.5" fill="white"/>
+<circle cx="31.98" cy="23" r="1.5" fill="white"/>
+<circle cx="26.98" cy="18" r="1.5" fill="white"/>
+<circle cx="26.98" cy="23" r="1.5" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_303_2">
+<rect width="26" height="18" fill="white" transform="translate(10 10)"/>
+</clipPath>
+</defs>
 </svg>
