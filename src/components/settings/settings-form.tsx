@@ -204,7 +204,7 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
                 </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4">
                 <Button type="submit">Guardar Perfil</Button>
             </div>
         </form>

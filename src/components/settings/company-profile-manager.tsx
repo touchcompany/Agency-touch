@@ -10,6 +10,7 @@ import { Plus, Edit, Trash, Loader2 } from 'lucide-react';
 import { CompanyProfileForm } from './settings-form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '../ui/scroll-area';
 
 export function CompanyProfileManager() {
   const { firestore, user } = useFirebase();
@@ -108,9 +109,11 @@ export function CompanyProfileManager() {
             {selectedProfile ? 'Editar Perfil de Empresa' : 'Nuevo Perfil de Empresa'}
           </DialogTitle>
         </DialogHeader>
-        <div className="py-4">
-            <CompanyProfileForm profile={selectedProfile} onSave={handleFormSave} />
-        </div>
+        <ScrollArea className="h-[70vh] w-full">
+            <div className="py-4 pr-6">
+                <CompanyProfileForm profile={selectedProfile} onSave={handleFormSave} />
+            </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
