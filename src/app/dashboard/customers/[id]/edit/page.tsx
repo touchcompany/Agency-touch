@@ -6,9 +6,8 @@ import type { Customer } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function EditCustomerPage({ params }: { params: { id: string } }) {
+export default function EditCustomerPage({ params: { id } }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
-  const { id } = params;
 
   const customerRef = useMemoFirebase(
     () =>
