@@ -3,6 +3,7 @@
 
 
 
+
 export type Service = {
   id: string;
   userId: string;
@@ -93,6 +94,8 @@ export type CompanyProfile = {
     companyWhatsapp: string;
     paymentDetails: string;
     logoUrl?: string;
+    companyAddress?: string;
+    companyEmail?: string;
 }
 
 // Deprecated, use CompanyProfile instead
@@ -178,3 +181,5 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
+
+    

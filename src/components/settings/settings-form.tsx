@@ -27,6 +27,8 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
     const [companyWhatsapp, setCompanyWhatsapp] = useState('');
     const [paymentDetails, setPaymentDetails] = useState('');
     const [logoUrl, setLogoUrl] = useState('/favicon.svg');
+    const [companyAddress, setCompanyAddress] = useState('');
+    const [companyEmail, setCompanyEmail] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -37,6 +39,8 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             setCompanyWhatsapp(profile.companyWhatsapp || '');
             setPaymentDetails(profile.paymentDetails || '');
             setLogoUrl(profile.logoUrl || '/favicon.svg');
+            setCompanyAddress(profile.companyAddress || '');
+            setCompanyEmail(profile.companyEmail || '');
         } else {
             // Reset form for new profile
             setProfileName('');
@@ -45,6 +49,8 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             setCompanyWhatsapp('');
             setPaymentDetails('');
             setLogoUrl('/favicon.svg');
+            setCompanyAddress('');
+            setCompanyEmail('');
         }
     }, [profile]);
 
@@ -81,7 +87,9 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             companyNit,
             companyWhatsapp,
             paymentDetails,
-            logoUrl
+            logoUrl,
+            companyAddress,
+            companyEmail
         };
 
         if (profile?.id) {
@@ -138,6 +146,25 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
                     placeholder="Ej: +57 300 123 4567"
                 />
             </div>
+            <div className="space-y-2">
+                <Label htmlFor="company-email">Correo de Contacto</Label>
+                <Input
+                    id="company-email"
+                    type="email"
+                    value={companyEmail}
+                    onChange={(e) => setCompanyEmail(e.target.value)}
+                    placeholder="Ej: contacto@empresa.com"
+                />
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="company-address">Dirección</Label>
+                <Input
+                    id="company-address"
+                    value={companyAddress}
+                    onChange={(e) => setCompanyAddress(e.target.value)}
+                    placeholder="Ej: Calle 123 # 45 - 67, Bogotá"
+                />
+            </div>
 
             <div className="space-y-2">
                 <Label htmlFor="payment-details">Detalles de Pago</Label>
@@ -183,3 +210,5 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
         </form>
     );
 }
+
+    

@@ -17,9 +17,9 @@ export function InvoicePrintLayout({ invoice, customer, companyProfile }: Invoic
 
     const companyDetails = {
         name: companyProfile?.companyName || 'Nombre no configurado',
-        address: 'Dirección no configurada',
+        address: companyProfile?.companyAddress || 'Dirección no configurada',
         phone: companyProfile?.companyWhatsapp || 'WhatsApp no configurado',
-        email: 'contacto@touchplus.co',
+        email: companyProfile?.companyEmail || 'Email no configurado',
         nit: companyProfile?.companyNit || 'NIT no configurado',
         paymentInfo: companyProfile?.paymentDetails || 'Datos de pago no configurados',
         logo: companyProfile?.logoUrl || '/favicon.svg'
@@ -125,3 +125,5 @@ export function InvoicePrintLayout({ invoice, customer, companyProfile }: Invoic
         </div>
     );
 }
+
+    
