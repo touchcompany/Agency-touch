@@ -14,7 +14,7 @@ import { MoreHorizontal, Loader2, Download, Send, MessageCircle, Mail } from 'lu
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuItem,,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -29,6 +29,7 @@ import { es } from 'date-fns/locale';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -259,3 +260,5 @@ export function CuentasTable() {
     </>
   );
 }
+
+    

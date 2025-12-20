@@ -48,6 +48,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import ReactDOMServer from 'react-dom/server';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 
 
 type CuentaFormProps = {
@@ -165,7 +166,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
 
     let invoiceNumber = cuenta?.invoiceNumber;
     if (!invoiceNumber) {
-      if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+      if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0]?.invoiceNumber) {
         const lastNum = parseInt(lastInvoiceArr[0].invoiceNumber, 10);
         if (!isNaN(lastNum)) {
           invoiceNumber = (lastNum + 1).toString();
@@ -211,7 +212,6 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      console.log("File selected:", file.name);
       const reader = new FileReader();
       reader.onload = (e) => {
         setFirmaUrl(e.target?.result as string);
@@ -226,7 +226,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     
     let finalInvoiceNumber = cuenta?.invoiceNumber;
     if (!finalInvoiceNumber) {
-        if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0].invoiceNumber) {
+        if (lastInvoiceArr && lastInvoiceArr.length > 0 && lastInvoiceArr[0]?.invoiceNumber) {
             const lastNum = parseInt(lastInvoiceArr[0].invoiceNumber, 10);
             finalInvoiceNumber = !isNaN(lastNum) ? (lastNum + 1).toString() : '1104';
         } else {
@@ -463,7 +463,7 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                     </div>
                      <Input
                       placeholder="Descripción"
-                      className="col-span-12 sm:col-span-6"
+                      className="col-span-12 sm:col-span-6 hidden"
                       value={item.descripcion}
                       onChange={(e) =>
                         handleItemChange(
@@ -623,3 +623,5 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     </>
   );
 }
+
+    
