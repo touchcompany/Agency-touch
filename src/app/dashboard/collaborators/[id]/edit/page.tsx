@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function EditCollaboratorPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const { id } = params;
 
   const collaboratorRef = useMemoFirebase(
     () =>
       user
-        ? (doc(firestore, 'users', user.uid, 'collaborators', params.id))
+        ? (doc(firestore, 'users', user.uid, 'collaborators', id))
         : null,
-    [firestore, user, params.id]
+    [firestore, user, id]
   );
   const { data: collaborator, isLoading } = useDoc<Collaborator>(collaboratorRef);
 

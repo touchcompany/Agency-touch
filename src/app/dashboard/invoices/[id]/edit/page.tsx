@@ -7,13 +7,14 @@ import { Loader2 } from 'lucide-react';
 
 export default function EditCuentaPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const { id } = params;
 
   const invoiceRef = useMemoFirebase(
     () =>
       user
-        ? (doc(firestore, 'users', user.uid, 'invoices', params.id))
+        ? (doc(firestore, 'users', user.uid, 'invoices', id))
         : null,
-    [firestore, user, params.id]
+    [firestore, user, id]
   );
   const { data: invoice, isLoading } = useDoc<Invoice>(invoiceRef);
 

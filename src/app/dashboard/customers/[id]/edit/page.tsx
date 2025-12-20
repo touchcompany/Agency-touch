@@ -8,13 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function EditCustomerPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const { id } = params;
 
   const customerRef = useMemoFirebase(
     () =>
       user
-        ? (doc(firestore, 'users', user.uid, 'customers', params.id))
+        ? (doc(firestore, 'users', user.uid, 'customers', id))
         : null,
-    [firestore, user, params.id]
+    [firestore, user, id]
   );
   const { data: customer, isLoading } = useDoc<Customer>(customerRef);
 

@@ -26,10 +26,11 @@ import Link from 'next/link';
 
 export default function CollaboratorDetailPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const { id } = params;
 
   const collaboratorRef = useMemoFirebase(
-    () => (user ? doc(firestore, 'users', user.uid, 'collaborators', params.id) : null),
-    [firestore, user, params.id]
+    () => (user ? doc(firestore, 'users', user.uid, 'collaborators', id) : null),
+    [firestore, user, id]
   );
   const { data: collaborator, isLoading: collaboratorLoading } = useDoc<Collaborator>(collaboratorRef);
 
@@ -38,11 +39,11 @@ export default function CollaboratorDetailPage({ params }: { params: { id: strin
       user
         ? query(
             collection(firestore, 'users', user.uid, 'expenses'),
-            where('collaboratorId', '==', params.id),
+            where('collaboratorId', '==', id),
             orderBy('date', 'desc')
           )
         : null,
-    [firestore, user, params.id]
+    [firestore, user, id]
   );
   const { data: expenses, isLoading: expensesLoading } = useCollection<Expense>(expensesQuery);
 

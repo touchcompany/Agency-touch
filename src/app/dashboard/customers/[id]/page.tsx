@@ -39,10 +39,11 @@ const statusTranslations: { [key: string]: string } = {
 
 export default function CustomerDetailPage({ params }: { params: { id: string } }) {
   const { firestore, user } = useFirebase();
+  const { id } = params;
 
   const customerRef = useMemoFirebase(
-    () => (user ? doc(firestore, 'users', user.uid, 'customers', params.id) : null),
-    [firestore, user, params.id]
+    () => (user ? doc(firestore, 'users', user.uid, 'customers', id) : null),
+    [firestore, user, id]
   );
   const { data: customer, isLoading: customerLoading } = useDoc<Customer>(customerRef);
 
@@ -51,11 +52,11 @@ export default function CustomerDetailPage({ params }: { params: { id: string } 
       user
         ? query(
             collection(firestore, 'users', user.uid, 'invoices'),
-            where('customerId', '==', params.id),
+            where('customerId', '==', id),
             orderBy('issueDate', 'desc')
           )
         : null,
-    [firestore, user, params.id]
+    [firestore, user, id]
   );
   const { data: invoices, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
 
