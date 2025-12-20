@@ -14,7 +14,7 @@ import { MoreHorizontal, Loader2, Download, Send, MessageCircle, Mail } from 'lu
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -260,5 +260,3 @@ export function CuentasTable() {
     </>
   );
 }
-
-    
