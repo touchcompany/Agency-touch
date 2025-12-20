@@ -5,7 +5,8 @@ import { doc } from 'firebase/firestore';
 import type { Invoice } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 
-export default function EditCuentaPage({ params: { id } }: { params: { id: string } }) {
+export default function EditCuentaPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { firestore, user } = useFirebase();
 
   const invoiceRef = useMemoFirebase(

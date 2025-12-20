@@ -6,7 +6,8 @@ import type { Service } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
-export default function EditServicePage({ params: { id } }: { params: { id: string } }) {
+export default function EditServicePage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const { firestore, user } = useFirebase();
 
   const serviceRef = useMemoFirebase(
