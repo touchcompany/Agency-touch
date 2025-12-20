@@ -2,6 +2,7 @@
 
 
 
+
 export type Service = {
   id: string;
   userId: string;
@@ -77,7 +78,7 @@ export type Collaborator = {
 
 
 export type DetalleCuenta = {
-  id: string;
+  id?: string;
   descripcion: string;
   cantidad: number;
   precio: number;
