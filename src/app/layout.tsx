@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'touch+',
+  title: 'touch',
   description: 'Gestión de finanzas personales con IA',
   icons: {
     icon: '/favicon.svg',

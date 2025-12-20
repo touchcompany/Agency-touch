@@ -117,7 +117,7 @@ export function DashboardHeader() {
               size="icon"
               className="overflow-hidden rounded-full"
             >
-               <Image src="/favicon.svg" alt="touch+ logo" width={28} height={28} />
+               <Image src="/favicon.svg" alt="touch logo" width={28} height={28} />
 
             </Button>
           </DropdownMenuTrigger>

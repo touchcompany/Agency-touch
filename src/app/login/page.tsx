@@ -143,8 +143,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
            <div className="mx-auto mb-4 flex items-center justify-center gap-2">
-            <Image src="/favicon.svg" alt="touch+ logo" width={32} height={32} />
-            <h1 className="font-headline text-2xl font-bold">touch+</h1>
+            <Image src="/favicon.svg" alt="touch logo" width={32} height={32} />
+            <h1 className="font-headline text-2xl font-bold">touch</h1>
           </div>
           <CardTitle className="text-2xl">
             {isCodeSent ? 'Verificar Código' : 'Iniciar Sesión'}
