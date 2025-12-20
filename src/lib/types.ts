@@ -1,8 +1,9 @@
-
-
-
-
-
+export type User = {
+  id: string;
+  email?: string;
+  phoneNumber?: string;
+  providerId?: string;
+};
 
 export type Service = {
   id: string;
@@ -181,5 +182,3 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
-
-    

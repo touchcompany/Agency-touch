@@ -34,7 +34,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="font-headline">Perfil de Usuario</CardTitle>
               <CardDescription>
-                Actualiza tu información personal.
+                Actualiza tu información personal y de seguridad.
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -45,7 +45,7 @@ export default function SettingsPage() {
             <CardHeader>
               <CardTitle className="font-headline">Gestión de Datos</CardTitle>
               <CardDescription>
-                Exporta todos tus datos como una copia de seguridad en formato JSON.
+                Importa o exporta todos tus datos de la aplicación.
               </CardDescription>
             </CardHeader>
             <CardContent>
