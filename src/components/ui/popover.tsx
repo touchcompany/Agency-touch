@@ -11,9 +11,12 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
+  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> & {
+    // Add a new prop to disable portaling
+    disablePortal?: boolean;
+  }
+>(({ className, align = "center", sideOffset = 4, disablePortal, ...props }, ref) => {
+  const Content = (
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
@@ -24,8 +27,11 @@ const PopoverContent = React.forwardRef<
       )}
       {...props}
     />
-  </PopoverPrimitive.Portal>
-))
-PopoverContent.displayName = PopoverPrimitive.Content.displayName
+  );
+
+  return disablePortal ? Content : <PopoverPrimitive.Portal>{Content}</PopoverPrimitive.Portal>;
+});
+PopoverContent.displayName = PopoverPrimitive.Content.displayName;
+
 
 export { Popover, PopoverTrigger, PopoverContent }
