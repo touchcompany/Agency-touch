@@ -1,11 +1,13 @@
 'use client';
 
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection, query, where } from 'firebase/firestore';
+import { collection } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
-import { AddProjectSheet } from '@/components/projects/add-project-sheet';
+import { Loader2, Plus } from 'lucide-react';
+import { ProjectFormSheet } from '@/components/projects/add-project-sheet';
 import { ProjectCard } from '@/components/projects/project-card';
 
 const projectColumns: { id: Project['status']; title: string }[] = [
@@ -16,6 +18,8 @@ const projectColumns: { id: Project['status']; title: string }[] = [
 
 export default function ProjectsPage() {
   const { firestore, user } = useFirebase();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | undefined>(undefined);
 
   const projectsQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'projects') : null),
@@ -39,6 +43,11 @@ export default function ProjectsPage() {
   const { data: collaborators, isLoading: collaboratorsLoading } =
     useCollection<Collaborator>(collaboratorsQuery);
 
+  const handleOpenSheet = (project?: Project) => {
+    setSelectedProject(project);
+    setIsSheetOpen(true);
+  };
+
   const isLoading = projectsLoading || customersLoading || collaboratorsLoading;
 
   return (
@@ -50,7 +59,10 @@ export default function ProjectsPage() {
             Gestiona tus proyectos y tareas en un solo lugar.
           </p>
         </div>
-        <AddProjectSheet />
+        <Button onClick={() => handleOpenSheet(undefined)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Crear Proyecto
+        </Button>
       </div>
 
       {isLoading ? (
@@ -82,6 +94,7 @@ export default function ProjectsPage() {
                           collaborator={collaborators?.find(
                             (c) => c.id === project.collaboratorId
                           )}
+                          onClick={() => handleOpenSheet(project)}
                         />
                       ))
                   )}
@@ -91,6 +104,11 @@ export default function ProjectsPage() {
           ))}
         </div>
       )}
+       <ProjectFormSheet 
+        open={isSheetOpen}
+        onOpenChange={setIsSheetOpen}
+        project={selectedProject}
+      />
     </div>
   );
 }

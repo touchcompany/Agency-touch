@@ -8,15 +8,20 @@ interface ProjectCardProps {
   project: Project;
   customer?: Customer;
   collaborator?: Collaborator;
+  onClick?: () => void;
 }
 
 export function ProjectCard({
   project,
   customer,
   collaborator,
+  onClick,
 }: ProjectCardProps) {
   return (
-    <Card className="bg-background hover:bg-card-hover transition-colors">
+    <Card 
+      className="bg-background hover:bg-card-hover transition-colors cursor-pointer"
+      onClick={onClick}
+    >
       <CardHeader className="p-4">
         <CardTitle className="text-base font-semibold">{project.title}</CardTitle>
       </CardHeader>

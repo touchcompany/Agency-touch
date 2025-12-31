@@ -6,17 +6,14 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetFooter,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, CalendarIcon } from 'lucide-react';
-import { useState } from 'react';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { addDocumentNonBlocking } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { CalendarIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Customer, Collaborator, Project } from '@/lib/types';
 import { Textarea } from '../ui/textarea';
@@ -34,15 +31,42 @@ import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 
-export function AddProjectSheet() {
+interface ProjectFormSheetProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    project?: Project;
+}
+
+export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormSheetProps) {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
+  
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<Project['status']>('todo');
   const [customerId, setCustomerId] = useState('');
   const [collaboratorId, setCollaboratorId] = useState('');
   const [dueDate, setDueDate] = useState<Date | undefined>();
+
+  useEffect(() => {
+    if (project) {
+        setTitle(project.title);
+        setDescription(project.description || '');
+        setStatus(project.status);
+        setCustomerId(project.customerId || '');
+        setCollaboratorId(project.collaboratorId || '');
+        setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
+    } else {
+        // Reset form for new project
+        setTitle('');
+        setDescription('');
+        setStatus('todo');
+        setCustomerId('');
+        setCollaboratorId('');
+        setDueDate(undefined);
+    }
+  }, [project, open]);
+
 
   const customersQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'customers') : null),
@@ -78,8 +102,7 @@ export function AddProjectSheet() {
       return;
     }
 
-    const projectsRef = collection(firestore, 'users', user.uid, 'projects');
-    addDocumentNonBlocking(projectsRef, {
+    const projectData = {
       userId: user.uid,
       title,
       description,
@@ -87,37 +110,31 @@ export function AddProjectSheet() {
       customerId: customerId || null,
       collaboratorId: collaboratorId || null,
       dueDate: dueDate ? dueDate.toISOString() : null,
-    });
+    };
 
-    toast({
-      title: 'Proyecto Creado',
-      description: `El proyecto "${title}" ha sido añadido.`,
-    });
+    if (project?.id) {
+        const projectRef = doc(firestore, 'users', user.uid, 'projects', project.id);
+        await setDocumentNonBlocking(projectRef, projectData, { merge: true });
+        toast({ title: 'Proyecto Actualizado', description: `El proyecto "${title}" ha sido actualizado.` });
 
-    // Reset fields
-    setTitle('');
-    setDescription('');
-    setStatus('todo');
-    setCustomerId('');
-    setCollaboratorId('');
-    setDueDate(undefined);
+    } else {
+        const projectsRef = collection(firestore, 'users', user.uid, 'projects');
+        await addDocumentNonBlocking(projectsRef, projectData);
+        toast({ title: 'Proyecto Creado', description: `El proyecto "${title}" ha sido añadido.` });
+    }
+
+    onOpenChange(false);
   };
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Crear Proyecto
-        </Button>
-      </SheetTrigger>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-headline">
-            Crear Nuevo Proyecto
+            {project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
           </SheetTitle>
           <SheetDescription>
-            Añade los detalles del nuevo proyecto.
+            {project ? 'Actualiza los detalles del proyecto.' : 'Añade los detalles del nuevo proyecto.'}
           </SheetDescription>
         </SheetHeader>
         <ScrollArea className="flex-1 pr-6">
@@ -161,6 +178,7 @@ export function AddProjectSheet() {
                   <SelectValue placeholder="Asignar a un cliente (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Ninguno</SelectItem>
                   {(customers || []).map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -176,6 +194,7 @@ export function AddProjectSheet() {
                   <SelectValue placeholder="Asignar a un colaborador (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">Ninguno</SelectItem>
                   {(collaborators || []).map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -217,11 +236,10 @@ export function AddProjectSheet() {
           </div>
         </ScrollArea>
         <SheetFooter>
-          <SheetClose asChild>
+            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" onClick={handleSubmit}>
               Guardar Proyecto
             </Button>
-          </SheetClose>
         </SheetFooter>
       </SheetContent>
     </Sheet>
