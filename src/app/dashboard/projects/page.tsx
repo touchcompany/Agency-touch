@@ -6,7 +6,7 @@ import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } f
 import { collection, doc } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
 import { Loader2, Plus } from 'lucide-react';
-import { ProjectFormSheet } from '@/components/projects/add-project-sheet';
+import { ProjectFormDialog } from '@/components/projects/project-form-dialog';
 import {
   DndContext,
   closestCenter,
@@ -31,7 +31,7 @@ const projectColumns: { id: Project['status']; title: string }[] = [
 
 export default function ProjectsPage() {
   const { firestore, user } = useFirebase();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | undefined>(undefined);
 
   const projectsQuery = useMemoFirebase(
@@ -59,9 +59,9 @@ export default function ProjectsPage() {
     })
   );
 
-  const handleOpenSheet = (project?: Project) => {
+  const handleOpenDialog = (project?: Project) => {
     setSelectedProject(project);
-    setIsSheetOpen(true);
+    setIsDialogOpen(true);
   };
   
   const handleDragEnd = (event: DragEndEvent) => {
@@ -100,7 +100,7 @@ export default function ProjectsPage() {
             Gestiona tus proyectos y tareas en un solo lugar.
           </p>
         </div>
-        <Button onClick={() => handleOpenSheet(undefined)}>
+        <Button onClick={() => handleOpenDialog(undefined)}>
             <Plus className="mr-2 h-4 w-4" />
             Crear Proyecto
         </Button>
@@ -125,15 +125,15 @@ export default function ProjectsPage() {
                         projects={projectsByStatus[column.id] || []}
                         customers={customers || []}
                         collaborators={collaborators || []}
-                        onCardClick={handleOpenSheet}
+                        onCardClick={handleOpenDialog}
                     />
                 ))}
             </div>
         </DndContext>
       )}
-       <ProjectFormSheet 
-        open={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
+       <ProjectFormDialog 
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
         project={selectedProject}
       />
     </div>
