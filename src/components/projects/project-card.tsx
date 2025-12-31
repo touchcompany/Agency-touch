@@ -44,7 +44,7 @@ export function ProjectCard({
   };
   
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} className="w-full">
       <Collapsible
         open={isDescriptionOpen}
         onOpenChange={setIsDescriptionOpen}
@@ -52,14 +52,18 @@ export function ProjectCard({
       >
           <Card 
               className={cn(
-                "bg-background hover:bg-card-hover transition-shadow w-full",
+                "bg-background hover:bg-card-hover transition-shadow w-full cursor-pointer",
                 isDragging && "shadow-lg"
               )}
           >
               <CardHeader 
-                  className="p-4 flex flex-row items-start justify-between cursor-grab"
+                  className="p-4 flex flex-row items-start justify-between"
+                  {...attributes}
+                  {...listeners}
               >
-                  <CardTitle className="text-base font-semibold" onClick={onClick}>{project.title}</CardTitle>
+                  <div onClick={onClick} className="flex-grow">
+                    <CardTitle className="text-base font-semibold">{project.title}</CardTitle>
+                  </div>
                    {project.description && (
                        <TooltipProvider>
                           <Tooltip>
