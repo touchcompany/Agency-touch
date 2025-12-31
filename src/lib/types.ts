@@ -108,6 +108,10 @@ export type Project = {
     customerId?: string;
     collaboratorId?: string;
     dueDate?: string;
+    script?: string;
+    songUrl?: string;
+    projectUrl?: string;
+    publishTime?: string;
 }
 
 // Deprecated, use CompanyProfile instead
@@ -193,3 +197,5 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
+
+    

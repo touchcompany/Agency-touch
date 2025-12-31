@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
+import { Separator } from '../ui/separator';
 
 interface ProjectFormSheetProps {
     open: boolean;
@@ -49,6 +50,10 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
   const [customerId, setCustomerId] = useState(NINGUNO_VALUE);
   const [collaboratorId, setCollaboratorId] = useState(NINGUNO_VALUE);
   const [dueDate, setDueDate] = useState<Date | undefined>();
+  const [script, setScript] = useState('');
+  const [songUrl, setSongUrl] = useState('');
+  const [projectUrl, setProjectUrl] = useState('');
+  const [publishTime, setPublishTime] = useState('');
 
   useEffect(() => {
     if (project) {
@@ -58,6 +63,10 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
         setCustomerId(project.customerId || NINGUNO_VALUE);
         setCollaboratorId(project.collaboratorId || NINGUNO_VALUE);
         setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
+        setScript(project.script || '');
+        setSongUrl(project.songUrl || '');
+        setProjectUrl(project.projectUrl || '');
+        setPublishTime(project.publishTime || '');
     } else {
         // Reset form for new project
         setTitle('');
@@ -66,6 +75,10 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
         setCustomerId(NINGUNO_VALUE);
         setCollaboratorId(NINGUNO_VALUE);
         setDueDate(undefined);
+        setScript('');
+        setSongUrl('');
+        setProjectUrl('');
+        setPublishTime('');
     }
   }, [project, open]);
 
@@ -112,6 +125,10 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
       customerId: customerId === NINGUNO_VALUE ? null : customerId,
       collaboratorId: collaboratorId === NINGUNO_VALUE ? null : collaboratorId,
       dueDate: dueDate ? dueDate.toISOString() : null,
+      script,
+      songUrl,
+      projectUrl,
+      publishTime,
     };
 
     if (project?.id) {
@@ -235,6 +252,47 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
                 </PopoverContent>
               </Popover>
             </div>
+
+            <Separator className="my-2" />
+
+            <div className="space-y-2">
+              <Label htmlFor="script">Guión</Label>
+              <Textarea
+                id="script"
+                value={script}
+                onChange={(e) => setScript(e.target.value)}
+                placeholder="Escribe el guión para el proyecto aquí..."
+                rows={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="songUrl">URL de Canción de Referencia</Label>
+              <Input
+                id="songUrl"
+                value={songUrl}
+                onChange={(e) => setSongUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="projectUrl">URL del Proyecto Final</Label>
+              <Input
+                id="projectUrl"
+                value={projectUrl}
+                onChange={(e) => setProjectUrl(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+             <div className="space-y-2">
+              <Label htmlFor="publishTime">Hora de Publicación</Label>
+              <Input
+                id="publishTime"
+                type="time"
+                value={publishTime}
+                onChange={(e) => setPublishTime(e.target.value)}
+                placeholder="HH:MM"
+              />
+            </div>
           </div>
         </ScrollArea>
         <SheetFooter>
@@ -247,3 +305,5 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
     </Sheet>
   );
 }
+
+    
