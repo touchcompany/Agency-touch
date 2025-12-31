@@ -382,6 +382,19 @@
             "publishTime": { "type": "string", "description": "Scheduled time for publication.", "format": "time" }
         },
         "required": ["id", "userId", "title", "status"]
+    },
+    "ScriptTemplate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ScriptTemplate",
+      "type": "object",
+      "description": "Represents a reusable script template.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the template." },
+        "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N ScriptTemplate)" },
+        "title": { "type": "string", "description": "Title of the template." },
+        "content": { "type": "string", "description": "The content of the script template." }
+      },
+      "required": ["id", "userId", "title", "content"]
     }
   },
   "auth": {
@@ -567,10 +580,28 @@
             }
           ]
         }
+      },
+      {
+        "path": "/users/{userId}/scriptTemplates/{templateId}",
+        "definition": {
+          "entityName": "ScriptTemplate",
+          "schema": {
+            "$ref": "#/backend/entities/ScriptTemplate"
+          },
+          "description": "Stores reusable script templates for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "templateId",
+              "description": "The unique identifier of the script template."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for FinancioAI, focusing on authorization independence and clear access patterns. User data is stored under `/users/{userId}`, ensuring private user data. Each user owns their customers, invoices, income, expenses, and services which are stored in subcollections under the user's document. This path-based ownership simplifies security rules and avoids complex hierarchical authorization.  This approach allows for simple and efficient security rules based on `request.auth.uid`. Authorization Independence is achieved since access control is implicitly based on the user's ID derived from the authentication, removing the necessity for `get()` calls in security rules. QAPs are supported via structural segregation - data with different access needs (user-specific data) are stored in separate collections, enabling secure list operations within the user's own data without exposing it to others."
   }
 }
-
-    
