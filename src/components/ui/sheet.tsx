@@ -42,9 +42,14 @@ const sheetVariants = cva(
         right:
           "inset-y-0 right-0 h-full w-3/4  border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
       },
+      size: {
+        default: "",
+        lg: "sm:max-w-lg",
+      },
     },
     defaultVariants: {
       side: "right",
+      size: "default",
     },
   }
 )
@@ -56,12 +61,12 @@ interface SheetContentProps
 const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
->(({ side = "right", className, children, ...props }, ref) => (
+>(({ side = "right", size, className, children, ...props }, ref) => (
   <SheetPortal>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}
-      className={cn(sheetVariants({ side }), className)}
+      className={cn(sheetVariants({ side, size }), className)}
       {...props}
     >
       {children}

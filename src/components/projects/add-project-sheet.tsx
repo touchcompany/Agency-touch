@@ -56,29 +56,31 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
   const [publishTime, setPublishTime] = useState('');
 
   useEffect(() => {
-    if (project) {
-        setTitle(project.title);
-        setDescription(project.description || '');
-        setStatus(project.status);
-        setCustomerId(project.customerId || NINGUNO_VALUE);
-        setCollaboratorId(project.collaboratorId || NINGUNO_VALUE);
-        setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
-        setScript(project.script || '');
-        setSongUrl(project.songUrl || '');
-        setProjectUrl(project.projectUrl || '');
-        setPublishTime(project.publishTime || '');
-    } else {
-        // Reset form for new project
-        setTitle('');
-        setDescription('');
-        setStatus('todo');
-        setCustomerId(NINGUNO_VALUE);
-        setCollaboratorId(NINGUNO_VALUE);
-        setDueDate(undefined);
-        setScript('');
-        setSongUrl('');
-        setProjectUrl('');
-        setPublishTime('');
+    if (open) {
+      if (project) {
+          setTitle(project.title);
+          setDescription(project.description || '');
+          setStatus(project.status);
+          setCustomerId(project.customerId || NINGUNO_VALUE);
+          setCollaboratorId(project.collaboratorId || NINGUNO_VALUE);
+          setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
+          setScript(project.script || '');
+          setSongUrl(project.songUrl || '');
+          setProjectUrl(project.projectUrl || '');
+          setPublishTime(project.publishTime || '');
+      } else {
+          // Reset form for new project
+          setTitle('');
+          setDescription('');
+          setStatus('todo');
+          setCustomerId(NINGUNO_VALUE);
+          setCollaboratorId(NINGUNO_VALUE);
+          setDueDate(undefined);
+          setScript('');
+          setSongUrl('');
+          setProjectUrl('');
+          setPublishTime('');
+      }
     }
   }, [project, open]);
 
@@ -147,7 +149,7 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex flex-col">
+      <SheetContent size="lg" className="flex flex-col">
         <SheetHeader>
           <SheetTitle className="font-headline">
             {project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
@@ -305,5 +307,3 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
     </Sheet>
   );
 }
-
-    
