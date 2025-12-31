@@ -37,6 +37,8 @@ interface ProjectFormSheetProps {
     project?: Project;
 }
 
+const NINGUNO_VALUE = 'ninguno';
+
 export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormSheetProps) {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
@@ -44,8 +46,8 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<Project['status']>('todo');
-  const [customerId, setCustomerId] = useState('');
-  const [collaboratorId, setCollaboratorId] = useState('');
+  const [customerId, setCustomerId] = useState(NINGUNO_VALUE);
+  const [collaboratorId, setCollaboratorId] = useState(NINGUNO_VALUE);
   const [dueDate, setDueDate] = useState<Date | undefined>();
 
   useEffect(() => {
@@ -53,16 +55,16 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
         setTitle(project.title);
         setDescription(project.description || '');
         setStatus(project.status);
-        setCustomerId(project.customerId || '');
-        setCollaboratorId(project.collaboratorId || '');
+        setCustomerId(project.customerId || NINGUNO_VALUE);
+        setCollaboratorId(project.collaboratorId || NINGUNO_VALUE);
         setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
     } else {
         // Reset form for new project
         setTitle('');
         setDescription('');
         setStatus('todo');
-        setCustomerId('');
-        setCollaboratorId('');
+        setCustomerId(NINGUNO_VALUE);
+        setCollaboratorId(NINGUNO_VALUE);
         setDueDate(undefined);
     }
   }, [project, open]);
@@ -107,8 +109,8 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
       title,
       description,
       status,
-      customerId: customerId || null,
-      collaboratorId: collaboratorId || null,
+      customerId: customerId === NINGUNO_VALUE ? null : customerId,
+      collaboratorId: collaboratorId === NINGUNO_VALUE ? null : collaboratorId,
       dueDate: dueDate ? dueDate.toISOString() : null,
     };
 
@@ -178,7 +180,7 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
                   <SelectValue placeholder="Asignar a un cliente (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ninguno</SelectItem>
+                  <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
                   {(customers || []).map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
@@ -194,7 +196,7 @@ export function ProjectFormSheet({ open, onOpenChange, project }: ProjectFormShe
                   <SelectValue placeholder="Asignar a un colaborador (opcional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Ninguno</SelectItem>
+                  <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
                   {(collaborators || []).map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.name}
