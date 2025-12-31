@@ -1,14 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { useCollection, useFirebase, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking } from '@/firebase';
+import { collection, doc } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
 import { Loader2, Plus } from 'lucide-react';
 import { ProjectFormSheet } from '@/components/projects/add-project-sheet';
-import { ProjectCard } from '@/components/projects/project-card';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { ProjectColumn } from '@/components/projects/project-column';
 
 const projectColumns: { id: Project['status']; title: string }[] = [
   { id: 'todo', title: 'Por Hacer' },
@@ -25,28 +38,56 @@ export default function ProjectsPage() {
     () => (user ? collection(firestore, 'users', user.uid, 'projects') : null),
     [firestore, user]
   );
-  const { data: projects, isLoading: projectsLoading } =
-    useCollection<Project>(projectsQuery);
+  const { data: projects, isLoading: projectsLoading } = useCollection<Project>(projectsQuery);
 
   const customersQuery = useMemoFirebase(
     () => (user ? collection(firestore, 'users', user.uid, 'customers') : null),
     [firestore, user]
   );
-  const { data: customers, isLoading: customersLoading } =
-    useCollection<Customer>(customersQuery);
+  const { data: customers, isLoading: customersLoading } = useCollection<Customer>(customersQuery);
 
   const collaboratorsQuery = useMemoFirebase(
-    () =>
-      user ? collection(firestore, 'users', user.uid, 'collaborators') : null,
+    () => (user ? collection(firestore, 'users', user.uid, 'collaborators') : null),
     [firestore, user]
   );
-  const { data: collaborators, isLoading: collaboratorsLoading } =
-    useCollection<Collaborator>(collaboratorsQuery);
+  const { data: collaborators, isLoading: collaboratorsLoading } = useCollection<Collaborator>(collaboratorsQuery);
+  
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const handleOpenSheet = (project?: Project) => {
     setSelectedProject(project);
     setIsSheetOpen(true);
   };
+  
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+        const activeProject = projects?.find(p => p.id === active.id);
+        const newStatus = over.id as Project['status'];
+
+        if (activeProject && newStatus && activeProject.status !== newStatus && user && firestore) {
+             const projectRef = doc(firestore, 'users', user.uid, 'projects', activeProject.id);
+             setDocumentNonBlocking(projectRef, { status: newStatus }, { merge: true });
+        }
+    }
+  }
+  
+  const projectsByStatus = useMemo(() => {
+    return (projects || []).reduce((acc, project) => {
+        if (!acc[project.status]) {
+            acc[project.status] = [];
+        }
+        acc[project.status].push(project);
+        return acc;
+    }, {} as Record<Project['status'], Project[]>);
+  }, [projects]);
+
 
   const isLoading = projectsLoading || customersLoading || collaboratorsLoading;
 
@@ -70,39 +111,25 @@ export default function ProjectsPage() {
           <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <div className="grid flex-1 grid-cols-1 items-start gap-6 md:grid-cols-3">
-          {projectColumns.map((column) => (
-            <div key={column.id} className="flex h-full flex-col gap-4">
-              <h2 className="px-2 text-lg font-semibold">{column.title}</h2>
-              <Card className="flex-1 bg-muted/50">
-                <CardContent className="space-y-4 p-4">
-                  {projects?.filter((p) => p.status === column.id).length ===
-                  0 ? (
-                    <p className="py-8 text-center text-sm text-muted-foreground">
-                      No hay proyectos en esta columna.
-                    </p>
-                  ) : (
-                    projects
-                      ?.filter((p) => p.status === column.id)
-                      .map((project) => (
-                        <ProjectCard
-                          key={project.id}
-                          project={project}
-                          customer={customers?.find(
-                            (c) => c.id === project.customerId
-                          )}
-                          collaborator={collaborators?.find(
-                            (c) => c.id === project.collaboratorId
-                          )}
-                          onClick={() => handleOpenSheet(project)}
-                        />
-                      ))
-                  )}
-                </CardContent>
-              </Card>
+        <DndContext 
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+        >
+            <div className="grid flex-1 grid-cols-1 items-start gap-6 md:grid-cols-3">
+                {projectColumns.map((column) => (
+                    <ProjectColumn 
+                        key={column.id}
+                        id={column.id}
+                        title={column.title}
+                        projects={projectsByStatus[column.id] || []}
+                        customers={customers || []}
+                        collaborators={collaborators || []}
+                        onCardClick={handleOpenSheet}
+                    />
+                ))}
             </div>
-          ))}
-        </div>
+        </DndContext>
       )}
        <ProjectFormSheet 
         open={isSheetOpen}
