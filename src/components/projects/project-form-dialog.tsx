@@ -10,12 +10,12 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Wand2, Save } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import type { Customer, Collaborator, Project } from '@/lib/types';
+import type { Customer, Collaborator, Project, ScriptTemplate } from '@/lib/types';
 import { Textarea } from '../ui/textarea';
 import {
   Select,
@@ -31,6 +31,18 @@ import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
+import { ScriptAssistantDialog } from './script-assistant-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface ProjectFormDialogProps {
     open: boolean;
@@ -54,6 +66,9 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [songUrl, setSongUrl] = useState('');
   const [projectUrl, setProjectUrl] = useState('');
   const [publishTime, setPublishTime] = useState('');
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [newTemplateTitle, setNewTemplateTitle] = useState('');
+
 
   useEffect(() => {
     if (open) {
@@ -99,6 +114,24 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const { data: collaborators } = useCollection<Collaborator>(
     collaboratorsQuery
   );
+  
+  const handleSaveTemplate = () => {
+    if (!firestore || !user) return;
+    if (!newTemplateTitle || !script) {
+        toast({ title: "Faltan datos", description: "El título de la plantilla y el contenido del guion no pueden estar vacíos.", variant: "destructive"});
+        return;
+    }
+
+    const templatesRef = collection(firestore, 'users', user.uid, 'scriptTemplates');
+    addDocumentNonBlocking(templatesRef, {
+        userId: user.uid,
+        title: newTemplateTitle,
+        content: script,
+    });
+    toast({ title: "Plantilla guardada", description: "Tu guion ha sido guardado como una plantilla." });
+    setNewTemplateTitle('');
+  };
+
 
   const handleSubmit = async () => {
     if (!firestore || !user) {
@@ -148,6 +181,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
@@ -243,14 +277,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         )}
                     </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                        mode="single"
-                        selected={dueDate}
-                        onSelect={setDueDate}
-                        initialFocus
-                        locale={es}
-                    />
+                    <PopoverContent className="w-auto p-0" align="start" disablePortal>
+                        <Calendar
+                            mode="single"
+                            selected={dueDate}
+                            onSelect={setDueDate}
+                            initialFocus
+                            locale={es}
+                        />
                     </PopoverContent>
                 </Popover>
                 </div>
@@ -258,14 +292,49 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 <Separator className="my-2" />
 
                 <div className="space-y-2">
-                <Label htmlFor="script">Guión</Label>
-                <Textarea
-                    id="script"
-                    value={script}
-                    onChange={(e) => setScript(e.target.value)}
-                    placeholder="Escribe el guión para el proyecto aquí..."
-                    rows={6}
-                />
+                    <div className="flex items-center justify-between">
+                         <Label htmlFor="script">Guión</Label>
+                         <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)}>
+                            <Wand2 className="mr-2 h-4 w-4" />
+                            Asistente IA
+                         </Button>
+                    </div>
+                    <Textarea
+                        id="script"
+                        value={script}
+                        onChange={(e) => setScript(e.target.value)}
+                        placeholder="Escribe el guión para el proyecto aquí o géneralo con IA..."
+                        rows={8}
+                    />
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={!script}>
+                                <Save className="mr-2 h-4 w-4" />
+                                Guardar como plantilla
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Guardar Plantilla de Guión</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Dale un nombre a esta plantilla para reutilizarla en otros proyectos.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <div className="py-4">
+                                <Label htmlFor="template-name">Nombre de la Plantilla</Label>
+                                <Input 
+                                    id="template-name"
+                                    value={newTemplateTitle}
+                                    onChange={(e) => setNewTemplateTitle(e.target.value)}
+                                    placeholder="Ej: Guión para Reels de Producto"
+                                />
+                            </div>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleSaveTemplate}>Guardar Plantilla</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
                 <div className="space-y-2">
                 <Label htmlFor="songUrl">URL de Canción de Referencia</Label>
@@ -305,5 +374,13 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ScriptAssistantDialog 
+        open={isAssistantOpen}
+        onOpenChange={setIsAssistantOpen}
+        projectTitle={title}
+        projectDescription={description}
+        onScriptGenerated={setScript}
+    />
+    </>
   );
 }

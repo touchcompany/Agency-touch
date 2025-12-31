@@ -174,7 +174,7 @@ service cloud.firestore {
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
+       /**
        * @description Manages company settings for a specific user.
        * @path /users/{userId}/settings/{docId}
        * @allow (read, write) A user can read and write to their own settings document.
@@ -197,6 +197,35 @@ service cloud.firestore {
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
+      
+       /**
+       * @description Manages projects for a specific user.
+       * @path /users/{userId}/projects/{projectId}
+       * @allow (read, write) A user can manage their own projects.
+       * @principle Enforces that users can only manage their own projects.
+       */
+      match /projects/{projectId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+
+      /**
+       * @description Manages script templates for a specific user.
+       * @path /users/{userId}/scriptTemplates/{templateId}
+       * @allow (read, write) A user can manage their own script templates.
+       * @principle Enforces that users can only manage their own script templates.
+       */
+      match /scriptTemplates/{templateId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
     }
   }
 }
+

@@ -1,3 +1,4 @@
+'use client';
 export type User = {
   id: string;
   email?: string;
@@ -103,7 +104,7 @@ export type Project = {
     id: string;
     userId: string;
     title: string;
-    description: string;
+    description?: string;
     status: 'todo' | 'in-progress' | 'done';
     customerId?: string;
     collaboratorId?: string;
@@ -113,6 +114,14 @@ export type Project = {
     projectUrl?: string;
     publishTime?: string;
 }
+
+export type ScriptTemplate = {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+}
+
 
 // Deprecated, use CompanyProfile instead
 export type CompanySettings = {

@@ -361,6 +361,40 @@
         }
       },
       "required": ["id", "userId", "profileName", "companyName", "companyNit"]
+    },
+    "Project": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Project",
+        "type": "object",
+        "description": "Represents a project with tasks and status.",
+        "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the Project entity." },
+            "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Project)" },
+            "title": { "type": "string", "description": "Title of the project." },
+            "description": { "type": "string", "description": "Detailed description of the project." },
+            "status": { "type": "string", "description": "Current status of the project.", "enum": ["todo", "in-progress", "done"] },
+            "customerId": { "type": "string", "description": "Optional reference to a Customer." },
+            "collaboratorId": { "type": "string", "description": "Optional reference to an assigned Collaborator." },
+            "dueDate": { "type": "string", "description": "Due date for the project.", "format": "date-time" },
+            "script": { "type": "string", "description": "The script for the project." },
+            "songUrl": { "type": "string", "description": "URL for the reference song." },
+            "projectUrl": { "type": "string", "description": "URL for the final project (e.g., video link)." },
+            "publishTime": { "type": "string", "description": "Scheduled time for publication.", "format": "time" }
+        },
+        "required": ["id", "userId", "title", "status"]
+    },
+    "ScriptTemplate": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ScriptTemplate",
+      "type": "object",
+      "description": "Represents a reusable script template.",
+      "properties": {
+        "id": { "type": "string", "description": "Unique identifier for the template." },
+        "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N ScriptTemplate)" },
+        "title": { "type": "string", "description": "Title of the template." },
+        "content": { "type": "string", "description": "The content of the script template." }
+      },
+      "required": ["id", "userId", "title", "content"]
     }
   },
   "auth": {
@@ -523,6 +557,46 @@
             {
               "name": "profileId",
               "description": "The unique identifier of the company profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Stores project information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier of the project."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/scriptTemplates/{templateId}",
+        "definition": {
+          "entityName": "ScriptTemplate",
+          "schema": {
+            "$ref": "#/backend/entities/ScriptTemplate"
+          },
+          "description": "Stores reusable script templates for a user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "templateId",
+              "description": "The unique identifier of the script template."
             }
           ]
         }
