@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -17,6 +16,7 @@ import {
   Presentation,
   Bot,
   Settings,
+  Rocket,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -57,6 +57,11 @@ const menuItems = [
     href: '/dashboard/automation',
     icon: Bot,
     label: 'Automatización'
+  },
+  {
+    href: '/dashboard/projects',
+    icon: Rocket,
+    label: 'Proyectos',
   },
     {
     href: '/dashboard/settings',

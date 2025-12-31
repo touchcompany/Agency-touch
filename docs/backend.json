@@ -154,6 +154,10 @@
           "type": "string",
           "description": "Reference to Customer. (Relationship: Customer 1:N Invoice)"
         },
+        "companyProfileId": {
+            "type": "string",
+            "description": "Reference to the CompanyProfile used for this invoice."
+        },
         "invoiceNumber": {
           "type": "string",
           "description": "Invoice number."
@@ -308,15 +312,23 @@
         "price"
       ]
     },
-    "CompanySettings": {
+    "CompanyProfile": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "CompanySettings",
+      "title": "CompanyProfile",
       "type": "object",
-      "description": "Stores company-specific settings for a user.",
+      "description": "Stores a company profile for a user, used for invoices.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier, should be 'company'."
+          "description": "Unique identifier for the profile."
+        },
+         "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N CompanyProfile)"
+        },
+        "profileName": {
+            "type": "string",
+            "description": "An internal name to identify the profile (e.g., 'My Company', 'Sister's Company')."
         },
         "companyName": {
           "type": "string",
@@ -337,9 +349,35 @@
         "logoUrl": {
           "type": "string",
           "description": "URL of the company logo."
+        },
+        "companyAddress": {
+            "type": "string",
+            "description": "Address of the company."
+        },
+        "companyEmail": {
+            "type": "string",
+            "description": "Contact email of the company.",
+            "format": "email"
         }
       },
-      "required": ["id"]
+      "required": ["id", "userId", "profileName", "companyName", "companyNit"]
+    },
+    "Project": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "title": "Project",
+        "type": "object",
+        "description": "Represents a project with tasks and status.",
+        "properties": {
+            "id": { "type": "string", "description": "Unique identifier for the Project entity." },
+            "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Project)" },
+            "title": { "type": "string", "description": "Title of the project." },
+            "description": { "type": "string", "description": "Detailed description of the project." },
+            "status": { "type": "string", "description": "Current status of the project.", "enum": ["todo", "in-progress", "done"] },
+            "customerId": { "type": "string", "description": "Optional reference to a Customer." },
+            "collaboratorId": { "type": "string", "description": "Optional reference to an assigned Collaborator." },
+            "dueDate": { "type": "string", "description": "Due date for the project.", "format": "date-time" }
+        },
+        "required": ["id", "userId", "title", "status"]
     }
   },
   "auth": {
@@ -487,21 +525,41 @@
         }
       },
        {
-        "path": "/users/{userId}/settings/{settingId}",
+        "path": "/users/{userId}/companyProfiles/{profileId}",
         "definition": {
-          "entityName": "CompanySettings",
+          "entityName": "CompanyProfile",
           "schema": {
-            "$ref": "#/backend/entities/CompanySettings"
+            "$ref": "#/backend/entities/CompanyProfile"
           },
-          "description": "Stores company settings for a specific user.",
+          "description": "Stores different company profiles for a user to use in invoices.",
           "params": [
             {
               "name": "userId",
               "description": "The unique identifier of the user."
             },
             {
-              "name": "settingId",
-              "description": "The unique identifier of the settings document (e.g., 'company')."
+              "name": "profileId",
+              "description": "The unique identifier of the company profile."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/projects/{projectId}",
+        "definition": {
+          "entityName": "Project",
+          "schema": {
+            "$ref": "#/backend/entities/Project"
+          },
+          "description": "Stores project information for a specific user.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "projectId",
+              "description": "The unique identifier of the project."
             }
           ]
         }

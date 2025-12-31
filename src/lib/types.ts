@@ -99,6 +99,17 @@ export type CompanyProfile = {
     companyEmail?: string;
 }
 
+export type Project = {
+    id: string;
+    userId: string;
+    title: string;
+    description: string;
+    status: 'todo' | 'in-progress' | 'done';
+    customerId?: string;
+    collaboratorId?: string;
+    dueDate?: string;
+}
+
 // Deprecated, use CompanyProfile instead
 export type CompanySettings = {
     id: 'company';
