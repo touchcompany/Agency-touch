@@ -4,6 +4,8 @@ export type User = {
   email?: string;
   phoneNumber?: string;
   providerId?: string;
+  role?: 'superuser' | 'collaborator';
+  displayName?: string;
 };
 
 export type Service = {
@@ -147,6 +149,168 @@ export type Cuenta = {
   datosEmpresa: {
     nombreEmpresa: string;
     nitEmpresa: string;
+d-spacing: 0.12rem;
+  letter-spacing: 0.12rem;
+}
+.k-color-accent {
+  color: hsl(var(--accent-foreground));
+}
+.k-color-accent--contrasted {
+  color: hsl(var(--accent));
+}
+.k-bg-accent {
+  background-color: hsl(var(--accent));
+}
+.k-bg-accent--contrasted {
+  background-color: hsl(var(--accent-foreground));
+}
+.k-border-accent {
+  border-color: hsl(var(--accent));
+}
+.k-color-destructive {
+  color: hsl(var(--destructive-foreground));
+}
+.k-color-destructive--contrasted {
+  color: hsl(var(--destructive));
+}
+.k-bg-destructive {
+  background-color: hsl(var(--destructive));
+}
+.k-bg-destructive--contrasted {
+  background-color: hsl(var(--destructive-foreground));
+}
+.k-border-destructive {
+  border-color: hsl(var(--destructive));
+}
+.k-color-secondary {
+  color: hsl(var(--secondary-foreground));
+}
+.k-color-secondary--contrasted {
+  color: hsl(var(--secondary));
+}
+.k-bg-secondary {
+  background-color: hsl(var(--secondary));
+}
+.k-bg-secondary--contrasted {
+  background-color: hsl(var(--secondary-foreground));
+}
+.k-border-secondary {
+  border-color: hsl(var(--secondary));
+}
+.k-color-muted {
+  color: hsl(var(--muted-foreground));
+}
+.k-color-muted--contrasted {
+  color: hsl(var(--muted));
+}
+.k-bg-muted {
+  background-color: hsl(var(--muted));
+}
+.k-bg-muted--contrasted {
+  background-color: hsl(var(--muted-foreground));
+}
+.k-border-muted {
+  border-color: hsl(var(--muted));
+}
+.k-color-popover {
+  color: hsl(var(--popover-foreground));
+}
+.k-color-popover--contrasted {
+  color: hsl(var(--popover));
+}
+.k-bg-popover {
+  background-color: hsl(var(--popover));
+}
+.k-bg-popover--contrasted {
+  background-color: hsl(var(--popover-foreground));
+}
+.k-border-popover {
+  border-color: hsl(var(--popover));
+}
+.k-color-card {
+  color: hsl(var(--card-foreground));
+}
+.k-color-card--contrasted {
+  color: hsl(var(--card));
+}
+.k-bg-card {
+  background-color: hsl(var(--card));
+}
+.k-bg-card--contrasted {
+  background-color: hsl(var(--card-foreground));
+}
+.k-border-card {
+  border-color: hsl(var(--card));
+}
+.k-color-background {
+  color: hsl(var(--foreground));
+}
+.k-color-background--contrasted {
+  color: hsl(var(--background));
+}
+.k-bg-background {
+  background-color: hsl(var(--background));
+}
+.k-bg-background--contrasted {
+  background-color: hsl(var(--foreground));
+}
+.k-border-background {
+  border-color: hsl(var(--foreground));
+}
+.k-color-foreground {
+  color: hsl(var(--background));
+}
+.k-color-foreground--contrasted {
+  color: hsl(var(--foreground));
+}
+.k-bg-foreground {
+  background-color: hsl(var(--foreground));
+}
+.k-bg-foreground--contrasted {
+  background-color: hsl(var(--background));
+}
+.k-border-foreground {
+  border-color: hsl(var(--background));
+}
+.k-color-border {
+  color: hsl(var(--border));
+}
+.k-color-ring {
+  color: hsl(var(--ring));
+}
+.k-color-input {
+  color: hsl(var(--input));
+}
+.k-font-sans {
+  font-family: var(--font-sans);
+}
+.k-font-mono {
+  font-family: var(--font-mono);
+}
+.k-font-display {
+  font-family: var(--font-display);
+}
+.k-rounded {
+  border-radius: var(--radius);
+}
+.k-rounded-sm {
+  border-radius: calc(var(--radius) - 4px);
+}
+.k-rounded-md {
+  border-radius: calc(var(--radius) - 2px);
+}
+.k-rounded-lg {
+  border-radius: var(--radius);
+}
+.k-rounded-xl {
+  border-radius: calc(var(--radius) + 4px);
+}
+.k-rounded-2xl {
+  border-radius: calc(var(--radius) + 8px);
+}
+.k-rounded-3xl {
+  border-radius: calc(var(--radius) + 16px);
+}
     direccion: string;
     datosBanco: string;
   };
@@ -206,5 +370,7 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
+
+    
 
     
