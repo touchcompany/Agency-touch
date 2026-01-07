@@ -8,40 +8,44 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the User entity."
+          "description": "Unique identifier for the user."
         },
         "email": {
           "type": "string",
-          "description": "Email address of the user.",
+          "description": "User's email address.",
           "format": "email"
         },
-        "phoneNumber": {
+        "firstName": {
           "type": "string",
-          "description": "Phone number of the user."
+          "description": "User's first name."
         },
-        "role": {
+        "lastName": {
           "type": "string",
-          "description": "The role of the user.",
-          "enum": ["superuser", "collaborator"]
+          "description": "User's last name."
         },
-        "displayName": {
+        "createdAt": {
           "type": "string",
-          "description": "The user's display name."
+          "description": "Date and time when the user account was created.",
+          "format": "date-time"
         }
       },
       "required": [
-        "id"
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "createdAt"
       ]
     },
     "Customer": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Customer",
       "type": "object",
-      "description": "Represents a customer to whom invoices are issued.",
+      "description": "Represents a customer to whom the user sends invoices.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Customer entity."
+          "description": "Unique identifier for the customer."
         },
         "userId": {
           "type": "string",
@@ -53,107 +57,34 @@
         },
         "email": {
           "type": "string",
-          "description": "Email address of the customer.",
+          "description": "Customer's email address.",
           "format": "email"
         },
-        "phoneNumber": {
+        "phone": {
           "type": "string",
-          "description": "Phone number of the customer."
+          "description": "Customer's phone number."
         },
         "address": {
           "type": "string",
-          "description": "Address of the customer."
-        },
-        "nit": {
-          "type": "string",
-          "description": "Tax identification number for the customer."
-        },
-        "logoUrl": {
-            "type": "string",
-            "description": "URL of the customer's logo."
-        },
-        "isMonthly": {
-          "type": "boolean",
-          "description": "Flag to indicate if the customer has recurring monthly billing."
-        },
-        "invoiceDay": {
-          "type": "number",
-          "description": "The day of the month (1-31) to generate the recurring invoice."
-        },
-        "defaultServiceId": {
-          "type": "string",
-          "description": "The ID of the default service to use for recurring invoices."
+          "description": "Customer's address."
         }
       },
       "required": [
         "id",
         "userId",
-        "name"
-      ]
-    },
-    "Collaborator": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Collaborator",
-      "type": "object",
-      "description": "Represents a collaborator who receives payments.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Collaborator entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Collaborator)"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the collaborator."
-        },
-        "email": {
-          "type": "string",
-          "description": "Email address of the collaborator.",
-          "format": "email"
-        },
-        "phoneNumber": {
-          "type": "string",
-          "description": "Phone number of the collaborator."
-        },
-        "isMonthly": {
-          "type": "boolean",
-          "description": "Flag to indicate if the collaborator has recurring monthly payments."
-        },
-        "paymentDay": {
-          "type": "number",
-          "description": "The day of the month (1-31) to generate the recurring payment."
-        },
-        "defaultPaymentAmount": {
-          "type": "number",
-          "description": "The default amount for the recurring monthly payment."
-        },
-        "defaultPaymentDescription": {
-          "type": "string",
-          "description": "The default description for the recurring payment (e.g., 'Monthly Payroll')."
-        },
-        "defaultPaymentCategory": {
-          "type": "string",
-          "description": "The default category for the recurring payment (e.g., 'Salary')."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "name"
+        "name",
+        "email"
       ]
     },
     "Invoice": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Invoice",
       "type": "object",
-      "description": "Represents an invoice issued to a customer.",
+      "description": "Represents an invoice sent to a customer.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Invoice entity."
+          "description": "Unique identifier for the invoice."
         },
         "userId": {
           "type": "string",
@@ -163,35 +94,32 @@
           "type": "string",
           "description": "Reference to Customer. (Relationship: Customer 1:N Invoice)"
         },
-        "companyProfileId": {
-            "type": "string",
-            "description": "Reference to the CompanyProfile used for this invoice."
-        },
         "invoiceNumber": {
           "type": "string",
           "description": "Invoice number."
         },
         "issueDate": {
           "type": "string",
-          "description": "Date the invoice was issued.",
+          "description": "Date when the invoice was issued.",
           "format": "date-time"
         },
         "dueDate": {
           "type": "string",
-          "description": "Date the invoice is due.",
+          "description": "Date when the invoice is due.",
           "format": "date-time"
         },
-        "amountDue": {
+        "amount": {
           "type": "number",
-          "description": "Total amount due on the invoice."
+          "description": "Total amount of the invoice."
         },
         "status": {
           "type": "string",
           "description": "Status of the invoice (e.g., sent, paid, overdue)."
         },
-        "bankDetails": {
+        "pdfUrl": {
           "type": "string",
-          "description": "Bank account details for payment."
+          "description": "URL of the generated invoice PDF.",
+          "format": "uri"
         }
       },
       "required": [
@@ -201,40 +129,44 @@
         "invoiceNumber",
         "issueDate",
         "dueDate",
-        "amountDue",
+        "amount",
         "status"
       ]
     },
-    "Income": {
+    "Transaction": {
       "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Income",
+      "title": "Transaction",
       "type": "object",
-      "description": "Represents an income transaction.",
+      "description": "Represents an income or expense transaction.",
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the Income entity."
+          "description": "Unique identifier for the transaction."
         },
         "userId": {
           "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Income)"
+          "description": "Reference to User. (Relationship: User 1:N Transaction)"
         },
         "date": {
           "type": "string",
-          "description": "Date of the income transaction.",
+          "description": "Date of the transaction.",
           "format": "date-time"
         },
         "amount": {
           "type": "number",
-          "description": "Amount of the income."
+          "description": "Amount of the transaction."
         },
         "description": {
           "type": "string",
-          "description": "Description of the income source."
+          "description": "Description of the transaction."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of transaction (income or expense)."
         },
         "category": {
           "type": "string",
-          "description": "Category of the income."
+          "description": "Category of the transaction (e.g., salary, rent, utilities)."
         }
       },
       "required": [
@@ -243,181 +175,16 @@
         "date",
         "amount",
         "description",
+        "type",
         "category"
       ]
-    },
-    "Expense": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Expense",
-      "type": "object",
-      "description": "Represents an expense transaction.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Expense entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Expense)"
-        },
-        "date": {
-          "type": "string",
-          "description": "Date of the expense transaction.",
-          "format": "date-time"
-        },
-        "amount": {
-          "type": "number",
-          "description": "Amount of the expense."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the expense."
-        },
-        "category": {
-          "type": "string",
-          "description": "Category of the expense."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "date",
-        "amount",
-        "description",
-        "category"
-      ]
-    },
-    "Service": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Service",
-      "type": "object",
-      "description": "Represents a service or product offered by the user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the Service entity."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N Service)"
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the service."
-        },
-        "description": {
-          "type": "string",
-          "description": "Detailed description of the service."
-        },
-        "price": {
-          "type": "number",
-          "description": "Price of the service."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "name",
-        "price"
-      ]
-    },
-    "CompanyProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "CompanyProfile",
-      "type": "object",
-      "description": "Stores a company profile for a user, used for invoices.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the profile."
-        },
-         "userId": {
-          "type": "string",
-          "description": "Reference to User. (Relationship: User 1:N CompanyProfile)"
-        },
-        "profileName": {
-            "type": "string",
-            "description": "An internal name to identify the profile (e.g., 'My Company', 'Sister's Company')."
-        },
-        "companyName": {
-          "type": "string",
-          "description": "The name of the user's company."
-        },
-        "companyNit": {
-          "type": "string",
-          "description": "The tax ID for the user's company."
-        },
-        "companyWhatsapp": {
-          "type": "string",
-          "description": "The contact WhatsApp number for the company."
-        },
-        "paymentDetails": {
-          "type": "string",
-          "description": "Bank account or other payment details."
-        },
-        "logoUrl": {
-          "type": "string",
-          "description": "URL of the company logo."
-        },
-        "companyAddress": {
-            "type": "string",
-            "description": "Address of the company."
-        },
-        "companyEmail": {
-            "type": "string",
-            "description": "Contact email of the company.",
-            "format": "email"
-        }
-      },
-      "required": ["id", "userId", "profileName", "companyName", "companyNit"]
-    },
-    "Project": {
-        "$schema": "http://json-schema.org/draft-07/schema#",
-        "title": "Project",
-        "type": "object",
-        "description": "Represents a project with tasks and status.",
-        "properties": {
-            "id": { "type": "string", "description": "Unique identifier for the Project entity." },
-            "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N Project)" },
-            "title": { "type": "string", "description": "Title of the project." },
-            "description": { "type": "string", "description": "Detailed description of the project." },
-            "status": { "type": "string", "description": "Current status of the project.", "enum": ["todo", "in-progress", "done"] },
-            "customerId": { "type": "string", "description": "Optional reference to a Customer." },
-            "collaboratorId": { "type": "string", "description": "Optional reference to an assigned Collaborator." },
-            "dueDate": { "type": "string", "description": "Due date for the project.", "format": "date-time" },
-            "script": { "type": "string", "description": "The script for the project." },
-            "songUrl": { "type": "string", "description": "URL for the reference song." },
-            "projectUrl": { "type": "string", "description": "URL for the final project (e.g., video link)." },
-            "publishTime": { "type": "string", "description": "Scheduled time for publication.", "format": "time" }
-        },
-        "required": ["id", "userId", "title", "status"]
-    },
-    "ScriptTemplate": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "ScriptTemplate",
-      "type": "object",
-      "description": "Represents a reusable script template.",
-      "properties": {
-        "id": { "type": "string", "description": "Unique identifier for the template." },
-        "userId": { "type": "string", "description": "Reference to User. (Relationship: User 1:N ScriptTemplate)" },
-        "title": { "type": "string", "description": "Title of the template." },
-        "content": { "type": "string", "description": "The content of the script template." }
-      },
-      "required": ["id", "userId", "title", "content"]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "phone",
-      "google"
-    ],
-    "customClaims": {
-      "role": {
-        "type": "string",
-        "enum": ["superuser", "collaborator"]
-      }
-    }
+      "anonymous"
+    ]
   },
   "firestore": {
     "structure": [
@@ -428,11 +195,11 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile information.",
+          "description": "Stores user profile information. Only the authenticated user can read or write their own profile data.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The unique identifier for the user, matching the Firebase Auth UID."
             }
           ]
         }
@@ -444,35 +211,15 @@
           "schema": {
             "$ref": "#/backend/entities/Customer"
           },
-          "description": "Stores customer information for a specific user.",
+          "description": "Stores customer data associated with a specific user. Only the authenticated user can manage their own customers.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The unique identifier for the user, matching the Firebase Auth UID."
             },
             {
               "name": "customerId",
-              "description": "The unique identifier of the customer."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/collaborators/{collaboratorId}",
-        "definition": {
-          "entityName": "Collaborator",
-          "schema": {
-            "$ref": "#/backend/entities/Collaborator"
-          },
-          "description": "Stores collaborator information for a specific user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "collaboratorId",
-              "description": "The unique identifier of the collaborator."
+              "description": "The unique identifier for the customer."
             }
           ]
         }
@@ -484,142 +231,40 @@
           "schema": {
             "$ref": "#/backend/entities/Invoice"
           },
-          "description": "Stores invoice information for a specific user.",
+          "description": "Stores invoice data associated with a specific user and customer. Only the authenticated user can manage their own invoices.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The unique identifier for the user, matching the Firebase Auth UID."
             },
             {
               "name": "invoiceId",
-              "description": "The unique identifier of the invoice."
+              "description": "The unique identifier for the invoice."
             }
           ]
         }
       },
       {
-        "path": "/users/{userId}/income/{incomeId}",
+        "path": "/users/{userId}/transactions/{transactionId}",
         "definition": {
-          "entityName": "Income",
+          "entityName": "Transaction",
           "schema": {
-            "$ref": "#/backend/entities/Income"
+            "$ref": "#/backend/entities/Transaction"
           },
-          "description": "Stores income transaction information for a specific user.",
+          "description": "Stores transaction data associated with a specific user. Only the authenticated user can manage their own transactions.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The unique identifier for the user, matching the Firebase Auth UID."
             },
             {
-              "name": "incomeId",
-              "description": "The unique identifier of the income transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/expenses/{expenseId}",
-        "definition": {
-          "entityName": "Expense",
-          "schema": {
-            "$ref": "#/backend/entities/Expense"
-          },
-          "description": "Stores expense transaction information for a specific user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "expenseId",
-              "description": "The unique identifier of the expense transaction."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/services/{serviceId}",
-        "definition": {
-          "entityName": "Service",
-          "schema": {
-            "$ref": "#/backend/entities/Service"
-          },
-          "description": "Stores service information for a specific user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "serviceId",
-              "description": "The unique identifier of the service."
-            }
-          ]
-        }
-      },
-       {
-        "path": "/users/{userId}/companyProfiles/{profileId}",
-        "definition": {
-          "entityName": "CompanyProfile",
-          "schema": {
-            "$ref": "#/backend/entities/CompanyProfile"
-          },
-          "description": "Stores different company profiles for a user to use in invoices.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "profileId",
-              "description": "The unique identifier of the company profile."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/projects/{projectId}",
-        "definition": {
-          "entityName": "Project",
-          "schema": {
-            "$ref": "#/backend/entities/Project"
-          },
-          "description": "Stores project information for a specific user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "projectId",
-              "description": "The unique identifier of the project."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/scriptTemplates/{templateId}",
-        "definition": {
-          "entityName": "ScriptTemplate",
-          "schema": {
-            "$ref": "#/backend/entities/ScriptTemplate"
-          },
-          "description": "Stores reusable script templates for a user.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "templateId",
-              "description": "The unique identifier of the script template."
+              "name": "transactionId",
+              "description": "The unique identifier for the transaction."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure secure and scalable data management for FinancioAI, focusing on authorization independence and clear access patterns. User data is stored under `/users/{userId}`, ensuring private user data. Each user owns their customers, invoices, income, expenses, and services which are stored in subcollections under the user's document. This path-based ownership simplifies security rules and avoids complex hierarchical authorization.  This approach allows for simple and efficient security rules based on `request.auth.uid`. Authorization Independence is achieved since access control is implicitly based on the user's ID derived from the authentication, removing the necessity for `get()` calls in security rules. QAPs are supported via structural segregation - data with different access needs (user-specific data) are stored in separate collections, enabling secure list operations within the user's own data without exposing it to others."
+    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. It leverages path-based ownership for user-specific data and denormalization where necessary to avoid using `get()` calls in security rules. The structure separates data with different access requirements into distinct collections, enhancing security and query performance.\n\n*   **Authorization Independence**: Achieved by using path-based ownership for user-related data (e.g., `/users/{userId}/customers/{customerId}`). No `get()` calls are required in rules to validate ownership. Access to user data is governed solely by the authenticated user's ID.\n*   **DBAC (Database Authenticated Access Control)**: Roles are implicitly determined by the path structure (`/users/{userId}`). No custom claims are needed; authorization relies exclusively on `request.auth.uid`.\n*   **QAPs (Rules are not Filters)**: The path-based ownership structure enables secure list operations. For example, a user can only list customers under their `/users/{userId}/customers` collection, ensuring that rules don't act as filters by accidentally exposing data from other users.\n\nSpecific design decisions include:\n\n*   Storing `Customer`, `Invoice`, and `Transaction` data as subcollections of `/users/{userId}`. This enforces clear ownership and simplifies security rules, as only the authenticated user has access to their respective data.\n*   Each entity (`Customer`, `Invoice`, `Transaction`) uses a unique ID for its documents, automatically generated by Firestore.\n*   Timestamp fields such as `createdAt`, `issueDate`, and `date` are stored as strings in `date-time` format, which allows for flexible date querying and sorting. For enhanced query capabilities on date ranges, consider adding `timestamp` fields as well.\n\nThis structure adheres to the core design principles, promoting secure, scalable, and debuggable Firestore data management for FinancioAI."
   }
 }
-
-    

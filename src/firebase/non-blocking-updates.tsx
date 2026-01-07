@@ -8,55 +8,9 @@ import {
   CollectionReference,
   DocumentReference,
   SetOptions,
-  doc,
-  getDoc,
 } from 'firebase/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import {FirestorePermissionError} from '@/firebase/errors';
-import { User, getAuth, onAuthStateChanged } from 'firebase/auth';
-
-const ensureUserDocument = async (user: User) => {
-  // Use getApp() and getFirestore() inside the function to ensure they are called on the client
-  const { getApp, getFirestore } = await import('firebase/app');
-  const firestore = getFirestore(getApp());
-
-  const userRef = doc(firestore, 'users', user.uid);
-  const userSnap = await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    const userData = {
-      id: user.uid,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      displayName: user.displayName,
-      role: user.phoneNumber === '+573173980133' ? 'superuser' : null
-    };
-    try {
-      await setDoc(userRef, userData, { merge: true });
-    } catch (error) {
-      console.error("Failed to create user document:", error);
-       const contextualError = new FirestorePermissionError({
-        path: userRef.path,
-        operation: 'create',
-        requestResourceData: userData,
-      });
-      errorEmitter.emit('permission-error', contextualError);
-    }
-  }
-};
-
-
-export function initializeAuthListener() {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-            ensureUserDocument(user);
-        }
-    });
-    // Returning the unsubscribe function in case the caller wants to clean up
-    return unsubscribe;
-}
-
 
 /**
  * Initiates a setDoc operation for a document reference.

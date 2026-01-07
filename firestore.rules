@@ -1,228 +1,122 @@
 /**
- * Core Philosophy: This ruleset enforces a strict user-ownership model. All data is considered private to the user who created it.
- * There are no public or shared collections. Access to any piece of data is granted if, and only if, the requesting user's
- * authenticated UID matches the user ID in the document's path.
+ * Core Philosophy: This ruleset enforces a strict user-ownership model for a
+ * financial management application. All data is considered private and can only
+ * be accessed by the user who created it. There is no concept of public data or
+ * shared access between users.
  *
- * Data Structure: The entire data model is hierarchical and user-centric, with all application data nested under the top-level
- * `/users/{userId}` collection. This creates a secure data silo for each user, making it impossible for one user to access
- * or even list the data of another. This structure is highly performant for security rules as it avoids cross-collection `get()` calls.
+ * Data Structure: The data is organized hierarchically. All user-specific
+ * data, including customers, invoices, and transactions, is stored in
+ * subcollections under that user's unique document at `/users/{userId}`. This
+ * structure inherently links data to its owner.
  *
  * Key Security Decisions:
- * - User Enumeration is Disabled: Listing documents in the top-level `/users` collection is explicitly forbidden to protect user privacy.
- * - Strict Ownership: A user can only read, write, or delete documents within their own data tree (i.e., `/users/{their-own-userId}/...`).
- * - Path and Data Consistency: On creation, rules enforce that a document's internal `userId` field must match the `userId` from the
- *   document path, ensuring relational integrity. This field is immutable once set.
- * - Prototyping Flexibility: The rules do not validate the shape or type of most data fields, focusing solely on authorization. This allows
- *   the application's data model to evolve rapidly without requiring constant rule updates.
+ * - Strict Authentication: All read and write operations require a user to be
+ *   signed in. Anonymous access is completely disallowed.
+ * - Data Privacy: Users can only access documents within their own data tree
+ *   (i.e., paths starting with `/users/{their_own_uid}`).
+ * - User Enumeration Disabled: Listing documents in the top-level `/users`
+ *   collection is forbidden to prevent attackers from discovering user IDs.
+ * - Path and Data Consistency: Rules enforce that the `userId` stored inside a
+ *   document must match the `{userId}` from the document's path. This ensures
+ *   relational integrity and prevents data from being misplaced or mis-owned.
+ *
+ * Denormalization for Authorization: The security model relies on path-based
+ * authorization, which is a form of structural denormalization. By placing a
+ * user's data in a subcollection under their own ID, we avoid costly and slow
+ * `get()` calls to check for ownership. For example, a rule for
+ * `/users/{userId}/invoices/{invoiceId}` simply checks that the authenticated
+ * user's ID matches the `{userId}` in the path.
+ *
+ * Structural Segregation: The design uses separate subcollections for each
+ * data type (`customers`, `invoices`, `transactions`) under the user's root
+ * document. This cleanly separates data with identical ownership rules and
+ * simplifies client-side queries and security logic.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper Functions for concise and readable rules
+    // Helper functions to ensure rules are readable and maintainable.
 
     /**
-     * Checks if a user is authenticated.
+     * Checks if the current request is from an authenticated user.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * Validates that the requesting user's UID matches the user ID in the path.
-     * This is the primary function for enforcing user ownership.
-     * @param userId The user ID from the document path.
+     * Checks if the requesting user's UID matches the provided userId.
+     * This is the primary function for enforcing data ownership.
      */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * Ensures an operation is performed by the document's owner and that the document already exists.
-     * Crucial for preventing unauthorized modifications or deletions of non-existent documents.
-     * @param userId The user ID from the document path.
+     * Checks if a document exists AND the requesting user is the owner.
+     * Used for safe state-changing operations like update and delete.
      */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
 
     /**
-     * On create, validates that the incoming `userId` field matches the `userId` in the document path.
-     * This enforces data integrity and prevents a user from creating records "owned" by someone else.
-     * @param userId The user ID from the document path.
-     */
-    function isCreatingOwnContent(userId) {
-      return isOwner(userId) && request.resource.data.userId == userId;
-    }
-
-    /**
-     * On update, ensures the `userId` field within a document cannot be changed.
-     * This prevents re-assigning ownership of a document.
-     */
-    function isUserIdImmutable() {
-      return request.resource.data.userId == resource.data.userId;
-    }
-
-    /**
-     * On update, ensures the `id` field within a User document cannot be changed.
-     */
-    function isIdImmutable() {
-      return request.resource.data.id == resource.data.id;
-    }
-
-    /**
-     * @description Manages user profile documents. A user can create their own profile, but cannot see or list other users.
+     * @description Controls access to a user's own profile document.
      * @path /users/{userId}
-     * @allow (create) An authenticated user with UID 'user_abc' creating their own profile at `/users/user_abc`.
-     * @deny (list) Any user attempting to list all documents in the `/users` collection.
-     * @principle Restricts access to a user's own data tree and prevents user enumeration for privacy.
+     * @allow A user (uid: 'user123') can (create) their own profile document at `/users/user123`.
+     * @deny A user (uid: 'user456') cannot (get) another user's profile at `/users/user123`.
+     * @principle Restricts access to a user's own data tree and prevents user enumeration.
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
+      allow list: if false; // Disallow listing of users for security.
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && isIdImmutable();
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
 
       /**
-       * @description Manages customers owned by a specific user.
+       * @description Controls access to the customers created by a specific user.
        * @path /users/{userId}/customers/{customerId}
-       * @allow (create) An authenticated user with UID 'user_abc' creating a customer in their own subcollection `/users/user_abc/customers/cust_123`.
-       * @deny (get) A user with UID 'user_xyz' attempting to read a customer from `/users/user_abc/customers/cust_123`.
-       * @principle Enforces strict data siloing; a user can only manage resources within their own subcollections.
+       * @allow A user (uid: 'user123') can (list) all customers at `/users/user123/customers`.
+       * @deny A user (uid: 'user456') cannot (delete) a customer at `/users/user123/customers/cust987`.
+       * @principle Enforces document ownership for all CRUD operations on a subcollection.
        */
       match /customers/{customerId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
 
       /**
-       * @description Manages collaborators owned by a specific user.
-       * @path /users/{userId}/collaborators/{collaboratorId}
-       * @allow (create) An authenticated user with UID 'user_abc' creating a collaborator in their own subcollection `/users/user_abc/collaborators/collab_123`.
-       * @deny (get) A user with UID 'user_xyz' attempting to read a collaborator from `/users/user_abc/collaborators/collab_123`.
-       * @principle Enforces strict data siloing; a user can only manage resources within their own subcollections.
-       */
-      match /collaborators/{collaboratorId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Manages invoices owned by a specific user.
+       * @description Controls access to the invoices created by a specific user.
        * @path /users/{userId}/invoices/{invoiceId}
-       * @allow (list) An authenticated user with UID 'user_abc' listing invoices from `/users/user_abc/invoices`.
-       * @deny (update) A user with UID 'user_xyz' attempting to update an invoice at `/users/user_abc/invoices/inv_456`.
-       * @principle Enforces strict data siloing; a user can only manage resources within their own subcollections.
+       * @allow A user (uid: 'user123') can (create) a new invoice at `/users/user123/invoices/inv456`.
+       * @deny A user (uid: 'user456') cannot (get) an invoice at `/users/user123/invoices/inv456`.
+       * @principle Enforces document ownership and validates relational integrity between the document and its path.
        */
       match /invoices/{invoiceId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
 
       /**
-       * @description Manages income records owned by a specific user.
-       * @path /users/{userId}/income/{incomeId}
-       * @allow (delete) An authenticated user with UID 'user_abc' deleting an income record from `/users/user_abc/income/inc_789`.
-       * @deny (create) A user with UID 'user_abc' trying to create an income record with a mismatched internal `userId` field.
-       * @principle Enforces strict data siloing and validates relational integrity between path and document data on create.
+       * @description Controls access to the transactions recorded by a specific user.
+       * @path /users/{userId}/transactions/{transactionId}
+       * @allow A user (uid: 'user123') can (update) a transaction at `/users/user123/transactions/txn789`.
+       * @deny A user (uid: 'user456') cannot (list) transactions at `/users/user123/transactions`.
+       * @principle Enforces document ownership for all CRUD operations on a subcollection.
        */
-      match /income/{incomeId} {
+      match /transactions/{transactionId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Manages expense records owned by a specific user.
-       * @path /users/{userId}/expenses/{expenseId}
-       * @allow (get) An authenticated user with UID 'user_abc' reading an expense from `/users/user_abc/expenses/exp_012`.
-       * @deny (list) An unauthenticated user attempting to list any expenses.
-       * @principle Enforces strict data siloing; a user can only manage resources within their own subcollections.
-       */
-      match /expenses/{expenseId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-      
-      /**
-       * @description Manages services offered by a specific user.
-       * @path /users/{userId}/services/{serviceId}
-       * @allow (list) An authenticated user with UID 'user_abc' listing services from `/users/user_abc/services`.
-       * @deny (create) A user with UID 'user_abc' trying to create a service record with a mismatched internal `userId` field.
-       * @principle Enforces strict data siloing for user-managed services.
-       */
-      match /services/{serviceId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-
-       /**
-       * @description Manages company settings for a specific user.
-       * @path /users/{userId}/settings/{docId}
-       * @allow (read, write) A user can read and write to their own settings document.
-       * @principle Enforces that users can only manage their own company settings.
-       */
-      match /settings/{docId} {
-        allow read, write: if isOwner(userId);
-      }
-
-      /**
-       * @description Manages multiple company profiles for a specific user.
-       * @path /users/{userId}/companyProfiles/{profileId}
-       * @allow (read, write) A user can manage their own company profiles.
-       * @principle Enforces that users can only manage their own company profiles.
-       */
-      match /companyProfiles/{profileId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-      
-       /**
-       * @description Manages projects for a specific user.
-       * @path /users/{userId}/projects/{projectId}
-       * @allow (read, write) A user can manage their own projects.
-       * @principle Enforces that users can only manage their own projects.
-       */
-      match /projects/{projectId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-
-      /**
-       * @description Manages script templates for a specific user.
-       * @path /users/{userId}/scriptTemplates/{templateId}
-       * @allow (read, write) A user can manage their own script templates.
-       * @principle Enforces that users can only manage their own script templates.
-       */
-      match /scriptTemplates/{templateId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow create: if isOwner(userId) && request.resource.data.userId == userId;
+        allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
         allow delete: if isExistingOwner(userId);
       }
     }
