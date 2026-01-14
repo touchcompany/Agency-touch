@@ -58,6 +58,11 @@ service cloud.firestore {
     function hasCorrectUserId(userId) {
       return request.resource.data.userId == userId;
     }
+    
+    function isCreatingOwnContent(userId) {
+      return isOwner(userId) && request.resource.data.userId == userId;
+    }
+
 
     /**
      * Enforces that the `userId` field is immutable and cannot be changed
@@ -110,7 +115,15 @@ service cloud.firestore {
       match /customers/{customerId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasCorrectUserId(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+      
+      match /income/{incomeId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
@@ -125,10 +138,35 @@ service cloud.firestore {
       match /invoices/{invoiceId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasCorrectUserId(userId);
+        allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
+      
+      match /services/{serviceId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+      
+      match /companyProfiles/{profileId} {
+          allow get: if isOwner(userId);
+          allow list: if isOwner(userId);
+          allow create: if isCreatingOwnContent(userId);
+          allow update: if isExistingOwner(userId) && isUserIdImmutable();
+          allow delete: if isExistingOwner(userId);
+      }
+      
+       match /scriptTemplates/{templateId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+
 
       /**
        * @description Manages financial transactions (income/expense) owned by a specific user.
@@ -140,8 +178,32 @@ service cloud.firestore {
       match /transactions/{transactionId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
-        allow create: if isOwner(userId) && hasCorrectUserId(userId);
+        allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+      
+      match /expenses/{expenseId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+      
+      match /collaborators/{collaboratorId} {
+        allow get: if isOwner(userId);
+        allow list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+      
+      match /projects/{projectId} {
+        allow get: if isOwner(userId) || resource.data.collaboratorId == request.auth.uid;
+        allow list: if isOwner(userId) || request.auth.token.role == 'collaborator';
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) || resource.data.collaboratorId == request.auth.uid;
         allow delete: if isExistingOwner(userId);
       }
     }
