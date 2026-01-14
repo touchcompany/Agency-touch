@@ -41,7 +41,7 @@
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Customer",
       "type": "object",
-      "description": "Represents a customer to whom the user sends invoices.",
+      "description": "Represents a customer of the user's business.",
       "properties": {
         "id": {
           "type": "string",
@@ -53,7 +53,7 @@
         },
         "name": {
           "type": "string",
-          "description": "Name of the customer."
+          "description": "Customer's name."
         },
         "email": {
           "type": "string",
@@ -72,15 +72,14 @@
       "required": [
         "id",
         "userId",
-        "name",
-        "email"
+        "name"
       ]
     },
     "Invoice": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Invoice",
       "type": "object",
-      "description": "Represents an invoice sent to a customer.",
+      "description": "Represents an invoice issued to a customer.",
       "properties": {
         "id": {
           "type": "string",
@@ -116,10 +115,9 @@
           "type": "string",
           "description": "Status of the invoice (e.g., sent, paid, overdue)."
         },
-        "pdfUrl": {
+        "bankDetails": {
           "type": "string",
-          "description": "URL of the generated invoice PDF.",
-          "format": "uri"
+          "description": "Bank details where the invoice payment should be sent"
         }
       },
       "required": [
@@ -156,17 +154,17 @@
           "type": "number",
           "description": "Amount of the transaction."
         },
-        "description": {
-          "type": "string",
-          "description": "Description of the transaction."
-        },
         "type": {
           "type": "string",
           "description": "Type of transaction (income or expense)."
         },
         "category": {
           "type": "string",
-          "description": "Category of the transaction (e.g., salary, rent, utilities)."
+          "description": "Category of the transaction (e.g., rent, salary, utilities)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the transaction."
         }
       },
       "required": [
@@ -174,7 +172,6 @@
         "userId",
         "date",
         "amount",
-        "description",
         "type",
         "category"
       ]
@@ -195,11 +192,11 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile information. Only the authenticated user can read or write their own profile data.",
+          "description": "Stores user profile information. Accessible only by the user themselves.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user, matching the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             }
           ]
         }
@@ -211,15 +208,15 @@
           "schema": {
             "$ref": "#/backend/entities/Customer"
           },
-          "description": "Stores customer data associated with a specific user. Only the authenticated user can manage their own customers.",
+          "description": "Stores customer data associated with a specific user. Accessible only by the user.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user, matching the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             },
             {
               "name": "customerId",
-              "description": "The unique identifier for the customer."
+              "description": "The unique identifier of the customer."
             }
           ]
         }
@@ -231,15 +228,15 @@
           "schema": {
             "$ref": "#/backend/entities/Invoice"
           },
-          "description": "Stores invoice data associated with a specific user and customer. Only the authenticated user can manage their own invoices.",
+          "description": "Stores invoice data associated with a specific user. Accessible only by the user.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user, matching the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             },
             {
               "name": "invoiceId",
-              "description": "The unique identifier for the invoice."
+              "description": "The unique identifier of the invoice."
             }
           ]
         }
@@ -251,20 +248,20 @@
           "schema": {
             "$ref": "#/backend/entities/Transaction"
           },
-          "description": "Stores transaction data associated with a specific user. Only the authenticated user can manage their own transactions.",
+          "description": "Stores transaction data associated with a specific user. Accessible only by the user.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier for the user, matching the Firebase Auth UID."
+              "description": "The unique identifier of the user."
             },
             {
               "name": "transactionId",
-              "description": "The unique identifier for the transaction."
+              "description": "The unique identifier of the transaction."
             }
           ]
         }
       }
     ],
-    "reasoning": "The Firestore structure is designed to ensure Authorization Independence, DBAC, and QAPs. It leverages path-based ownership for user-specific data and denormalization where necessary to avoid using `get()` calls in security rules. The structure separates data with different access requirements into distinct collections, enhancing security and query performance.\n\n*   **Authorization Independence**: Achieved by using path-based ownership for user-related data (e.g., `/users/{userId}/customers/{customerId}`). No `get()` calls are required in rules to validate ownership. Access to user data is governed solely by the authenticated user's ID.\n*   **DBAC (Database Authenticated Access Control)**: Roles are implicitly determined by the path structure (`/users/{userId}`). No custom claims are needed; authorization relies exclusively on `request.auth.uid`.\n*   **QAPs (Rules are not Filters)**: The path-based ownership structure enables secure list operations. For example, a user can only list customers under their `/users/{userId}/customers` collection, ensuring that rules don't act as filters by accidentally exposing data from other users.\n\nSpecific design decisions include:\n\n*   Storing `Customer`, `Invoice`, and `Transaction` data as subcollections of `/users/{userId}`. This enforces clear ownership and simplifies security rules, as only the authenticated user has access to their respective data.\n*   Each entity (`Customer`, `Invoice`, `Transaction`) uses a unique ID for its documents, automatically generated by Firestore.\n*   Timestamp fields such as `createdAt`, `issueDate`, and `date` are stored as strings in `date-time` format, which allows for flexible date querying and sorting. For enhanced query capabilities on date ranges, consider adding `timestamp` fields as well.\n\nThis structure adheres to the core design principles, promoting secure, scalable, and debuggable Firestore data management for FinancioAI."
+    "reasoning": "The Firestore structure is designed to ensure data isolation and ownership based on user IDs, enabling secure and scalable access. Each user's data (customers, invoices, and transactions) is stored under their respective user ID, which simplifies security rules and improves query performance. This approach ensures that users can only access data that belongs to them.  The use of path-based ownership (`/users/{userId}/...`) eliminates the need for complex `get()` calls in security rules, achieving Authorization Independence. This structure supports the QAPs by using Structural Segregation, ensuring that all documents within a user's subcollections share the same security requirements.  There is no mixing of data with different access needs within the same collection. Each top-level collection represents a distinct entity type with consistent access control."
   }
 }
