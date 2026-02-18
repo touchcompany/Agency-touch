@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -57,77 +56,86 @@ export default function TransactionsPage() {
   }
 
   return (
-    <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab}>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <TabsList>
-          <TabsTrigger value="income">Ingresos</TabsTrigger>
-          <TabsTrigger value="expenses">Egresos</TabsTrigger>
-        </TabsList>
-
-        <div className="flex flex-wrap items-center gap-2">
-            <Select value={month} onValueChange={setMonth}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Mes" />
-              </SelectTrigger>
-              <SelectContent>
-                {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
-              </SelectContent>
-            </Select>
-             <Select value={year} onValueChange={setYear}>
-              <SelectTrigger className="w-full sm:w-[120px]">
-                <SelectValue placeholder="Año" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            {activeTab === 'income' && (
-                 <Select value={customerId} onValueChange={setCustomerId}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Todos los clientes" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos los clientes</SelectItem>
-                    {(customers || []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-            )}
-            {activeTab === 'expenses' && (
-                 <Select value={collaboratorId} onValueChange={setCollaboratorId}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
-                    <SelectValue placeholder="Todos los colaboradores" />
-                  </SelectTrigger>
-                  <SelectContent>
-                     <SelectItem value="all">Todos los colaboradores</SelectItem>
-                    {(collaborators || []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-            )}
-             <Button variant="ghost" onClick={clearFilters}>Limpiar</Button>
-        </div>
+    <div className="space-y-4">
+      <div>
+        <h1 className="font-headline text-3xl font-bold">Transacciones</h1>
+        <p className="text-muted-foreground">
+          Revisa y gestiona tus ingresos y egresos.
+        </p>
       </div>
-      <TabsContent value="income">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="font-headline">Ingresos</CardTitle>
-            <AddTransactionSheet />
-          </CardHeader>
-          <CardContent>
-            <TransactionsTable month={month} year={year} customerId={customerId} />
-          </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="expenses">
-        <Card>
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="font-headline">Egresos</CardTitle>
-            <AddExpenseSheet />
-          </CardHeader>
-          <CardContent>
-            <ExpensesTable month={month} year={year} collaboratorId={collaboratorId} />
-          </CardContent>
-        </Card>
-      </TabsContent>
-    </Tabs>
+      <Tabs defaultValue="income" value={activeTab} onValueChange={setActiveTab}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+            <TabsList>
+              <TabsTrigger value="income">Ingresos</TabsTrigger>
+              <TabsTrigger value="expenses">Egresos</TabsTrigger>
+            </TabsList>
+            <div className="flex flex-wrap items-center gap-2">
+                <Select value={month} onValueChange={setMonth}>
+                    <SelectTrigger className="w-full flex-1 sm:w-[150px]">
+                        <SelectValue placeholder="Mes" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {months.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <Select value={year} onValueChange={setYear}>
+                    <SelectTrigger className="w-full flex-1 sm:w-[120px]">
+                        <SelectValue placeholder="Año" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                    </SelectContent>
+                </Select>
+                <div className="w-full flex-1 sm:w-auto">
+                    {activeTab === 'income' ? (
+                        <Select value={customerId} onValueChange={setCustomerId}>
+                        <SelectTrigger className="w-full sm:w-[200px]">
+                            <SelectValue placeholder="Todos los clientes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Todos los clientes</SelectItem>
+                            {(customers || []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                        </Select>
+                    ) : (
+                        <Select value={collaboratorId} onValueChange={setCollaboratorId}>
+                        <SelectTrigger className="w-full sm:w-[200px]">
+                            <SelectValue placeholder="Todos los colaboradores" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">Todos los colaboradores</SelectItem>
+                            {(collaborators || []).map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        </SelectContent>
+                        </Select>
+                    )}
+                </div>
+                <Button variant="ghost" onClick={clearFilters}>Limpiar</Button>
+            </div>
+        </div>
+
+        <TabsContent value="income">
+            <Card>
+            <CardHeader className="flex-row items-center justify-between">
+                <CardTitle className="font-headline">Ingresos</CardTitle>
+                <AddTransactionSheet />
+            </CardHeader>
+            <CardContent>
+                <TransactionsTable month={month} year={year} customerId={customerId} />
+            </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="expenses">
+            <Card>
+            <CardHeader className="flex-row items-center justify-between">
+                <CardTitle className="font-headline">Egresos</CardTitle>
+                <AddExpenseSheet />
+            </CardHeader>
+            <CardContent>
+                <ExpensesTable month={month} year={year} collaboratorId={collaboratorId} />
+            </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 }
