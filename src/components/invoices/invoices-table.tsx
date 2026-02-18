@@ -22,14 +22,13 @@ import {
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useFirebase, useCollection, useMemoFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from '@/firebase';
-import { collection, doc } from 'firebase/firestore';
+import { collection, doc, query, where, orderBy } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { InvoicePrintLayout } from './invoice-print-layout';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
   paid: 'default',
@@ -43,14 +42,35 @@ const statusTranslations: { [key: string]: string } = {
   overdue: 'Vencida',
 };
 
-export function CuentasTable() {
+interface CuentasTableProps {
+  month: string;
+  year: string;
+  customerId: string;
+}
+
+export function CuentasTable({ month, year, customerId }: CuentasTableProps) {
   const { firestore, user } = useFirebase();
   const { toast } = useToast();
   const locale = 'es-ES';
 
-  const invoicesQuery = useMemoFirebase(() =>
-    user ? collection(firestore, 'users', user.uid, 'invoices') : null
-  , [firestore, user]);
+  const invoicesQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    let q = query(collection(firestore, 'users', user.uid, 'invoices'), orderBy('issueDate', 'desc'));
+
+    const parsedYear = parseInt(year, 10);
+    const parsedMonth = parseInt(month, 10);
+    if (!isNaN(parsedYear) && !isNaN(parsedMonth)) {
+        const startDate = new Date(parsedYear, parsedMonth - 1, 1);
+        const endDate = new Date(parsedYear, parsedMonth, 0, 23, 59, 59);
+        q = query(q, where('issueDate', '>=', startDate.toISOString()), where('issueDate', '<=', endDate.toISOString()));
+    }
+    
+    if (customerId && customerId !== 'all') {
+        q = query(q, where('customerId', '==', customerId));
+    }
+    
+    return q;
+  }, [firestore, user, month, year, customerId]);
   const { data: invoices, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
 
   const customersQuery = useMemoFirebase(() =>
@@ -170,7 +190,7 @@ export function CuentasTable() {
   if (!invoices || invoices.length === 0) {
     return (
       <div className="text-center p-8 text-muted-foreground">
-        No hay cuentas todavía. ¡Crea una para empezar!
+        No hay cuentas para los filtros seleccionados.
       </div>
     );
   }

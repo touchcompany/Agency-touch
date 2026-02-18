@@ -12,17 +12,42 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, where, Timestamp } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { useMemo } from 'react';
 
+interface TransactionsTableProps {
+  month: string;
+  year: string;
+  customerId: string;
+}
 
-export function TransactionsTable() {
+export function TransactionsTable({ month, year, customerId }: TransactionsTableProps) {
   const { firestore, user } = useFirebase();
   const locale = 'es-ES';
 
-  const incomeQuery = useMemoFirebase(() =>
-    user ? query(collection(firestore, 'users', user.uid, 'income'), orderBy('date', 'desc')) : null
-  , [firestore, user]);
+  const incomeQuery = useMemoFirebase(() => {
+    if (!user) return null;
+
+    let q = query(collection(firestore, 'users', user.uid, 'income'), orderBy('date', 'desc'));
+    
+    // Date filter
+    const parsedYear = parseInt(year, 10);
+    const parsedMonth = parseInt(month, 10);
+    if (!isNaN(parsedYear) && !isNaN(parsedMonth)) {
+        const startDate = new Date(parsedYear, parsedMonth - 1, 1);
+        const endDate = new Date(parsedYear, parsedMonth, 0, 23, 59, 59);
+        q = query(q, where('date', '>=', startDate.toISOString()), where('date', '<=', endDate.toISOString()));
+    }
+    
+    // Customer filter
+    if(customerId && customerId !== 'all') {
+        q = query(q, where('customerId', '==', customerId));
+    }
+
+    return q;
+  }, [firestore, user, month, year, customerId]);
+  
   const { data: income, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
 
   const customersQuery = useMemoFirebase(() =>
@@ -38,6 +63,10 @@ export function TransactionsTable() {
 
   const isLoading = incomeLoading || customersLoading;
 
+  const filteredIncome = useMemo(() => {
+    return income; // Query is already filtered
+  }, [income]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -46,10 +75,10 @@ export function TransactionsTable() {
     );
   }
   
-  if (!income || income.length === 0) {
+  if (!filteredIncome || filteredIncome.length === 0) {
       return (
         <div className="text-center p-8 text-muted-foreground">
-            No hay ingresos todavía. ¡Añade uno para empezar!
+            No hay ingresos para los filtros seleccionados.
         </div>
       )
   }
@@ -67,7 +96,7 @@ export function TransactionsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {income.map((item) => (
+          {filteredIncome.map((item) => (
             <TableRow key={item.id}>
               <TableCell>
                 {new Date(item.date).toLocaleDateString(locale)}
