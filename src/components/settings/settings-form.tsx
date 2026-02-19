@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useFirebase, setDocumentNonBlocking, addDocumentNonBlocking } from "@/firebase";
 import { doc, collection } from "firebase/firestore";
 import type { CompanyProfile } from "@/lib/types";
+import { Separator } from "../ui/separator";
 
 interface CompanyProfileFormProps {
   profile?: CompanyProfile;
@@ -27,9 +28,11 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
     const [companyWhatsapp, setCompanyWhatsapp] = useState('');
     const [paymentDetails, setPaymentDetails] = useState('');
     const [logoUrl, setLogoUrl] = useState('/favicon.svg');
+    const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
     const [companyAddress, setCompanyAddress] = useState('');
     const [companyEmail, setCompanyEmail] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const faviconFileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if(profile) {
@@ -39,6 +42,7 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             setCompanyWhatsapp(profile.companyWhatsapp || '');
             setPaymentDetails(profile.paymentDetails || '');
             setLogoUrl(profile.logoUrl || '/favicon.svg');
+            setFaviconUrl(profile.faviconUrl || null);
             setCompanyAddress(profile.companyAddress || '');
             setCompanyEmail(profile.companyEmail || '');
         } else {
@@ -49,6 +53,7 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             setCompanyWhatsapp('');
             setPaymentDetails('');
             setLogoUrl('/favicon.svg');
+            setFaviconUrl(null);
             setCompanyAddress('');
             setCompanyEmail('');
         }
@@ -56,6 +61,10 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
 
     const handleLogoUploadClick = () => {
         fileInputRef.current?.click();
+    };
+    
+    const handleFaviconUploadClick = () => {
+        faviconFileInputRef.current?.click();
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,6 +76,18 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             };
             reader.readAsDataURL(file);
             toast({ title: 'Logo actualizado', description: 'El nuevo logo se ha cargado (localmente).' });
+        }
+    };
+    
+    const handleFaviconFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                setFaviconUrl(e.target?.result as string);
+            };
+            reader.readAsDataURL(file);
+            toast({ title: 'Favicon cargado', description: 'El nuevo favicon se ha cargado (localmente).' });
         }
     };
 
@@ -88,6 +109,7 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
             companyWhatsapp,
             paymentDetails,
             logoUrl,
+            faviconUrl,
             companyAddress,
             companyEmail
         };
@@ -179,10 +201,12 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
                     Esta información se mostrará en tus cuentas de cobro.
                 </p>
             </div>
-
-            <div className="space-y-2">
-                <Label>Logo</Label>
-                <div className="flex items-center gap-4">
+            
+            <Separator />
+            
+            <div className="space-y-4">
+                 <Label>Identidad Visual</Label>
+                 <div className="flex items-center gap-4">
                     <Image
                         src={logoUrl}
                         width={64}
@@ -192,7 +216,7 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
                     />
                     <Button type="button" variant="outline" onClick={handleLogoUploadClick}>
                         <Upload className="mr-2 h-4 w-4" />
-                        Subir Nuevo Logo
+                        Subir Logo
                     </Button>
                     <input
                         type="file"
@@ -200,6 +224,26 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
                         onChange={handleFileChange}
                         className="hidden"
                         accept="image/*"
+                    />
+                </div>
+                 <div className="flex items-center gap-4">
+                    <Image
+                        src={faviconUrl || '/favicon.svg'}
+                        width={64}
+                        height={64}
+                        alt="Current favicon"
+                        className="rounded-md border bg-muted object-contain"
+                    />
+                    <Button type="button" variant="outline" onClick={handleFaviconUploadClick}>
+                        <Upload className="mr-2 h-4 w-4" />
+                        Subir Favicon (PNG)
+                    </Button>
+                    <input
+                        type="file"
+                        ref={faviconFileInputRef}
+                        onChange={handleFaviconFileChange}
+                        className="hidden"
+                        accept="image/png"
                     />
                 </div>
             </div>
@@ -210,5 +254,3 @@ export function CompanyProfileForm({ profile, onSave }: CompanyProfileFormProps)
         </form>
     );
 }
-
-    

@@ -28,7 +28,7 @@ export type Income = {
 };
 
 export type Expense = {
-  id: string;
+  id:string;
   userId: string;
   collaboratorId?: string;
   date: string;
@@ -98,6 +98,7 @@ export type CompanyProfile = {
     companyWhatsapp: string;
     paymentDetails: string;
     logoUrl?: string;
+    faviconUrl?: string;
     companyAddress?: string;
     companyEmail?: string;
 }
@@ -370,7 +371,3 @@ export type Configuracion = {
   datosEmpresa: ConfiguracionEmpresa;
   ajustesEnvio: AjustesEnvio;
 };
-
-    
-
-    

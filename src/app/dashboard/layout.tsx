@@ -1,6 +1,7 @@
 'use client';
 import { DashboardHeader } from "@/components/layout/header";
 import { DashboardSidebar } from "@/components/layout/sidebar";
+import { DynamicFavicon } from "@/components/layout/dynamic-favicon";
 import {
   SidebarProvider,
   Sidebar,
@@ -40,6 +41,7 @@ export default function DashboardLayout({
   if (user) {
     return (
       <SidebarProvider>
+        <DynamicFavicon />
         <Sidebar>
           <DashboardSidebar />
         </Sidebar>
