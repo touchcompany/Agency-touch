@@ -98,9 +98,14 @@ export type CompanyProfile = {
     companyWhatsapp: string;
     paymentDetails: string;
     logoUrl?: string;
-    faviconUrl?: string;
     companyAddress?: string;
     companyEmail?: string;
+}
+
+export type UserSettings = {
+    id: 'main' | string;
+    userId: string;
+    appleTouchIconUrl?: string;
 }
 
 export type Project = {

@@ -1,43 +1,38 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
-import type { CompanyProfile } from '@/lib/types';
-import { collection, query, limit } from 'firebase/firestore';
+import { useFirebase, useDoc, useMemoFirebase } from '@/firebase';
+import type { UserSettings } from '@/lib/types';
+import { doc } from 'firebase/firestore';
 
 export function DynamicFavicon() {
   const { firestore, user } = useFirebase();
 
-  // Assume the first company profile dictates the branding favicon.
-  const companyProfileQuery = useMemoFirebase(
-    () => (user ? query(collection(firestore, 'users', user.uid, 'companyProfiles'), limit(1)) : null),
+  const settingsRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid, 'settings', 'main') : null),
     [firestore, user]
   );
-  const { data: profiles } = useCollection<CompanyProfile>(companyProfileQuery);
+  const { data: settings } = useDoc<UserSettings>(settingsRef);
 
   useEffect(() => {
-    if (profiles && profiles.length > 0 && profiles[0].faviconUrl) {
-      const faviconUrl = profiles[0].faviconUrl;
+    const iconUrl = settings?.appleTouchIconUrl;
 
-      // Clean up previous dynamic icons
-      document.querySelectorAll('link[data-dynamic-favicon]').forEach(e => e.remove());
+    // First, remove any previously added dynamic apple-touch-icon
+    const existingIcon = document.querySelector('link[data-dynamic-apple-icon]');
+    if (existingIcon) {
+      existingIcon.remove();
+    }
 
-      // Add apple-touch-icon
+    if (iconUrl) {
+      // Add the new apple-touch-icon link element
       const appleIcon = document.createElement('link');
       appleIcon.rel = 'apple-touch-icon';
-      appleIcon.href = faviconUrl;
-      appleIcon.setAttribute('data-dynamic-favicon', 'true');
+      appleIcon.href = iconUrl;
+      // Add a data attribute to identify it for future removals
+      appleIcon.setAttribute('data-dynamic-apple-icon', 'true');
       document.head.appendChild(appleIcon);
-
-      // Add standard favicon
-      const standardIcon = document.createElement('link');
-      standardIcon.rel = 'icon';
-      standardIcon.type = 'image/png';
-      standardIcon.href = faviconUrl;
-      standardIcon.setAttribute('data-dynamic-favicon', 'true');
-      document.head.appendChild(standardIcon);
     }
-  }, [profiles]);
+  }, [settings]);
 
   return null; // This component doesn't render anything
 }

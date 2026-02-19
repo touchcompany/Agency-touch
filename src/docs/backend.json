@@ -350,10 +350,6 @@
           "type": "string",
           "description": "URL of the company logo."
         },
-        "faviconUrl": {
-          "type": "string",
-          "description": "Data URL of the company favicon for Apple devices."
-        },
         "companyAddress": {
             "type": "string",
             "description": "Address of the company."
@@ -365,6 +361,27 @@
         }
       },
       "required": ["id", "userId", "profileName", "companyName", "companyNit"]
+    },
+     "UserSettings": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserSettings",
+      "type": "object",
+      "description": "Stores general user-specific settings like branding.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the settings document (e.g., 'main')."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User."
+        },
+        "appleTouchIconUrl": {
+          "type": "string",
+          "description": "URL for the apple-touch-icon PNG."
+        }
+      },
+      "required": ["id", "userId"]
     },
     "Project": {
         "$schema": "http://json-schema.org/draft-07/schema#",
@@ -561,6 +578,26 @@
             {
               "name": "profileId",
               "description": "The unique identifier of the company profile."
+            }
+          ]
+        }
+      },
+       {
+        "path": "/users/{userId}/settings/{settingsId}",
+        "definition": {
+          "entityName": "UserSettings",
+          "schema": {
+            "$ref": "#/backend/entities/UserSettings"
+          },
+          "description": "Stores general user-specific settings.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "settingsId",
+              "description": "The unique identifier for the settings document (e.g., 'main')."
             }
           ]
         }

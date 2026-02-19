@@ -3,6 +3,7 @@ import { CompanyProfileManager } from "@/components/settings/company-profile-man
 import { DataExportManager } from "@/components/settings/data-export-manager";
 import { UserDataManager } from "@/components/settings/user-data-manager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { BrandingManager } from "@/components/settings/branding-manager";
 
 export default function SettingsPage() {
   return (
@@ -39,6 +40,17 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent>
               <UserDataManager />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Branding General</CardTitle>
+              <CardDescription>
+                Configura el ícono de la aplicación para dispositivos Apple.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BrandingManager />
             </CardContent>
           </Card>
            <Card>
