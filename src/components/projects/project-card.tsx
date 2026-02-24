@@ -44,53 +44,57 @@ export function ProjectCard({
   };
   
   return (
-    <div ref={setNodeRef} style={style} className="w-full">
+    <div 
+        ref={setNodeRef} 
+        style={style}
+        className={cn("w-full touch-none", isDragging ? 'opacity-50' : 'opacity-100')}
+        onClick={onClick}
+    >
       <Collapsible
         open={isDescriptionOpen}
         onOpenChange={setIsDescriptionOpen}
         className="w-full"
       >
           <Card 
+              {...attributes} 
+              {...listeners} 
               className={cn(
-                "bg-background hover:bg-card-hover transition-shadow w-full cursor-pointer",
-                isDragging && "shadow-lg"
+                "bg-card hover:bg-card-hover/80 transition-shadow w-full cursor-grab",
+                isDragging && "shadow-lg ring-2 ring-primary"
               )}
-              onClick={(e) => {
-                // Trigger onClick only if the click is not on the collapsible trigger
-                const target = e.target as HTMLElement;
-                if (!target.closest('[data-collapsible-trigger]')) {
-                  onClick?.();
-                }
-              }}
           >
-            <div {...attributes} {...listeners}>
-              <CardHeader 
-                  className="p-4 flex flex-row items-start justify-between"
-              >
-                  <div className="flex-grow">
-                    <CardTitle className="text-base font-semibold leading-tight">{project.title}</CardTitle>
-                     {customer && (
-                        <p className="text-xs text-muted-foreground mt-1">{customer.name}</p>
-                     )}
-                  </div>
-                  {project.description && (
-                       <TooltipProvider>
-                          <Tooltip>
-                              <TooltipTrigger asChild>
-                                  <CollapsibleTrigger asChild>
-                                      <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" data-collapsible-trigger>
-                                          <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:-rotate-180" />
-                                      </Button>
-                                  </CollapsibleTrigger>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                  <p>Ver descripción</p>
-                              </TooltipContent>
-                          </Tooltip>
-                       </TooltipProvider>
+            <CardHeader 
+                className="p-4 flex flex-row items-start justify-between"
+            >
+                <div className="flex-grow pr-2">
+                  <CardTitle className="text-base font-semibold leading-tight">{project.title}</CardTitle>
+                   {customer && (
+                      <p className="text-xs text-muted-foreground mt-1">{customer.name}</p>
                    )}
-              </CardHeader>
-            </div>
+                </div>
+                {project.description && (
+                     <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <CollapsibleTrigger asChild>
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-6 w-6 shrink-0" 
+                                        onClick={(e) => e.stopPropagation()}
+                                        onPointerDown={(e) => e.stopPropagation()}
+                                    >
+                                        <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                                    </Button>
+                                </CollapsibleTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Ver descripción</p>
+                            </TooltipContent>
+                        </Tooltip>
+                     </TooltipProvider>
+                 )}
+            </CardHeader>
 
             <CollapsibleContent>
                 <CardContent className="px-4 pb-4 pt-0">

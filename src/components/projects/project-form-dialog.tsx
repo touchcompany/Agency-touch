@@ -47,7 +47,7 @@ import {
 interface ProjectFormDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    project?: Project;
+    project?: Partial<Project>;
 }
 
 const NINGUNO_VALUE = 'ninguno';
@@ -58,7 +58,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<Project['status']>('todo');
+  const [status, setStatus] = useState<Project['status']>('pending');
   const [customerId, setCustomerId] = useState(NINGUNO_VALUE);
   const [collaboratorId, setCollaboratorId] = useState(NINGUNO_VALUE);
   const [dueDate, setDueDate] = useState<Date | undefined>();
@@ -68,14 +68,18 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [publishTime, setPublishTime] = useState('');
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [newTemplateTitle, setNewTemplateTitle] = useState('');
+  
+  const [priority, setPriority] = useState<Project['priority'] | undefined>();
+  const [tags, setTags] = useState('');
+  const [campaign, setCampaign] = useState('');
 
 
   useEffect(() => {
     if (open) {
-      if (project) {
-          setTitle(project.title);
+      if (project && project.id) { // Check for project.id to confirm it's an existing project
+          setTitle(project.title || '');
           setDescription(project.description || '');
-          setStatus(project.status);
+          setStatus(project.status || 'pending');
           setCustomerId(project.customerId || NINGUNO_VALUE);
           setCollaboratorId(project.collaboratorId || NINGUNO_VALUE);
           setDueDate(project.dueDate ? new Date(project.dueDate) : undefined);
@@ -83,11 +87,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           setSongUrl(project.songUrl || '');
           setProjectUrl(project.projectUrl || '');
           setPublishTime(project.publishTime || '');
+          setPriority(project.priority);
+          setTags(project.tags?.join(', ') || '');
+          setCampaign(project.campaign || '');
       } else {
-          // Reset form for new project
+          // Reset form for new project, pre-filling status if provided
           setTitle('');
           setDescription('');
-          setStatus('todo');
+          setStatus(project?.status || 'pending');
           setCustomerId(NINGUNO_VALUE);
           setCollaboratorId(NINGUNO_VALUE);
           setDueDate(undefined);
@@ -95,6 +102,9 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           setSongUrl('');
           setProjectUrl('');
           setPublishTime('');
+          setPriority(undefined);
+          setTags('');
+          setCampaign('');
       }
     }
   }, [project, open]);
@@ -164,6 +174,9 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
       songUrl,
       projectUrl,
       publishTime,
+      priority: priority || null,
+      tags: tags.split(',').map(t => t.trim()).filter(Boolean),
+      campaign,
     };
 
     if (project?.id) {
@@ -186,10 +199,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">
-            {project ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
+            {project?.id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
           <DialogDescription>
-            {project ? 'Actualiza los detalles del proyecto.' : 'Añade los detalles del nuevo proyecto.'}
+            {project?.id ? 'Actualiza los detalles del proyecto.' : 'Añade los detalles del nuevo proyecto.'}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[70vh] w-full">
@@ -220,9 +233,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     <SelectValue placeholder="Selecciona un estado" />
                     </SelectTrigger>
                     <SelectContent>
-                    <SelectItem value="todo">Por Hacer</SelectItem>
-                    <SelectItem value="in-progress">En Progreso</SelectItem>
-                    <SelectItem value="done">Hecho</SelectItem>
+                        <SelectItem value="pending">Pendiente</SelectItem>
+                        <SelectItem value="in-progress">En Progreso</SelectItem>
+                        <SelectItem value="customer-review">Revisión Cliente</SelectItem>
+                        <SelectItem value="completed">Completada</SelectItem>
                     </SelectContent>
                 </Select>
                 </div>
@@ -287,6 +301,38 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         />
                     </PopoverContent>
                 </Popover>
+                </div>
+                 <div className="space-y-2">
+                    <Label htmlFor="priority">Prioridad</Label>
+                    <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])}>
+                        <SelectTrigger id="priority">
+                            <SelectValue placeholder="Establecer prioridad (opcional)" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="low">Baja</SelectItem>
+                            <SelectItem value="medium">Media</SelectItem>
+                            <SelectItem value="high">Alta</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="campaign">Campaña</Label>
+                    <Input
+                        id="campaign"
+                        value={campaign}
+                        onChange={(e) => setCampaign(e.target.value)}
+                        placeholder="Ej: Lanzamiento Verano 2024"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="tags">Etiquetas</Label>
+                    <Input
+                        id="tags"
+                        value={tags}
+                        onChange={(e) => setTags(e.target.value)}
+                        placeholder="Ej: marketing, video, diseño"
+                    />
+                    <p className="text-xs text-muted-foreground">Separadas por comas.</p>
                 </div>
 
                 <Separator className="my-2" />

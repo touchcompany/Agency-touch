@@ -113,7 +113,7 @@ export type Project = {
     userId: string;
     title: string;
     description?: string;
-    status: 'todo' | 'in-progress' | 'done';
+    status: 'pending' | 'in-progress' | 'customer-review' | 'completed';
     customerId?: string;
     collaboratorId?: string;
     dueDate?: string;
@@ -121,6 +121,9 @@ export type Project = {
     songUrl?: string;
     projectUrl?: string;
     publishTime?: string;
+    priority?: 'low' | 'medium' | 'high';
+    tags?: string[];
+    campaign?: string;
 }
 
 export type ScriptTemplate = {
