@@ -27,7 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { InvoicePrintLayout } from './invoice-print-layout';
-import React from 'react';
+import React, { useMemo } from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 const statusVariant: { [key: string]: 'default' | 'secondary' | 'destructive' } = {
@@ -65,13 +65,17 @@ export function CuentasTable({ month, year, customerId }: CuentasTableProps) {
         q = query(q, where('issueDate', '>=', startDate.toISOString()), where('issueDate', '<=', endDate.toISOString()));
     }
     
-    if (customerId && customerId !== 'all') {
-        q = query(q, where('customerId', '==', customerId));
-    }
-    
     return q;
-  }, [firestore, user, month, year, customerId]);
+  }, [firestore, user, month, year]);
   const { data: invoices, isLoading: invoicesLoading } = useCollection<Invoice>(invoicesQuery);
+
+  const filteredInvoices = useMemo(() => {
+    if (!invoices) return null;
+    if (customerId && customerId !== 'all') {
+      return invoices.filter((invoice) => invoice.customerId === customerId);
+    }
+    return invoices;
+  }, [invoices, customerId]);
 
   const customersQuery = useMemoFirebase(() =>
     user ? collection(firestore, 'users', user.uid, 'customers') : null
@@ -187,7 +191,7 @@ export function CuentasTable({ month, year, customerId }: CuentasTableProps) {
     );
   }
 
-  if (!invoices || invoices.length === 0) {
+  if (!filteredInvoices || filteredInvoices.length === 0) {
     return (
       <div className="text-center p-8 text-muted-foreground">
         No hay cuentas para los filtros seleccionados.
@@ -211,7 +215,7 @@ export function CuentasTable({ month, year, customerId }: CuentasTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((invoice) => (
+            {filteredInvoices.map((invoice) => (
               <TableRow key={invoice.id}>
                 <TableCell>
                   <Badge

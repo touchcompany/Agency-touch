@@ -39,14 +39,9 @@ export function TransactionsTable({ month, year, customerId }: TransactionsTable
         const endDate = new Date(parsedYear, parsedMonth, 0, 23, 59, 59);
         q = query(q, where('date', '>=', startDate.toISOString()), where('date', '<=', endDate.toISOString()));
     }
-    
-    // Customer filter
-    if(customerId && customerId !== 'all') {
-        q = query(q, where('customerId', '==', customerId));
-    }
 
     return q;
-  }, [firestore, user, month, year, customerId]);
+  }, [firestore, user, month, year]);
   
   const { data: income, isLoading: incomeLoading } = useCollection<Income>(incomeQuery);
 
@@ -64,8 +59,12 @@ export function TransactionsTable({ month, year, customerId }: TransactionsTable
   const isLoading = incomeLoading || customersLoading;
 
   const filteredIncome = useMemo(() => {
-    return income; // Query is already filtered
-  }, [income]);
+    if (!income) return null;
+    if (customerId && customerId !== 'all') {
+      return income.filter(item => item.customerId === customerId);
+    }
+    return income;
+  }, [income, customerId]);
 
   if (isLoading) {
     return (

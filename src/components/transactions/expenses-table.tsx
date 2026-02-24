@@ -42,13 +42,8 @@ export function ExpensesTable({ month, year, collaboratorId }: ExpensesTableProp
         q = query(q, where('date', '>=', startDate.toISOString()), where('date', '<=', endDate.toISOString()));
     }
     
-    // Collaborator filter
-    if(collaboratorId && collaboratorId !== 'all') {
-        q = query(q, where('collaboratorId', '==', collaboratorId));
-    }
-
     return q;
-  }, [firestore, user, month, year, collaboratorId]);
+  }, [firestore, user, month, year]);
 
   const { data: expenses, isLoading: expensesLoading } = useCollection<Expense>(expensesQuery);
 
@@ -66,8 +61,12 @@ export function ExpensesTable({ month, year, collaboratorId }: ExpensesTableProp
   const isLoading = expensesLoading || collaboratorsLoading;
 
   const filteredExpenses = useMemo(() => {
-    return expenses; // Query is already filtered
-  }, [expenses]);
+    if (!expenses) return null;
+    if (collaboratorId && collaboratorId !== 'all') {
+      return expenses.filter(item => item.collaboratorId === collaboratorId);
+    }
+    return expenses;
+  }, [expenses, collaboratorId]);
 
 
   if (isLoading) {
