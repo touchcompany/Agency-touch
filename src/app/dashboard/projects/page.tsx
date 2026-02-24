@@ -94,10 +94,10 @@ export default function ProjectsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center rounded-md bg-muted p-1">
-                        <Button variant={view === 'kanban' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('kanban')}>
+                        <Button variant={view === 'kanban' ? 'default' : 'ghost'} size="sm" onClick={() => setView('kanban')}>
                             <LayoutGrid className="h-4 w-4 mr-2"/> Kanban
                         </Button>
-                        <Button variant={view === 'list' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('list')}>
+                        <Button variant={view === 'list' ? 'default' : 'ghost'} size="sm" onClick={() => setView('list')}>
                             <List className="h-4 w-4 mr-2"/> Lista
                         </Button>
                     </div>
