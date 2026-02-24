@@ -39,7 +39,11 @@ export function ProjectsKanbanView({ projects, customers, collaborators, onCardC
   const { firestore, user } = useFirebase();
   
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
