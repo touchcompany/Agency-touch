@@ -1,18 +1,14 @@
 'use client';
 import type { Project, Customer, Collaborator } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CalendarDays, ChevronDown, Clock, Flag } from 'lucide-react';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { Badge } from '../ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible';
-import { Button } from '../ui/button';
-import { useState } from 'react';
+import { Separator } from '../ui/separator';
 import { cn } from '@/lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Badge } from '../ui/badge';
+
 
 interface ProjectCardProps {
   project: Project;
@@ -21,26 +17,19 @@ interface ProjectCardProps {
   onClick?: () => void;
 }
 
-const priorityVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
-  low: 'secondary',
-  medium: 'default',
-  high: 'destructive',
-};
-
-const priorityText: { [key: string]: string } = {
-  low: 'Baja',
-  medium: 'Media',
-  high: 'Alta',
+const statusDisplay: Record<Project['status'], { text: string; className: string }> = {
+  pending: { text: 'PENDIENTE', className: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800' },
+  'in-progress': { text: 'EN PROGRESO', className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800' },
+  'customer-review': { text: 'REVISIÓN', className: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-800' },
+  completed: { text: 'APROBADO', className: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800' },
 };
 
 
 export function ProjectCard({
   project,
-  customer,
   collaborator,
   onClick
 }: ProjectCardProps) {
-  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   const {
     attributes,
     listeners,
@@ -56,6 +45,8 @@ export function ProjectCard({
     zIndex: isDragging ? 10 : 'auto',
   };
   
+  const displayStatus = statusDisplay[project.status] || statusDisplay.pending;
+
   return (
     <div 
         ref={setNodeRef} 
@@ -63,119 +54,44 @@ export function ProjectCard({
         className={cn("w-full touch-none", isDragging ? 'opacity-50' : 'opacity-100')}
         onClick={onClick}
     >
-      <Collapsible
-        open={isDescriptionOpen}
-        onOpenChange={setIsDescriptionOpen}
-        className="w-full"
-      >
-          <Card 
-              {...attributes} 
-              {...listeners} 
-              className={cn(
-                "bg-card hover:bg-card-hover/80 transition-shadow w-full cursor-grab",
-                isDragging && "shadow-lg ring-2 ring-primary"
-              )}
-          >
+        <Card 
+            {...attributes} 
+            {...listeners} 
+            className={cn(
+            "bg-card hover:bg-card-hover/80 transition-shadow w-full cursor-grab",
+            isDragging && "shadow-lg ring-2 ring-primary"
+            )}
+        >
             <CardHeader 
-                className="p-4 flex flex-row items-start justify-between"
+                className="p-4 flex flex-row items-center justify-between space-y-0"
             >
-                <div className="flex-grow pr-2">
-                  <CardTitle className="text-base font-semibold leading-tight">{project.title}</CardTitle>
-                   {customer && (
-                      <p className="text-xs text-muted-foreground mt-1">{customer.name}</p>
-                   )}
-                </div>
-                {project.description && (
-                     <TooltipProvider>
+                <Badge variant="outline" className={cn("text-xs font-bold tracking-wider", displayStatus.className)}>{displayStatus.text}</Badge>
+                <TooltipProvider>
+                    {collaborator ? (
                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <CollapsibleTrigger asChild>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="h-6 w-6 shrink-0" 
-                                        onClick={(e) => e.stopPropagation()}
-                                        onPointerDown={(e) => e.stopPropagation()}
-                                    >
-                                        <ChevronDown className="h-4 w-4 transition-transform duration-200 data-[state=open]:rotate-180" />
-                                    </Button>
-                                </CollapsibleTrigger>
+                            <TooltipTrigger>
+                                <Avatar className="h-7 w-7 border-2 border-background">
+                                    <AvatarImage src={`https://picsum.photos/seed/${collaborator.id}/100`} data-ai-hint="person" />
+                                    <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p>Ver descripción</p>
+                                <p>Asignado a: {collaborator.name}</p>
                             </TooltipContent>
                         </Tooltip>
-                     </TooltipProvider>
-                 )}
+                    ) : (
+                        <div className="h-7 w-7 rounded-full bg-muted border-2 border-background"></div>
+                    )}
+                </TooltipProvider>
             </CardHeader>
 
-            <CollapsibleContent>
-                <CardContent className="px-4 pb-4 pt-0">
-                    <p className="text-sm text-muted-foreground">{project.description}</p>
-                </CardContent>
-            </CollapsibleContent>
-
-            {(collaborator || project.dueDate || project.publishTime || project.priority || (project.tags && project.tags.length > 0)) && (
-              <CardFooter className="flex items-center justify-between p-4 pt-0 gap-2 flex-wrap">
-                  <div className="flex -space-x-2">
-                      <TooltipProvider>
-                          {collaborator && (
-                              <Tooltip>
-                                  <TooltipTrigger>
-                                      <Avatar className="h-7 w-7 border-2 border-background">
-                                          <AvatarImage src={`https://picsum.photos/seed/${collaborator.id}/100`} data-ai-hint="person" />
-                                          <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
-                                      </Avatar>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                      <p>Asignado a: {collaborator.name}</p>
-                                  </TooltipContent>
-                              </Tooltip>
-                          )}
-                      </TooltipProvider>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {project.priority && (
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger>
-                                     <Badge variant={priorityVariant[project.priority] || 'outline'} className="flex items-center gap-1 font-normal">
-                                        <Flag className="h-3 w-3" />
-                                        <span>{priorityText[project.priority]}</span>
-                                    </Badge>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Prioridad {priorityText[project.priority]}</p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
-                    )}
-                    {project.publishTime && (
-                       <Badge variant="outline" className="flex items-center gap-1 font-normal">
-                          <Clock className="h-3 w-3" />
-                          <span className="text-xs">{project.publishTime}</span>
-                      </Badge>
-                    )}
-                    {project.dueDate && (
-                        <Badge variant="outline" className="flex items-center gap-1 font-normal">
-                            <CalendarDays className="h-3 w-3" />
-                            <span className="text-xs">{format(new Date(project.dueDate), "d MMM", { locale: es })}</span>
-                        </Badge>
-                    )}
-                  </div>
-              </CardFooter>
-            )}
-             {project.tags && project.tags.length > 0 && (
-                <CardFooter className="p-4 pt-0">
-                    <div className="flex flex-wrap gap-1">
-                        {project.tags.map(tag => (
-                            <Badge key={tag} variant="secondary" className="text-xs font-normal">{tag}</Badge>
-                        ))}
-                    </div>
-                </CardFooter>
-            )}
+            <CardContent className="px-4 pb-4 pt-2">
+                <CardTitle className="text-lg font-semibold leading-tight mb-4">{project.title}</CardTitle>
+                <p className="text-sm text-muted-foreground">{project.script ? 'Guion listo' : 'Sin guion...'}</p>
+                <Separator className="my-3" />
+                <p className="text-sm text-muted-foreground">{project.tags && project.tags.length > 0 ? `Planos: ${project.tags.join(', ')}` : 'Sin planos'}</p>
+            </CardContent>
           </Card>
-      </Collapsible>
     </div>
   );
 }
