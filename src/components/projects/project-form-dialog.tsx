@@ -79,6 +79,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [publishTime, setPublishTime] = useState('');
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [newTemplateTitle, setNewTemplateTitle] = useState('');
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   const [priority, setPriority] = useState<Project['priority'] | undefined>();
   const [tags, setTags] = useState<string[]>([]);
@@ -325,7 +326,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="due-date" className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
-                        <Popover>
+                        <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                             <PopoverTrigger asChild>
                                 <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal',!dueDate && 'text-muted-foreground')}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
@@ -333,7 +334,16 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                                <Calendar mode="single" selected={dueDate} onSelect={setDueDate} initialFocus locale={es}/>
+                                <Calendar 
+                                    mode="single" 
+                                    selected={dueDate} 
+                                    onSelect={(date) => {
+                                        setDueDate(date);
+                                        setIsDatePickerOpen(false);
+                                    }} 
+                                    initialFocus 
+                                    locale={es}
+                                />
                             </PopoverContent>
                         </Popover>
                     </div>
