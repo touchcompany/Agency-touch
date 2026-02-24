@@ -3,7 +3,7 @@ import type { Project, Customer, Collaborator } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CalendarDays, ChevronDown, Clock } from 'lucide-react';
+import { CalendarDays, ChevronDown, Clock, Flag } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Badge } from '../ui/badge';
@@ -20,6 +20,19 @@ interface ProjectCardProps {
   collaborator?: Collaborator;
   onClick?: () => void;
 }
+
+const priorityVariant: { [key: string]: 'default' | 'secondary' | 'destructive' | 'outline' } = {
+  low: 'secondary',
+  medium: 'default',
+  high: 'destructive',
+};
+
+const priorityText: { [key: string]: string } = {
+  low: 'Baja',
+  medium: 'Media',
+  high: 'Alta',
+};
+
 
 export function ProjectCard({
   project,
@@ -102,8 +115,8 @@ export function ProjectCard({
                 </CardContent>
             </CollapsibleContent>
 
-            {(collaborator || project.dueDate || project.publishTime) && (
-              <CardFooter className="flex items-center justify-between p-4 pt-0">
+            {(collaborator || project.dueDate || project.publishTime || project.priority || (project.tags && project.tags.length > 0)) && (
+              <CardFooter className="flex items-center justify-between p-4 pt-0 gap-2 flex-wrap">
                   <div className="flex -space-x-2">
                       <TooltipProvider>
                           {collaborator && (
@@ -122,6 +135,21 @@ export function ProjectCard({
                       </TooltipProvider>
                   </div>
                   <div className="flex items-center gap-2">
+                    {project.priority && (
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger>
+                                     <Badge variant={priorityVariant[project.priority] || 'outline'} className="flex items-center gap-1 font-normal">
+                                        <Flag className="h-3 w-3" />
+                                        <span>{priorityText[project.priority]}</span>
+                                    </Badge>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Prioridad {priorityText[project.priority]}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    )}
                     {project.publishTime && (
                        <Badge variant="outline" className="flex items-center gap-1 font-normal">
                           <Clock className="h-3 w-3" />
@@ -136,6 +164,15 @@ export function ProjectCard({
                     )}
                   </div>
               </CardFooter>
+            )}
+             {project.tags && project.tags.length > 0 && (
+                <CardFooter className="p-4 pt-0">
+                    <div className="flex flex-wrap gap-1">
+                        {project.tags.map(tag => (
+                            <Badge key={tag} variant="secondary" className="text-xs font-normal">{tag}</Badge>
+                        ))}
+                    </div>
+                </CardFooter>
             )}
           </Card>
       </Collapsible>
