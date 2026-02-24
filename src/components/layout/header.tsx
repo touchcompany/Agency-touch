@@ -25,7 +25,7 @@ const titleTranslations: { [key: string]: string } = {
   transactions: "Transacciones",
   invoices: "Cuentas",
   customers: "Clientes",
-  collaborators: "Colaboradores",
+  collaborators: "Pagos",
   services: "Servicios",
   settings: "Configuración",
   edit: "Editar",

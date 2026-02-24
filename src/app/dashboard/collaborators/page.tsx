@@ -8,7 +8,7 @@ export default function CollaboratorsPage() {
   return (
     <Card>
       <CardHeader className="flex-row items-center justify-between">
-        <CardTitle className="font-headline">Colaboradores</CardTitle>
+        <CardTitle className="font-headline">Pagos a Colaboradores</CardTitle>
         <AddCollaboratorSheet />
       </CardHeader>
       <CardContent>

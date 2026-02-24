@@ -12,7 +12,7 @@ import {
   Users,
   FileText,
   CreditCard,
-  Briefcase,
+  Receipt,
   Presentation,
   Bot,
   Settings,
@@ -45,8 +45,8 @@ const menuItems = [
   },
   {
     href: '/dashboard/collaborators',
-    icon: Briefcase,
-    label: 'Colaboradores',
+    icon: Receipt,
+    label: 'Pagos',
   },
   {
     href: '/dashboard/services',
