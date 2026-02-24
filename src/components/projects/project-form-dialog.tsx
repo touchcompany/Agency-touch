@@ -326,23 +326,39 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="due-date" className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
-                        <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
+                         <Popover>
                             <PopoverTrigger asChild>
                                 <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal',!dueDate && 'text-muted-foreground')}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dueDate ? format(dueDate, 'PPP', { locale: es }) : (<span>Elige una fecha</span>)}
                                 </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent className="w-auto p-0" align="start" disablePortal>
                                 <Calendar 
                                     mode="single" 
                                     selected={dueDate} 
-                                    onSelect={(date) => {
-                                        setDueDate(date);
-                                        setIsDatePickerOpen(false);
-                                    }} 
+                                    onSelect={setDueDate}
                                     initialFocus 
                                     locale={es}
+                                    captionLayout="dropdown-buttons"
+                                    fromYear={new Date().getFullYear() - 5}
+                                    toYear={new Date().getFullYear() + 5}
+                                    footer={
+                                    <div className="flex justify-between p-2 pt-4 border-t">
+                                        <Button
+                                        variant="ghost"
+                                        onClick={() => setDueDate(undefined)}
+                                        >
+                                        Borrar
+                                        </Button>
+                                        <Button
+                                        variant="ghost"
+                                        onClick={() => setDueDate(new Date())}
+                                        >
+                                        Hoy
+                                        </Button>
+                                    </div>
+                                    }
                                 />
                             </PopoverContent>
                         </Popover>

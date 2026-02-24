@@ -401,6 +401,9 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                       onSelect={setFechaEmision}
                       initialFocus
                       locale={es}
+                      captionLayout="dropdown-buttons"
+                      fromYear={new Date().getFullYear() - 5}
+                      toYear={new Date().getFullYear() + 5}
                     />
                   </PopoverContent>
                 </Popover>
@@ -431,6 +434,9 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
                       onSelect={setFechaVencimiento}
                       initialFocus
                       locale={es}
+                       captionLayout="dropdown-buttons"
+                      fromYear={new Date().getFullYear() - 5}
+                      toYear={new Date().getFullYear() + 5}
                     />
                   </PopoverContent>
                 </Popover>
@@ -623,5 +629,3 @@ export function CuentaForm({ cuenta }: CuentaFormProps) {
     </>
   );
 }
-
-    
