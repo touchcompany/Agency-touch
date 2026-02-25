@@ -8,27 +8,39 @@ import {
   SidebarInset,
 } from "@/components/ui/sidebar";
 import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from "lucide-react";
-import { AddCollaboratorSheet } from "@/components/collaborators/add-collaborator-sheet";
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isUserLoading } = useUser();
+  const { user, appUser, isUserLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    // If loading is finished and there's no user, redirect to login
+    // Redirección si no está autenticado
     if (!isUserLoading && !user) {
       router.push('/login');
+      return;
     }
-  }, [user, isUserLoading, router]);
 
-  // While loading, show a loading indicator
+    // Redirección por rol
+    if (!isUserLoading && appUser?.role === 'collaborator') {
+      // Si un colaborador intenta entrar a la raíz del dashboard o rutas prohibidas
+      const forbiddenRoutes = ['/dashboard/transactions', '/dashboard/invoices', '/dashboard/customers', '/dashboard/collaborators', '/dashboard/services', '/dashboard/automation'];
+      const isForbidden = forbiddenRoutes.some(route => pathname.startsWith(item => pathname === '/dashboard' || pathname.startsWith(route)));
+      
+      if (pathname === '/dashboard' || forbiddenRoutes.some(route => pathname.startsWith(route))) {
+        router.push('/dashboard/projects');
+      }
+    }
+  }, [user, appUser, isUserLoading, router, pathname]);
+
+  // Mientras carga, mostrar indicador
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -37,7 +49,7 @@ export default function DashboardLayout({
     );
   }
 
-  // If there is a user, render the dashboard
+  // Si hay usuario, renderizar el dashboard
   if (user) {
     return (
       <SidebarProvider>
@@ -53,6 +65,5 @@ export default function DashboardLayout({
     );
   }
   
-  // If no user and not loading (should be covered by useEffect, but as a fallback)
   return null;
 }

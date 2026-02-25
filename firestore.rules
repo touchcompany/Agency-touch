@@ -6,18 +6,6 @@
  * Data Structure: The database is hierarchically organized around users. All application
  * data, including customers, invoices, and transactions, is stored in subcollections
  * nested under a specific user's document path: /users/{userId}/...
- *
- * Key Security Decisions:
- * - Data Isolation: The core principle is that users can NEVER see, read, or write data
- *   belonging to another user.
- * - No Global Access: There are no admin roles or public collections. All access is
- *   scoped to the authenticated user.
- * - Path-Based Security: Authorization is derived directly from the document path (the
- *   {userId} wildcard), making rules fast, performant, and simple. This avoids slow and
- *   costly `get()` calls to other documents for authorization checks.
- * - Implicit Deny: Access is denied by default. Rules only explicitly grant permissions.
- * - No User Listing: It is not possible for any user to list all the user documents in
- *   the database.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -27,62 +15,26 @@ service cloud.firestore {
     // Helper Functions
     // --------------------------------------------------------------------------------
 
-    /**
-     * Checks if the user is authenticated.
-     */
     function isSignedIn() {
       return request.auth != null;
     }
 
-    /**
-     * Checks if the authenticated user's UID matches the provided userId.
-     * This is the primary function for establishing document ownership.
-     */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    /**
-     * Checks for ownership on an existing document. Used for update and delete
-     * operations to prevent acting on non-existent data.
-     */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
 
-    /**
-     * Validates that the `userId` field within a new document correctly
-     * matches the {userId} from the document's path.
-     * This enforces relational integrity on creation.
-     */
-    function hasCorrectUserId(userId) {
-      return request.resource.data.userId == userId;
-    }
-    
     function isCreatingOwnContent(userId) {
       return isOwner(userId) && request.resource.data.userId == userId;
     }
 
-
-    /**
-     * Enforces that the `userId` field is immutable and cannot be changed
-     * after a document has been created.
-     */
     function isUserIdImmutable() {
       return request.resource.data.userId == resource.data.userId;
     }
 
-    /**
-     * Validates that the `id` field within a user's own profile document
-     * matches their authenticated UID on creation.
-     */
-    function hasCorrectId(userId) {
-      return request.resource.data.id == userId;
-    }
-
-    /**
-     * Enforces that the `id` field within a user's profile is immutable.
-     */
     function isIdImmutable() {
       return request.resource.data.id == resource.data.id;
     }
@@ -91,27 +43,13 @@ service cloud.firestore {
     // Collection Rules
     // --------------------------------------------------------------------------------
 
-    /**
-     * @description Manages user profile documents.
-     * @path /users/{userId}
-     * @allow (create): A new user 'user_123' can create their own profile at /users/user_123.
-     * @deny (get): A signed-in user 'user_456' cannot read the profile of 'user_123' at /users/user_123.
-     * @principle Restricts access to a user's own data tree and enforces self-creation of their root document.
-     */
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
-      allow create: if isOwner(userId) && hasCorrectId(userId);
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && isIdImmutable();
       allow delete: if isExistingOwner(userId);
 
-      /**
-       * @description Manages customer records owned by a specific user.
-       * @path /users/{userId}/customers/{customerId}
-       * @allow (create): User 'user_123' can create a new customer document in their own subcollection.
-       * @deny (list): User 'user_456' cannot list the customers belonging to 'user_123'.
-       * @principle Enforces that all data within a user's subcollections is owned and managed exclusively by that user.
-       */
       match /customers/{customerId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
@@ -128,13 +66,6 @@ service cloud.firestore {
         allow delete: if isExistingOwner(userId);
       }
 
-      /**
-       * @description Manages invoice records owned by a specific user.
-       * @path /users/{userId}/invoices/{invoiceId}
-       * @allow (get): User 'user_123' can read an invoice they created.
-       * @deny (update): User 'user_456' cannot update an invoice belonging to 'user_123'.
-       * @principle Enforces that all data within a user's subcollections is owned and managed exclusively by that user.
-       */
       match /invoices/{invoiceId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
@@ -167,22 +98,6 @@ service cloud.firestore {
         allow delete: if isExistingOwner(userId);
       }
 
-
-      /**
-       * @description Manages financial transactions (income/expense) owned by a specific user.
-       * @path /users/{userId}/transactions/{transactionId}
-       * @allow (delete): User 'user_123' can delete a transaction they created.
-       * @deny (create): An unauthenticated user cannot create any transaction records.
-       * @principle Enforces that all data within a user's subcollections is owned and managed exclusively by that user.
-       */
-      match /transactions/{transactionId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-      
       match /expenses/{expenseId} {
         allow get: if isOwner(userId);
         allow list: if isOwner(userId);
@@ -200,10 +115,12 @@ service cloud.firestore {
       }
       
       match /projects/{projectId} {
-        allow get: if isOwner(userId) || resource.data.collaboratorId == request.auth.uid;
-        allow list: if isOwner(userId) || request.auth.token.role == 'collaborator';
+        // Un colaborador puede ver y editar proyectos donde sea el responsable asignado
+        // incluso si están en la subcolección de otro usuario (el superuser).
+        allow get: if isOwner(userId) || (isSignedIn() && resource.data.collaboratorId == request.auth.uid);
+        allow list: if isOwner(userId) || (isSignedIn() && request.auth.uid != null); 
         allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) || resource.data.collaboratorId == request.auth.uid;
+        allow update: if isExistingOwner(userId) || (isSignedIn() && resource.data.collaboratorId == request.auth.uid);
         allow delete: if isExistingOwner(userId);
       }
 

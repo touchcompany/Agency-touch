@@ -21,57 +21,71 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import { useUser } from '@/firebase';
 
 const menuItems = [
   {
     href: '/dashboard',
     icon: LayoutDashboard,
     label: 'Panel',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/transactions',
     icon: CreditCard,
     label: 'Transacciones',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/invoices',
     icon: FileText,
     label: 'Cuentas',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/customers',
     icon: Users,
     label: 'Clientes',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/collaborators',
     icon: Receipt,
     label: 'Pagos',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/services',
     icon: Presentation,
     label: 'Servicios',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/automation',
     icon: Bot,
-    label: 'Automatización'
+    label: 'Automatización',
+    roles: ['superuser'],
   },
   {
     href: '/dashboard/projects',
     icon: Rocket,
     label: 'Proyectos',
+    roles: ['superuser', 'collaborator'],
   },
     {
     href: '/dashboard/settings',
     icon: Settings,
-    label: 'Configuración'
+    label: 'Configuración',
+    roles: ['superuser', 'collaborator'],
   }
 ];
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const { appUser } = useUser();
+  
+  // Por defecto es superuser si no hay rol definido (para no romper cuentas existentes)
+  const userRole = appUser?.role || 'superuser';
 
   const isActive = (href: string) => {
     if (href === '/dashboard') {
@@ -79,6 +93,8 @@ export function DashboardSidebar() {
     }
     return pathname.startsWith(href);
   };
+
+  const filteredItems = menuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
@@ -96,7 +112,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
-          {menuItems.map((item) => (
+          {filteredItems.map((item) => (
             <SidebarMenuItem key={item.href}>
               <SidebarMenuButton
                 asChild
