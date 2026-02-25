@@ -219,17 +219,17 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh]">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
+        <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-headline text-2xl">
             {project?.id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-full max-h-[75vh] w-full">
-            <div className="grid grid-cols-3 gap-8 py-4 pr-6">
+        <ScrollArea className="h-full max-h-[75vh] w-full px-6">
+            <div className="grid grid-cols-3 gap-8 py-4">
                 
                 {/* --- LEFT COLUMN --- */}
-                <div className="col-span-2 flex flex-col gap-6">
+                <div className="col-span-3 lg:col-span-2 flex flex-col gap-6">
                     <Input
                         id="title"
                         value={title}
@@ -248,10 +248,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
 
                     <Separator />
 
-                    <div>
+                    <div className="space-y-4">
                         <div className="flex items-center justify-between mb-2">
-                             <Label htmlFor="script" className="font-semibold">Guion</Label>
-                             <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)}>
+                             <Label htmlFor="script" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Guion del Video</Label>
+                             <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
                                 <Wand2 className="mr-2 h-4 w-4" />
                                 Asistente IA
                              </Button>
@@ -260,6 +260,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                           value={script}
                           onChange={setScript}
                           placeholder="Escribe el guion detallado aquí..."
+                          className="min-h-[300px]"
                         />
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -320,7 +321,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {/* Video Final */}
                             <div className="rounded-xl bg-muted/30 p-6 space-y-4 border border-transparent hover:border-muted-foreground/20 transition-all">
                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
@@ -358,7 +359,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
 
                 {/* --- RIGHT COLUMN --- */}
-                <div className="col-span-1 space-y-4 bg-muted/20 p-4 rounded-xl">
+                <div className="col-span-3 lg:col-span-1 space-y-4 bg-muted/20 p-4 rounded-xl">
                     <div className="space-y-2">
                         <Label htmlFor="status" className="flex items-center gap-2 text-muted-foreground"><ClipboardList className="h-4 w-4" />Estado</Label>
                         <Select value={status} onValueChange={(v) => setStatus(v as Project['status'])}>
@@ -457,13 +458,18 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                             {planoTagsConfig.map(tag => (
                                 <Button 
                                     key={tag.id} 
-                                    variant={tags.includes(tag.id) ? 'secondary' : 'outline'}
+                                    variant="ghost"
                                     onClick={() => handleTagToggle(tag.id)}
                                     type="button" 
-                                    className="h-auto flex-row justify-start p-2 gap-2 bg-background"
+                                    className={cn(
+                                        "h-auto flex-row justify-start p-2 gap-2 border transition-all duration-200",
+                                        tags.includes(tag.id) 
+                                            ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-1 ring-blue-600 ring-offset-1 scale-[1.02]" 
+                                            : "bg-background text-muted-foreground border-input hover:bg-accent"
+                                    )}
                                 >
-                                    <tag.icon className="h-4 w-4" />
-                                    <span className="text-[10px]">{tag.label}</span>
+                                    <tag.icon className={cn("h-4 w-4", tags.includes(tag.id) ? "text-white" : "text-muted-foreground")} />
+                                    <span className={cn("text-[10px] font-medium", tags.includes(tag.id) ? "text-white" : "text-muted-foreground")}>{tag.label}</span>
                                 </Button>
                             ))}
                         </div>
@@ -471,7 +477,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
             </div>
         </ScrollArea>
-        <DialogFooter className="pr-6 pt-4 border-t">
+        <DialogFooter className="p-6 border-t bg-background">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" onClick={handleSubmit} className="px-8">
               Guardar Proyecto
