@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
-import { Loader2, Plus, List, LayoutGrid, Filter, X, Clock, User, CheckCircle } from 'lucide-react';
+import { Loader2, Plus, List, LayoutGrid, Filter, X, Clock, User, CheckCircle, ClipboardList } from 'lucide-react';
 import { ProjectFormDialog } from '@/components/projects/project-form-dialog';
 import { ProjectsKanbanView } from '@/components/projects/projects-kanban-view';
 import { ProjectsListView } from '@/components/projects/projects-list-view';
@@ -78,7 +78,7 @@ export default function ProjectsPage() {
     
     const summaryCards = [
         { title: 'Pendientes', count: summary.pending, icon: Clock, color: 'text-yellow-500' },
-        { title: 'En Progreso', count: summary['in-progress'], icon: Loader2, color: 'text-blue-500', spin: true },
+        { title: 'En Progreso', count: summary['in-progress'], icon: ClipboardList, color: 'text-blue-500' },
         { title: 'Revisión Cliente', count: summary['customer-review'], icon: User, color: 'text-purple-500' },
         { title: 'Completadas', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
     ];
@@ -165,7 +165,7 @@ export default function ProjectsPage() {
                                 <div className="text-2xl font-bold">{card.count}</div>
                             </div>
                             <div className={`p-2 rounded-md bg-muted ${card.color}`}>
-                                <card.icon className={`h-6 w-6 ${card.spin ? 'animate-spin' : ''}`} />
+                                <card.icon className="h-6 w-6" />
                             </div>
                         </CardContent>
                     </Card>
