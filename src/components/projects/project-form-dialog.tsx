@@ -1,4 +1,3 @@
-
 'use client';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,7 +27,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from '@/components/ui/select';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
@@ -37,6 +36,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { ScriptAssistantDialog } from './script-assistant-dialog';
+import { RichTextEditor } from '../ui/rich-text-editor';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -250,19 +250,16 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
 
                     <div>
                         <div className="flex items-center justify-between mb-2">
-                             <Label htmlFor="script" className="font-semibold">Guión</Label>
+                             <Label htmlFor="script" className="font-semibold">Guion</Label>
                              <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)}>
                                 <Wand2 className="mr-2 h-4 w-4" />
                                 Asistente IA
                              </Button>
                         </div>
-                        <Textarea
-                            id="script"
-                            value={script}
-                            onChange={(e) => setScript(e.target.value)}
-                            placeholder="Escribe el guión para el proyecto aquí o géneralo con IA..."
-                            rows={8}
-                            className="bg-muted/30"
+                        <RichTextEditor 
+                          value={script}
+                          onChange={setScript}
+                          placeholder="Escribe el guion detallado aquí..."
                         />
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -273,7 +270,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                                 <AlertDialogHeader>
-                                <AlertDialogTitle>Guardar Plantilla de Guión</AlertDialogTitle>
+                                <AlertDialogTitle>Guardar Plantilla de Guion</AlertDialogTitle>
                                 <AlertDialogDescription>
                                     Dale un nombre a esta plantilla para reutilizarla en otros proyectos.
                                 </AlertDialogDescription>
@@ -284,7 +281,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                         id="template-name"
                                         value={newTemplateTitle}
                                         onChange={(e) => setNewTemplateTitle(e.target.value)}
-                                        placeholder="Ej: Guión para Reels de Producto"
+                                        placeholder="Ej: Guion para Reels de Producto"
                                     />
                                 </div>
                                 <AlertDialogFooter>

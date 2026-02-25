@@ -47,6 +47,9 @@ export function ProjectCard({
   
   const displayStatus = statusDisplay[project.status] || statusDisplay.pending;
 
+  // Helper to check if content is present but ignore HTML tags if empty-ish
+  const hasScript = project.script && project.script.replace(/<[^>]*>/g, '').trim().length > 0;
+
   return (
     <div 
         ref={setNodeRef} 
@@ -87,7 +90,7 @@ export function ProjectCard({
 
             <CardContent className="px-4 pb-4 pt-2">
                 <CardTitle className="text-lg font-semibold leading-tight mb-4">{project.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">{project.script ? 'Guion listo' : 'Sin guion...'}</p>
+                <p className="text-sm text-muted-foreground">{hasScript ? 'Guion listo' : 'Sin guion...'}</p>
                 <Separator className="my-3" />
                 <p className="text-sm text-muted-foreground">{project.tags && project.tags.length > 0 ? `Planos: ${project.tags.join(', ')}` : 'Sin planos'}</p>
             </CardContent>
