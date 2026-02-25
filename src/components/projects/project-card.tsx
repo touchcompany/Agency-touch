@@ -8,7 +8,9 @@ import { cn } from '@/lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Badge } from '../ui/badge';
-
+import { 
+    User, Video, Send, Eye, Monitor, Box, FileText 
+} from 'lucide-react';
 
 interface ProjectCardProps {
   project: Project;
@@ -24,6 +26,14 @@ const statusDisplay: Record<Project['status'], { text: string; className: string
   completed: { text: 'APROBADO', className: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800' },
 };
 
+const tagIcons: Record<string, React.ElementType> = {
+    'Talking Head': User,
+    'B-Roll': Video,
+    'Drone': Send,
+    'POV': Eye,
+    'Pantalla': Monitor,
+    'Producto': Box,
+};
 
 export function ProjectCard({
   project,
@@ -68,11 +78,11 @@ export function ProjectCard({
             <CardHeader 
                 className="p-4 flex flex-row items-center justify-between space-y-0"
             >
-                <Badge variant="outline" className={cn("text-xs font-bold tracking-wider", displayStatus.className)}>{displayStatus.text}</Badge>
+                <Badge variant="outline" className={cn("text-[10px] font-bold tracking-wider px-2 py-0 h-5", displayStatus.className)}>{displayStatus.text}</Badge>
                 <TooltipProvider>
                     {collaborator ? (
                         <Tooltip>
-                            <TooltipTrigger>
+                            <TooltipTrigger asChild>
                                 <Avatar className="h-7 w-7 border-2 border-background">
                                     <AvatarImage src={`https://picsum.photos/seed/${collaborator.id}/100`} data-ai-hint="person" />
                                     <AvatarFallback>{collaborator.name.charAt(0)}</AvatarFallback>
@@ -89,10 +99,51 @@ export function ProjectCard({
             </CardHeader>
 
             <CardContent className="px-4 pb-4 pt-2">
-                <CardTitle className="text-lg font-semibold leading-tight mb-4">{project.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">{hasScript ? 'Guion listo' : 'Sin guion...'}</p>
-                <Separator className="my-3" />
-                <p className="text-sm text-muted-foreground">{project.tags && project.tags.length > 0 ? `Planos: ${project.tags.join(', ')}` : 'Sin planos'}</p>
+                <CardTitle className="text-base font-bold leading-tight mb-4 line-clamp-2">{project.title}</CardTitle>
+                
+                <div className="flex items-center gap-3">
+                    {/* Script Status Icon */}
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <div className="flex items-center gap-1">
+                                    <FileText className={cn("h-4 w-4", hasScript ? "text-blue-500" : "text-muted-foreground/30")} />
+                                    <span className={cn("text-[9px] font-black uppercase tracking-tighter", hasScript ? "text-blue-600" : "text-muted-foreground/40")}>
+                                        {hasScript ? 'Guion' : 'Sin Guion'}
+                                    </span>
+                                </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{hasScript ? 'El guion está redactado' : 'Aún no hay guion'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+
+                    <Separator orientation="vertical" className="h-3" />
+
+                    {/* Plano Icons */}
+                    <div className="flex items-center gap-1.5">
+                        {project.tags && project.tags.length > 0 ? (
+                            project.tags.map(tagId => {
+                                const Icon = tagIcons[tagId];
+                                return Icon ? (
+                                    <TooltipProvider key={tagId}>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Icon className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>{tagId}</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </TooltipProvider>
+                                ) : null;
+                            })
+                        ) : (
+                            <span className="text-[9px] font-black uppercase tracking-tighter text-muted-foreground/30">Sin Planos</span>
+                        )}
+                    </div>
+                </div>
             </CardContent>
           </Card>
     </div>
