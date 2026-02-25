@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -403,7 +404,8 @@
             "publishTime": { "type": "string", "description": "Scheduled time for publication.", "format": "time" },
             "priority": { "type": "string", "description": "Priority of the project.", "enum": ["low", "medium", "high"] },
             "tags": { "type": "array", "items": { "type": "string" }, "description": "Tags for the project." },
-            "campaign": { "type": "string", "description": "Campaign associated with the project." }
+            "campaign": { "type": "string", "description": "Campaign associated with the project." },
+            "editingInstructions": { "type": "string", "description": "Specific editing instructions for the editor." }
         },
         "required": ["id", "userId", "title", "status"]
     },

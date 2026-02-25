@@ -1,3 +1,4 @@
+
 'use client';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,7 +11,11 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Wand2, Save, User, Video, Send, Eye, Monitor, Box, Flag, Tag, Link as LinkIcon, CalendarDays, ClipboardList, Users, UserCheck } from 'lucide-react';
+import { 
+    CalendarIcon, Wand2, Save, User, Video, Send, Eye, Monitor, 
+    Box, Flag, Tag, Link as LinkIcon, CalendarDays, ClipboardList, 
+    Users, UserCheck, Music, Clapperboard, Sparkles
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
@@ -43,7 +48,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Badge } from '../ui/badge';
 
 
 interface ProjectFormDialogProps {
@@ -77,9 +81,9 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [songUrl, setSongUrl] = useState('');
   const [projectUrl, setProjectUrl] = useState('');
   const [publishTime, setPublishTime] = useState('');
+  const [editingInstructions, setEditingInstructions] = useState('');
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [newTemplateTitle, setNewTemplateTitle] = useState('');
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   
   const [priority, setPriority] = useState<Project['priority'] | undefined>();
   const [tags, setTags] = useState<string[]>([]);
@@ -88,7 +92,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
 
   useEffect(() => {
     if (open) {
-      if (project && project.id) { // Check for project.id to confirm it's an existing project
+      if (project && project.id) {
           setTitle(project.title || '');
           setDescription(project.description || '');
           setStatus(project.status || 'pending');
@@ -102,8 +106,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           setPriority(project.priority);
           setTags(project.tags || []);
           setCampaign(project.campaign || '');
+          setEditingInstructions(project.editingInstructions || '');
       } else {
-          // Reset form for new project, pre-filling status if provided
           setTitle('');
           setDescription('');
           setStatus(project?.status || 'pending');
@@ -117,6 +121,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           setPriority(undefined);
           setTags([]);
           setCampaign('');
+          setEditingInstructions('');
       }
     }
   }, [project, open]);
@@ -194,6 +199,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
       priority: priority || null,
       tags: tags,
       campaign,
+      editingInstructions,
     };
 
     if (project?.id) {
@@ -213,13 +219,13 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl max-h-[90vh]">
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">
             {project?.id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
         </DialogHeader>
-        <ScrollArea className="h-[75vh] w-full">
+        <ScrollArea className="h-full max-h-[75vh] w-full">
             <div className="grid grid-cols-3 gap-8 py-4 pr-6">
                 
                 {/* --- LEFT COLUMN --- */}
@@ -236,8 +242,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Añade una descripción detallada del proyecto..."
-                        className="border-0 px-0 shadow-none focus-visible:ring-0"
-                        rows={3}
+                        className="border-0 px-0 shadow-none focus-visible:ring-0 min-h-[60px]"
+                        rows={2}
                     />
 
                     <Separator />
@@ -255,7 +261,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                             value={script}
                             onChange={(e) => setScript(e.target.value)}
                             placeholder="Escribe el guión para el proyecto aquí o géneralo con IA..."
-                            rows={12}
+                            rows={8}
+                            className="bg-muted/30"
                         />
                          <AlertDialog>
                             <AlertDialogTrigger asChild>
@@ -288,14 +295,77 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         </AlertDialog>
                     </div>
 
+                    {/* --- EDICIÓN Y ENTREGA SECTION --- */}
+                    <div className="space-y-4 pt-4">
+                        <div className="flex items-center gap-2 text-xl font-bold">
+                            <Video className="h-6 w-6" />
+                            <h2>Edición y Entrega</h2>
+                        </div>
+                        <Separator />
+                        
+                        {/* Instrucciones para Editor */}
+                        <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="editing-instructions" className="text-xs font-bold uppercase tracking-wider text-blue-800">
+                                    Instrucciones para Editor
+                                </Label>
+                                <Button variant="ghost" size="sm" className="text-blue-700 hover:text-blue-900 hover:bg-blue-100/50">
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    Sugerir Estilo
+                                </Button>
+                            </div>
+                            <Textarea
+                                id="editing-instructions"
+                                value={editingInstructions}
+                                onChange={(e) => setEditingInstructions(e.target.value)}
+                                placeholder="Instrucciones manuales o generadas por IA..."
+                                className="border-0 bg-transparent p-0 text-blue-600/80 placeholder:text-blue-300 shadow-none focus-visible:ring-0 min-h-[100px]"
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            {/* Video Final */}
+                            <div className="rounded-xl bg-muted/30 p-6 space-y-4 border border-transparent hover:border-muted-foreground/20 transition-all">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                    Video Final (Drive/Dropbox)
+                                </Label>
+                                <div className="flex items-center gap-3">
+                                    <Clapperboard className="h-5 w-5 text-muted-foreground" />
+                                    <Input
+                                        value={projectUrl}
+                                        onChange={(e) => setProjectUrl(e.target.value)}
+                                        placeholder="Pegar enlace..."
+                                        className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 h-auto"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Música Usada */}
+                            <div className="rounded-xl bg-muted/30 p-6 space-y-4 border border-transparent hover:border-muted-foreground/20 transition-all">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                                    Música Usada
+                                </Label>
+                                <div className="flex items-center gap-3">
+                                    <Music className="h-5 w-5 text-muted-foreground" />
+                                    <Input
+                                        value={songUrl}
+                                        onChange={(e) => setSongUrl(e.target.value)}
+                                        placeholder="Pegar enlace canción..."
+                                        className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 h-auto"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 {/* --- RIGHT COLUMN --- */}
-                <div className="col-span-1 space-y-4">
+                <div className="col-span-1 space-y-4 bg-muted/20 p-4 rounded-xl">
                     <div className="space-y-2">
                         <Label htmlFor="status" className="flex items-center gap-2 text-muted-foreground"><ClipboardList className="h-4 w-4" />Estado</Label>
                         <Select value={status} onValueChange={(v) => setStatus(v as Project['status'])}>
-                            <SelectTrigger><SelectValue placeholder="Selecciona un estado" /></SelectTrigger>
+                            <SelectTrigger className="bg-background"><SelectValue placeholder="Selecciona un estado" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="pending">Pendiente</SelectItem>
                                 <SelectItem value="in-progress">En Progreso</SelectItem>
@@ -307,7 +377,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                      <div className="space-y-2">
                         <Label htmlFor="customer" className="flex items-center gap-2 text-muted-foreground"><Users className="h-4 w-4" />Cliente</Label>
                         <Select value={customerId} onValueChange={setCustomerId}>
-                            <SelectTrigger><SelectValue placeholder="Asignar un cliente" /></SelectTrigger>
+                            <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un cliente" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
                                 {(customers || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
@@ -317,7 +387,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                      <div className="space-y-2">
                         <Label htmlFor="collaborator" className="flex items-center gap-2 text-muted-foreground"><UserCheck className="h-4 w-4" />Editor</Label>
                         <Select value={collaboratorId} onValueChange={setCollaboratorId}>
-                            <SelectTrigger><SelectValue placeholder="Asignar un editor" /></SelectTrigger>
+                            <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un editor" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
                                 {(collaborators || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
@@ -328,7 +398,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         <Label htmlFor="due-date" className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
                          <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal',!dueDate && 'text-muted-foreground')}>
+                                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal bg-background',!dueDate && 'text-muted-foreground')}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dueDate ? format(dueDate, 'PPP', { locale: es }) : (<span>Elige una fecha</span>)}
                                 </Button>
@@ -347,12 +417,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                     <div className="flex justify-between p-2 pt-4 border-t">
                                         <Button
                                         variant="ghost"
+                                        size="sm"
                                         onClick={() => setDueDate(undefined)}
                                         >
                                         Borrar
                                         </Button>
                                         <Button
                                         variant="ghost"
+                                        size="sm"
                                         onClick={() => setDueDate(new Date())}
                                         >
                                         Hoy
@@ -366,7 +438,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                      <div className="space-y-2">
                         <Label htmlFor="priority" className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" />Prioridad</Label>
                         <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])}>
-                            <SelectTrigger id="priority"><SelectValue placeholder="Establecer prioridad" /></SelectTrigger>
+                            <SelectTrigger id="priority" className="bg-background"><SelectValue placeholder="Establecer prioridad" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="low">Baja</SelectItem>
                                 <SelectItem value="medium">Media</SelectItem>
@@ -378,45 +450,33 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     <Separator />
                     
                     <div className="space-y-2">
-                        <Label htmlFor="songUrl" className="flex items-center gap-2 text-muted-foreground"><LinkIcon className="h-4 w-4" />Referencia (URL)</Label>
-                        <Input id="songUrl" value={songUrl} onChange={(e) => setSongUrl(e.target.value)} placeholder="https://tiktok.com/..."/>
+                        <Label htmlFor="campaign" className="flex items-center gap-2 text-muted-foreground">Campaña</Label>
+                        <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Lanzamiento Verano" className="bg-background" />
                     </div>
                     
                     <div className="space-y-2">
                         <Label className="flex items-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Lista de Planos</Label>
-                         <div className="grid grid-cols-3 gap-2">
+                         <div className="grid grid-cols-2 gap-2">
                             {planoTagsConfig.map(tag => (
                                 <Button 
                                     key={tag.id} 
                                     variant={tags.includes(tag.id) ? 'secondary' : 'outline'}
                                     onClick={() => handleTagToggle(tag.id)}
                                     type="button" 
-                                    className="h-auto flex-col p-2 gap-1"
+                                    className="h-auto flex-row justify-start p-2 gap-2 bg-background"
                                 >
-                                    <tag.icon className="h-5 w-5" />
-                                    <span className="text-xs">{tag.label}</span>
+                                    <tag.icon className="h-4 w-4" />
+                                    <span className="text-[10px]">{tag.label}</span>
                                 </Button>
                             ))}
                         </div>
                     </div>
-                    <div className="space-y-2 hidden">
-                        <Label htmlFor="campaign">Campaña</Label>
-                        <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Lanzamiento Verano 2024"/>
-                    </div>
-                     <div className="space-y-2 hidden">
-                        <Label htmlFor="projectUrl">URL del Proyecto Final</Label>
-                        <Input id="projectUrl" value={projectUrl} onChange={(e) => setProjectUrl(e.target.value)} placeholder="https://..."/>
-                    </div>
-                    <div className="space-y-2 hidden">
-                        <Label htmlFor="publishTime">Hora de Publicación</Label>
-                        <Input id="publishTime" type="time" value={publishTime} onChange={(e) => setPublishTime(e.target.value)} placeholder="HH:MM"/>
-                    </div>
                 </div>
             </div>
         </ScrollArea>
-        <DialogFooter className="pr-6">
+        <DialogFooter className="pr-6 pt-4 border-t">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" onClick={handleSubmit}>
+            <Button type="submit" onClick={handleSubmit} className="px-8">
               Guardar Proyecto
             </Button>
         </DialogFooter>
