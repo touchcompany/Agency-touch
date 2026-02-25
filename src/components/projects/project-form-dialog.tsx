@@ -462,10 +462,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                     onClick={() => handleTagToggle(tag.id)}
                                     type="button" 
                                     className={cn(
-                                        "h-auto flex-row justify-start p-2 gap-2 border transition-all duration-200",
+                                        "h-auto flex-row justify-start p-3 gap-3 border-none transition-colors duration-200 rounded-xl",
                                         tags.includes(tag.id) 
-                                            ? "bg-blue-600 text-white border-blue-600 shadow-sm ring-1 ring-blue-600 ring-offset-1 scale-[1.02]" 
-                                            : "bg-background text-muted-foreground border-input hover:bg-accent"
+                                            ? "bg-blue-500 text-white shadow-none" 
+                                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
                                     )}
                                 >
                                     <tag.icon className={cn("h-4 w-4", tags.includes(tag.id) ? "text-white" : "text-muted-foreground")} />
