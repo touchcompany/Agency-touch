@@ -35,6 +35,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { ScriptAssistantDialog } from './script-assistant-dialog';
+import { RichTextEditor } from '../ui/rich-text-editor';
 
 interface ProjectFormDialogProps {
     open: boolean;
@@ -174,9 +175,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0 flex flex-col">
         <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b">
-          <DialogTitle className="font-headline text-2xl">
+          <DialogTitle className="font-headline text-2xl flex items-center gap-2">
+            <Clapperboard className="h-6 w-6 text-primary" />
             {project?.id ? 'Detalles del Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
           {isCollaborator && (
@@ -190,7 +192,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 {/* --- COLUMNA IZQUIERDA --- */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="space-y-4">
-                        <Label htmlFor="title" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Título del Proyecto</Label>
+                        <Label htmlFor="title" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Título de la Tarea *</Label>
                         <Input
                             id="title"
                             value={title}
@@ -201,14 +203,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         />
                     </div>
                     <div className="space-y-4">
-                        <Label htmlFor="description" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Descripción / Objetivo</Label>
+                        <Label htmlFor="description" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Descripción Breve</Label>
                         <Textarea
                             id="description"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Define el objetivo del video..."
+                            placeholder="Define el objetivo o contexto rápido del video..."
                             disabled={isCollaborator}
-                            rows={3}
+                            rows={2}
                         />
                     </div>
 
@@ -216,18 +218,17 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
 
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                             <Label htmlFor="script" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Guion Detallado</Label>
+                             <Label htmlFor="script" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Guion del Video</Label>
                              <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
                                 <Wand2 className="mr-2 h-4 w-4" />
                                 Asistente IA
                              </Button>
                         </div>
-                        <Textarea
-                            id="script"
+                        <RichTextEditor
                             value={script}
-                            onChange={(e) => setScript(e.target.value)}
-                            placeholder="Escribe el guion paso a paso aquí..."
-                            className="min-h-[200px] font-mono text-sm leading-relaxed"
+                            onChange={setScript}
+                            placeholder="Escribe el guion detallado, diálogos y escenas aquí..."
+                            className="min-h-[350px]"
                         />
                     </div>
 
@@ -269,7 +270,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                     <Input
                                         value={projectUrl}
                                         onChange={(e) => setProjectUrl(e.target.value)}
-                                        placeholder="Pegar enlace..."
+                                        placeholder="Pegar enlace de entrega..."
                                         className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 h-auto"
                                     />
                                 </div>
@@ -284,7 +285,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                     <Input
                                         value={songUrl}
                                         onChange={(e) => setSongUrl(e.target.value)}
-                                        placeholder="Pegar enlace canción..."
+                                        placeholder="Enlace de la canción..."
                                         className="border-0 bg-transparent p-0 shadow-none focus-visible:ring-0 h-auto"
                                     />
                                 </div>
@@ -376,10 +377,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
             </div>
 
-            {/* BOTONES DE ACCIÓN: Ahora dentro del ScrollArea para que no estén fijos */}
-            <div className="flex w-full items-center justify-end gap-3 py-8 border-t mt-4">
+            {/* BOTONES DE ACCIÓN: Al final del ScrollArea */}
+            <div className="flex w-full items-center justify-end gap-3 py-12 border-t mt-8 mb-12">
                 <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-                <Button type="submit" onClick={handleSubmit} className="px-8 font-bold">
+                <Button type="submit" onClick={handleSubmit} className="px-12 font-bold h-12">
                   {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
                 </Button>
             </div>

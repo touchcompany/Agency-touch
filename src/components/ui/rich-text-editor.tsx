@@ -12,12 +12,10 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   Link as LinkIcon, Undo, Redo, Heading1, Heading2
 } from 'lucide-react';
-import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { useEffect } from 'react';
 
-// For simplicity, we define a small Toggle component locally if not available
 function EditorToggle({ 
   pressed, 
   onPressedChange, 
@@ -38,8 +36,8 @@ function EditorToggle({
       }}
       title={title}
       className={cn(
-        "h-8 w-8 flex items-center justify-center rounded-md transition-colors hover:bg-muted",
-        pressed ? "bg-muted text-primary" : "text-muted-foreground"
+        "h-9 w-9 flex items-center justify-center rounded-md transition-all hover:bg-muted active:scale-95",
+        pressed ? "bg-muted text-primary shadow-sm" : "text-muted-foreground"
       )}
     >
       {children}
@@ -64,9 +62,12 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
       }),
       Link.configure({
         openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-primary underline cursor-pointer',
+        },
       }),
       Placeholder.configure({
-        placeholder: placeholder || 'Escribe algo...',
+        placeholder: placeholder || 'Empieza a escribir el guion...',
       }),
     ],
     content: value,
@@ -76,14 +77,13 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm dark:prose-invert max-w-none min-h-[200px] focus:outline-none p-4",
+          "prose prose-sm dark:prose-invert max-w-none min-h-[300px] focus:outline-none p-6 text-base leading-relaxed",
           className
         ),
       },
     },
   });
 
-  // Sync value if changed from outside (e.g. IA generation)
   useEffect(() => {
     if (editor && value !== editor.getHTML()) {
       editor.commands.setContent(value);
@@ -93,8 +93,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
   if (!editor) return null;
 
   return (
-    <div className="rounded-xl border border-input bg-background overflow-hidden flex flex-col focus-within:ring-1 focus-within:ring-ring">
-      <div className="flex flex-wrap items-center gap-1 p-1 bg-muted/20 border-b">
+    <div className="rounded-xl border border-input bg-background overflow-hidden flex flex-col focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 transition-all">
+      <div className="flex flex-wrap items-center gap-1 p-2 bg-muted/30 border-b border-input/50">
         <EditorToggle
           pressed={editor.isActive('bold')}
           onPressedChange={() => editor.chain().focus().toggleBold().run()}
@@ -206,8 +206,8 @@ export function RichTextEditor({ value, onChange, placeholder, className }: Rich
             }
           }}
           className={cn(
-            "h-8 w-8 flex items-center justify-center rounded-md transition-colors hover:bg-muted",
-            editor.isActive('link') ? "bg-muted text-primary" : "text-muted-foreground"
+            "h-9 w-9 flex items-center justify-center rounded-md transition-all hover:bg-muted active:scale-95",
+            editor.isActive('link') ? "bg-muted text-primary shadow-sm" : "text-muted-foreground"
           )}
           title="Enlace"
         >

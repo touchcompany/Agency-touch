@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { useUser } from '@/firebase';
+import { cn } from '@/lib/utils';
 
 const menuItems = [
   {
@@ -101,9 +102,9 @@ export function DashboardSidebar() {
       <SidebarHeader className="py-4 px-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
+            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent px-2">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground group-data-[state=collapsed]:mx-auto">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
                    <Image src="/favicon.svg" alt="touch logo" width={24} height={24} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden">

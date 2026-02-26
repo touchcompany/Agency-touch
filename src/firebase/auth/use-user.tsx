@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 isUserLoading: true,
             }));
 
-           // Auto-creación de perfil si no existe (con manejo robusto de undefined)
+           // Auto-creación de perfil si no existe (robusto contra undefined)
            if (firestore) {
              const userRef = doc(firestore, 'users', firebaseUser.uid);
              const userSnap = await getDoc(userRef);
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                  email: safeValue(firebaseUser.email),
                  phoneNumber: safeValue(firebaseUser.phoneNumber),
                  displayName: safeValue(firebaseUser.displayName),
-                 role: 'superuser', // Primer usuario es superusuario
+                 role: 'superuser', // El primer usuario que se registre será superusuario
                  createdAt: new Date().toISOString(),
                });
              }
