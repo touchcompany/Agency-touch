@@ -98,15 +98,21 @@ export function DashboardSidebar() {
 
   return (
     <>
-      <SidebarHeader className="flex flex-col items-center justify-center py-4 px-2">
-        <Link href="/dashboard" className="flex items-center gap-2 group-data-[state=collapsed]:justify-center w-full">
-          <div className="flex items-center justify-center shrink-0 size-8 transition-all group-data-[state=collapsed]:mx-auto">
-              <Image src="/favicon.svg" alt="touch logo" width={28} height={28} className="object-contain" />
-          </div>
-          <h1 className="font-headline text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
-            touch
-          </h1>
-        </Link>
+      <SidebarHeader className="py-4 px-2">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
+              <Link href="/dashboard" className="flex items-center gap-2">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground group-data-[state=collapsed]:mx-auto">
+                   <Image src="/favicon.svg" alt="touch logo" width={24} height={24} />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden">
+                  <span className="truncate font-semibold font-headline text-lg text-foreground">touch</span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>

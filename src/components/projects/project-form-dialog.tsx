@@ -6,7 +6,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -376,16 +375,15 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     </div>
                 </div>
             </div>
-        </ScrollArea>
 
-        <DialogFooter className="p-6 border-t flex-shrink-0 bg-background">
-            <div className="flex w-full items-center justify-end gap-3">
+            {/* BOTONES DE ACCIÓN: Ahora dentro del ScrollArea para que no estén fijos */}
+            <div className="flex w-full items-center justify-end gap-3 py-8 border-t mt-4">
                 <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
                 <Button type="submit" onClick={handleSubmit} className="px-8 font-bold">
                   {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
                 </Button>
             </div>
-        </DialogFooter>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
     <ScriptAssistantDialog 
