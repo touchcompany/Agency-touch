@@ -104,8 +104,8 @@ export function DashboardSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild className="hover:bg-transparent px-0 flex justify-center">
               <Link href="/dashboard" className="flex items-center gap-2">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0 overflow-hidden">
-                   <Image src="/favicon.svg" alt="touch logo" width={32} height={32} className="object-contain" />
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-transparent shrink-0 overflow-hidden">
+                   <Image src="/favicon.svg" alt="touch logo" width={28} height={28} className="object-contain" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight group-data-[state=collapsed]:hidden">
                   <span className="truncate font-semibold font-headline text-lg text-foreground">touch</span>

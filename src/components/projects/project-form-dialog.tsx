@@ -174,8 +174,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
-        <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b">
+      <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto p-0 flex flex-col">
+        <DialogHeader className="p-6 pb-4 border-b bg-background sticky top-0 z-10">
           <DialogTitle className="font-headline text-2xl flex items-center gap-2">
             <Clapperboard className="h-6 w-6 text-primary" />
             {project?.id ? 'Detalles del Proyecto' : 'Crear Nuevo Proyecto'}
@@ -185,7 +185,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           )}
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto px-6">
+        <div className="flex-1 px-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6">
                 
                 {/* --- COLUMNA IZQUIERDA --- */}
