@@ -32,7 +32,6 @@ export default function DashboardLayout({
     if (!isUserLoading && appUser?.role === 'collaborator') {
       // Si un colaborador intenta entrar a la raíz del dashboard o rutas prohibidas
       const forbiddenRoutes = ['/dashboard/transactions', '/dashboard/invoices', '/dashboard/customers', '/dashboard/collaborators', '/dashboard/services', '/dashboard/automation'];
-      const isForbidden = forbiddenRoutes.some(route => pathname.startsWith(item => pathname === '/dashboard' || pathname.startsWith(route)));
       
       if (pathname === '/dashboard' || forbiddenRoutes.some(route => pathname.startsWith(route))) {
         router.push('/dashboard/projects');
@@ -54,7 +53,7 @@ export default function DashboardLayout({
     return (
       <SidebarProvider>
         <DynamicFavicon />
-        <Sidebar>
+        <Sidebar collapsible="icon">
           <DashboardSidebar />
         </Sidebar>
         <SidebarInset>

@@ -6,6 +6,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarRail,
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
@@ -84,7 +85,6 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const { appUser } = useUser();
   
-  // Por defecto es superuser si no hay rol definido (para no romper cuentas existentes)
   const userRole = appUser?.role || 'superuser';
 
   const isActive = (href: string) => {
@@ -99,12 +99,12 @@ export function DashboardSidebar() {
   return (
     <>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 p-2">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="p-1 rounded-md">
+            <div className="p-1 rounded-md shrink-0">
                 <Image src="/favicon.svg" alt="touch logo" width={28} height={28} />
             </div>
-            <h1 className="font-headline text-xl font-bold text-foreground">
+            <h1 className="font-headline text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
               touch
             </h1>
           </Link>
@@ -117,7 +117,7 @@ export function DashboardSidebar() {
               <SidebarMenuButton
                 asChild
                 isActive={isActive(item.href)}
-                tooltip={{ children: item.label, side: 'right' }}
+                tooltip={item.label}
               >
                 <Link href={item.href}>
                   <item.icon />
@@ -128,6 +128,7 @@ export function DashboardSidebar() {
           ))}
         </SidebarMenu>
       </SidebarContent>
+      <SidebarRail />
     </>
   );
 }

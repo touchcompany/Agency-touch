@@ -1,4 +1,3 @@
-
 "use client";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -15,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,6 +29,7 @@ const titleTranslations: { [key: string]: string } = {
   edit: "Editar",
   new: "Nueva",
   automation: "Automatización",
+  projects: "Proyectos",
 };
 
 const getTitleFromPath = (path: string) => {
@@ -66,18 +65,14 @@ const getTitleFromPath = (path: string) => {
     return titleTranslations[lastPart];
   }
   
-  // If no direct translation, check if it's an ID (if it looks like one)
-  // This is a simple check, can be improved
-  if(pathParts.length > 2 && lastPart.length > 10) { // Assume long strings are IDs
+  if(pathParts.length > 2 && lastPart.length > 10) { 
     const parent = pathParts[pathParts.length-2];
     let translatedParent = titleTranslations[parent] || parent;
-     // Singularize
     if (translatedParent.endsWith('s')) {
       translatedParent = translatedParent.slice(0, -1);
     }
     return `Detalle de ${translatedParent}`;
   }
-
 
   return lastPart.charAt(0).toUpperCase() + lastPart.slice(1);
 };
@@ -96,15 +91,9 @@ export function DashboardHeader() {
     }
   };
 
-  const getInitials = (phoneNumber: string | null | undefined) => {
-    if (!phoneNumber) return 'U';
-    // Get last 2 digits for initials
-    return phoneNumber.slice(-2);
-  }
-
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-      <div className="md:hidden">
+      <div className="flex items-center gap-2">
         <SidebarTrigger />
       </div>
       <h1 className="font-headline flex-1 text-xl sm:text-2xl font-bold text-foreground">{title}</h1>
@@ -118,7 +107,6 @@ export function DashboardHeader() {
               className="overflow-hidden rounded-full"
             >
                <Image src="/favicon.svg" alt="touch logo" width={28} height={28} />
-
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
