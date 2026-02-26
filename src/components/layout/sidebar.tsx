@@ -103,7 +103,7 @@ export function DashboardSidebar() {
       <SidebarHeader>
         <div className="flex items-center gap-2 p-2 group-data-[state=collapsed]:p-0 group-data-[state=collapsed]:justify-center">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="p-1 rounded-md shrink-0 flex items-center justify-center w-9 h-9">
+            <div className="rounded-md shrink-0 flex items-center justify-center w-9 h-9 group-data-[state=collapsed]:w-8 group-data-[state=collapsed]:h-8 transition-all">
                 <Image src="/favicon.svg" alt="touch logo" width={28} height={28} className="object-contain" />
             </div>
             <h1 className="font-headline text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
