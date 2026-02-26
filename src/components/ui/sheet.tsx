@@ -71,8 +71,8 @@ const SheetContent = React.forwardRef<
     >
       {/* Accesibilidad: Títulos ocultos requeridos por Radix UI */}
       <div className="sr-only">
-        <SheetPrimitive.Title>Panel lateral de navegación</SheetPrimitive.Title>
-        <SheetPrimitive.Description>Navega por las diferentes secciones de tu aplicación.</SheetPrimitive.Description>
+        <SheetPrimitive.Title>Menú de navegación</SheetPrimitive.Title>
+        <SheetPrimitive.Description>Panel lateral para navegar por las secciones del panel.</SheetPrimitive.Description>
       </div>
       {children}
       <SheetPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">

@@ -32,7 +32,6 @@ import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { ScriptAssistantDialog } from './script-assistant-dialog';
 import { RichTextEditor } from '../ui/rich-text-editor';
@@ -175,7 +174,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[95vh] overflow-hidden p-0 flex flex-col">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
         <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b">
           <DialogTitle className="font-headline text-2xl flex items-center gap-2">
             <Clapperboard className="h-6 w-6 text-primary" />
@@ -186,7 +185,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
           )}
         </DialogHeader>
         
-        <ScrollArea className="flex-1 w-full px-6">
+        <div className="flex-1 overflow-y-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6">
                 
                 {/* --- COLUMNA IZQUIERDA --- */}
@@ -377,14 +376,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
             </div>
 
-            {/* BOTONES DE ACCIÓN: Al final del ScrollArea */}
+            {/* BOTONES DE ACCIÓN: Ahora se desplazan con el contenido */}
             <div className="flex w-full items-center justify-end gap-3 py-12 border-t mt-8 mb-12">
                 <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
                 <Button type="submit" onClick={handleSubmit} className="px-12 font-bold h-12">
                   {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
                 </Button>
             </div>
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
     <ScriptAssistantDialog 
