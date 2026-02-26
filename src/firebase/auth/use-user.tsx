@@ -8,9 +8,8 @@ import {
 } from 'react';
 import { User, onAuthStateChanged } from 'firebase/auth';
 import { useFirebase } from '@/firebase/provider';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import type { User as AppUser } from '@/lib/types';
-
 
 export interface UserHookResult {
   user: User | null;
@@ -20,6 +19,8 @@ export interface UserHookResult {
 }
 
 export const UserContext = createContext<UserHookResult | undefined>(undefined);
+
+const safeValue = (val: any) => val === undefined ? null : val;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { auth, firestore } = useFirebase();
@@ -43,13 +44,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const unsubscribeAuth = onAuthStateChanged(
       auth,
-      (firebaseUser) => {
+      async (firebaseUser) => {
         if(firebaseUser) {
            setUserState((prevState) => ({
                 ...prevState,
                 user: firebaseUser,
-                isUserLoading: true, // Still loading appUser
+                isUserLoading: true,
             }));
+
+           // Auto-creación de perfil si no existe
+           if (firestore) {
+             const userRef = doc(firestore, 'users', firebaseUser.uid);
+             const userSnap = await getDoc(userRef);
+             if (!userSnap.exists()) {
+               await setDoc(userRef, {
+                 id: firebaseUser.uid,
+                 email: safeValue(firebaseUser.email),
+                 phoneNumber: safeValue(firebaseUser.phoneNumber),
+                 displayName: safeValue(firebaseUser.displayName),
+                 role: 'superuser', // Primer usuario es admin
+                 createdAt: new Date().toISOString(),
+               });
+             }
+           }
         } else {
             setUserState({ user: null, appUser: null, isUserLoading: false, userError: null });
         }
@@ -65,7 +82,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
      return () => unsubscribeAuth();
-  }, [auth]);
+  }, [auth, firestore]);
 
   useEffect(() => {
      if(userState.user && firestore) {
@@ -79,12 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     isUserLoading: false,
                 }));
             } else {
-                 // The user document might not exist yet, we wait for it to be created
-                 // non-blocking-updates.tsx will handle the creation
                  setUserState(prevState => ({
                     ...prevState,
-                    appUser: null, // Explicitly set to null if doc doesn't exist
-                    isUserLoading: false, // We've checked, so loading is done
+                    appUser: null,
+                    isUserLoading: false,
                 }));
             }
         }, (error) => {
@@ -115,5 +130,3 @@ export const useUser = (): UserHookResult => {
   }
   return context;
 };
-
-    

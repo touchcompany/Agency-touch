@@ -85,7 +85,6 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const { appUser } = useUser();
   
-  // Por defecto tratamos como superuser si el rol no está definido explícitamente
   const userRole = appUser?.role || 'superuser';
 
   const isActive = (href: string) => {
@@ -95,22 +94,19 @@ export function DashboardSidebar() {
     return pathname.startsWith(href);
   };
 
-  // Filtrar ítems del menú según el rol del usuario actual
   const filteredItems = menuItems.filter(item => item.roles.includes(userRole));
 
   return (
     <>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 p-2 group-data-[state=collapsed]:p-0 group-data-[state=collapsed]:justify-center">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="rounded-md shrink-0 flex items-center justify-center w-9 h-9 group-data-[state=collapsed]:w-8 group-data-[state=collapsed]:h-8 transition-all">
-                <Image src="/favicon.svg" alt="touch logo" width={28} height={28} className="object-contain" />
-            </div>
-            <h1 className="font-headline text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
-              touch
-            </h1>
-          </Link>
-        </div>
+      <SidebarHeader className="flex flex-col items-center justify-center py-4 px-2">
+        <Link href="/dashboard" className="flex items-center gap-2 group-data-[state=collapsed]:justify-center w-full">
+          <div className="flex items-center justify-center shrink-0 size-8 transition-all group-data-[state=collapsed]:mx-auto">
+              <Image src="/favicon.svg" alt="touch logo" width={28} height={28} className="object-contain" />
+          </div>
+          <h1 className="font-headline text-xl font-bold text-foreground group-data-[collapsible=icon]:hidden">
+            touch
+          </h1>
+        </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>

@@ -11,9 +11,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { 
-    CalendarIcon, Wand2, Save, User, Video, Send, Eye, Monitor, 
-    Box, Flag, Tag, Link as LinkIcon, CalendarDays, ClipboardList, 
-    Users, UserCheck, Music, Clapperboard, Sparkles
+    CalendarIcon, Wand2, Video, ClipboardList, 
+    Users, UserCheck, Music, Clapperboard, Sparkles,
+    Flag, CalendarDays
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking, useUser } from '@/firebase';
@@ -175,8 +175,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
-        <DialogHeader className="p-6 pb-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0 flex flex-col">
+        <DialogHeader className="p-6 pb-4 flex-shrink-0 border-b">
           <DialogTitle className="font-headline text-2xl">
             {project?.id ? 'Detalles del Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
@@ -184,11 +184,12 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
             <DialogDescription>Como colaborador, puedes actualizar el guion, el estado y los enlaces de entrega.</DialogDescription>
           )}
         </DialogHeader>
-        <ScrollArea className="h-full max-h-[75vh] w-full px-6">
-            <div className="grid grid-cols-3 gap-8 py-4">
+        
+        <ScrollArea className="flex-1 w-full px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 py-6">
                 
-                {/* --- LEFT COLUMN --- */}
-                <div className="col-span-3 lg:col-span-2 space-y-6">
+                {/* --- COLUMNA IZQUIERDA --- */}
+                <div className="lg:col-span-2 space-y-6">
                     <div className="space-y-4">
                         <Label htmlFor="title" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Título del Proyecto</Label>
                         <Input
@@ -294,8 +295,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
 
                 </div>
 
-                {/* --- RIGHT COLUMN --- */}
-                <div className="col-span-3 lg:col-span-1 space-y-6">
+                {/* --- COLUMNA DERECHA --- */}
+                <div className="space-y-6">
                     <div className="space-y-4 bg-muted/50 p-4 rounded-xl">
                         <div className="space-y-2">
                             <Label htmlFor="status" className="flex items-center gap-2"><ClipboardList className="h-4 w-4" />Estado</Label>
@@ -376,11 +377,14 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
             </div>
         </ScrollArea>
-        <DialogFooter className="p-6 border-t">
-            <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
-            <Button type="submit" onClick={handleSubmit} className="px-8">
-              {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
-            </Button>
+
+        <DialogFooter className="p-6 border-t flex-shrink-0 bg-background">
+            <div className="flex w-full items-center justify-end gap-3">
+                <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
+                <Button type="submit" onClick={handleSubmit} className="px-8 font-bold">
+                  {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
+                </Button>
+            </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

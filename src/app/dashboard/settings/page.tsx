@@ -4,33 +4,47 @@ import { DataExportManager } from "@/components/settings/data-export-manager";
 import { UserDataManager } from "@/components/settings/user-data-manager";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BrandingManager } from "@/components/settings/branding-manager";
+import { TeamManagement } from "@/components/settings/team-management";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useUser } from "@/firebase";
 
 export default function SettingsPage() {
+  const { appUser } = useUser();
+  const isSuperuser = appUser?.role === 'superuser';
+
   return (
     <div className="space-y-8">
        <div>
         <h1 className="font-headline text-3xl font-bold">Configuración</h1>
         <p className="text-muted-foreground">
-          Gestiona los perfiles de tu empresa, datos de usuario y copias de seguridad.
+          Gestiona tu empresa, equipo y datos personales.
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2 space-y-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Perfiles de Empresa</CardTitle>
-                <CardDescription>
-                  Gestiona los perfiles de emisor para tus cuentas de cobro. Puedes tener múltiples perfiles.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CompanyProfileManager />
-              </CardContent>
-            </Card>
-        </div>
+      <Tabs defaultValue="company" className="w-full">
+        <TabsList className="mb-4">
+          <TabsTrigger value="company">Empresa</TabsTrigger>
+          <TabsTrigger value="profile">Mi Perfil</TabsTrigger>
+          {isSuperuser && <TabsTrigger value="team">Equipo</TabsTrigger>}
+          <TabsTrigger value="branding">Branding</TabsTrigger>
+          <TabsTrigger value="backup">Copia de Seguridad</TabsTrigger>
+        </TabsList>
 
-        <div className="space-y-8">
+        <TabsContent value="company">
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">Perfiles de Empresa</CardTitle>
+              <CardDescription>
+                Gestiona los perfiles de emisor para tus cuentas de cobro.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CompanyProfileManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="profile">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Perfil de Usuario</CardTitle>
@@ -42,6 +56,25 @@ export default function SettingsPage() {
               <UserDataManager />
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {isSuperuser && (
+          <TabsContent value="team">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Gestión de Equipo</CardTitle>
+                <CardDescription>
+                  Administra los roles y accesos de tus colaboradores.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TeamManagement />
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
+
+        <TabsContent value="branding">
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">Branding General</CardTitle>
@@ -53,19 +86,22 @@ export default function SettingsPage() {
               <BrandingManager />
             </CardContent>
           </Card>
-           <Card>
+        </TabsContent>
+
+        <TabsContent value="backup">
+          <Card>
             <CardHeader>
               <CardTitle className="font-headline">Gestión de Datos</CardTitle>
               <CardDescription>
-                Importa o exporta todos tus datos de la aplicación.
+                Exporta tus datos o restaura una copia de seguridad.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <DataExportManager />
             </CardContent>
           </Card>
-        </div>
-      </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
