@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.Node;
 }) {
   const { user, appUser, isUserLoading } = useUser();
   const router = useRouter();

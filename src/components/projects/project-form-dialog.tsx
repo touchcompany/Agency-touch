@@ -231,7 +231,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         />
                     </div>
 
-                    {/* --- EDICIÓN Y ENTREGA SECTION --- */}
                     <div className="space-y-4 pt-4">
                         <div className="flex items-center gap-2 text-xl font-bold">
                             <Video className="h-6 w-6" />
@@ -239,7 +238,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         </div>
                         <Separator />
                         
-                        {/* Instrucciones para Editor */}
                         <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="editing-instructions" className="text-xs font-bold uppercase tracking-wider text-blue-800">
@@ -262,7 +260,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            {/* Video Final */}
                             <div className="rounded-xl bg-muted/30 p-6 space-y-4 border border-transparent hover:border-muted-foreground/20 transition-all">
                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                     Video Final (Drive/Dropbox)
@@ -278,7 +275,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                 </div>
                             </div>
 
-                            {/* Música Usada */}
                             <div className="rounded-xl bg-muted/30 p-6 space-y-4 border border-transparent hover:border-muted-foreground/20 transition-all">
                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                                     Música Usada

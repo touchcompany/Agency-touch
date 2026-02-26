@@ -30,9 +30,6 @@ export default function ProjectsPage() {
     // Identificar si el usuario es colaborador
     const isCollaborator = appUser?.role === 'collaborator';
 
-    // Para un MVP, consultamos la colección del usuario logueado.
-    // Si un colaborador trabaja para un superuser, las reglas de Firestore permitirán
-    // el acceso si implementamos una búsqueda por responsable (collaboratorId).
     const projectsQuery = useMemoFirebase(() => (user ? query(collection(firestore, 'users', user.uid, 'projects'),) : null), [firestore, user]);
     const { data: projects, isLoading: projectsLoading } = useCollection<Project>(projectsQuery);
 
@@ -51,7 +48,6 @@ export default function ProjectsPage() {
             const collaboratorMatch = collaboratorFilter === 'all' || p.collaboratorId === collaboratorFilter;
             
             // Si es colaborador, solo puede ver proyectos donde él es el responsable
-            // O si es el dueño del documento (superuser)
             const roleMatch = !isCollaborator || p.collaboratorId === user?.uid;
             
             return searchMatch && statusMatch && customerMatch && collaboratorMatch && roleMatch;
@@ -72,7 +68,6 @@ export default function ProjectsPage() {
 
     const isLoading = projectsLoading || customersLoading || collaboratorsLoading;
 
-    // Summary cards data basados en los proyectos filtrados por rol
     const summary = useMemo(() => {
         const initial: Record<Project['status'] | 'total', number> = { pending: 0, 'in-progress': 0, 'customer-review': 0, completed: 0, total: 0 };
         if (!filteredProjects) return initial;
@@ -86,16 +81,15 @@ export default function ProjectsPage() {
     }, [filteredProjects]);
     
     const summaryCards = [
-        { title: 'Ideas', count: summary.pending, icon: Lightbulb, color: 'text-yellow-500' },
+        { title: 'Idea', count: summary.pending, icon: Lightbulb, color: 'text-yellow-500' },
         { title: 'Edición', count: summary['in-progress'], icon: Scissors, color: 'text-blue-500' },
         { title: 'Para publicar', count: summary['customer-review'], icon: Send, color: 'text-purple-500' },
-        { title: 'Publicadas', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
+        { title: 'Publicado', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
     ];
 
 
     return (
         <div className="flex h-full flex-col gap-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="font-headline text-3xl font-bold">Gestor de Tareas</h1>
@@ -122,7 +116,6 @@ export default function ProjectsPage() {
                             <List className="h-4 w-4 mr-2"/> Lista
                         </Button>
                     </div>
-                    {/* Solo el superuser puede crear nuevas tareas de raíz */}
                     {!isCollaborator && (
                         <Button onClick={() => handleOpenDialog(undefined)}>
                             <Plus className="mr-2 h-4 w-4" />
@@ -132,7 +125,6 @@ export default function ProjectsPage() {
                 </div>
             </div>
 
-            {/* Filters */}
             <Card>
                 <CardContent className="p-4">
                     <div className="flex items-center mb-4 gap-2">
@@ -160,10 +152,9 @@ export default function ProjectsPage() {
                                 <SelectItem value="pending">Idea</SelectItem>
                                 <SelectItem value="in-progress">Edición</SelectItem>
                                 <SelectItem value="customer-review">Para publicar</SelectItem>
-                                <SelectItem value="completed">Publicada</SelectItem>
+                                <SelectItem value="completed">Publicado</SelectItem>
                             </SelectContent>
                         </Select>
-                        {/* El filtro de responsable solo tiene sentido para el superuser */}
                         {!isCollaborator && (
                             <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
                                 <SelectTrigger><SelectValue placeholder="Responsable" /></SelectTrigger>
@@ -182,7 +173,6 @@ export default function ProjectsPage() {
                 </CardContent>
             </Card>
 
-            {/* Summary Cards */}
              <div className="grid gap-4 grid-cols-2 md:grid-cols-4">
                 {summaryCards.map(card => (
                      <Card key={card.title}>
@@ -199,7 +189,6 @@ export default function ProjectsPage() {
                 ))}
              </div>
 
-            {/* Main Content */}
             {isLoading ? (
                  <div className="flex flex-1 items-center justify-center">
                     <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" />
