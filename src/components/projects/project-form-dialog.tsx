@@ -16,7 +16,7 @@ import {
     Users, UserCheck, Music, Clapperboard, Sparkles
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking, useUser } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import type { Customer, Collaborator, Project, ScriptTemplate } from '@/lib/types';
@@ -69,6 +69,7 @@ const planoTagsConfig = [
 
 export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDialogProps) {
   const { firestore, user } = useFirebase();
+  const { appUser } = useUser();
   const { toast } = useToast();
   
   const [title, setTitle] = useState('');
@@ -89,6 +90,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [tags, setTags] = useState<string[]>([]);
   const [campaign, setCampaign] = useState('');
 
+  const isCollaborator = appUser?.role === 'collaborator';
 
   useEffect(() => {
     if (open) {
@@ -222,8 +224,11 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden p-0">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="font-headline text-2xl">
-            {project?.id ? 'Editar Proyecto' : 'Crear Nuevo Proyecto'}
+            {project?.id ? 'Detalles del Proyecto' : 'Crear Nuevo Proyecto'}
           </DialogTitle>
+          {isCollaborator && (
+            <DialogDescription>Como colaborador, puedes actualizar el guion, el estado y los enlaces de entrega.</DialogDescription>
+          )}
         </DialogHeader>
         <ScrollArea className="h-full max-h-[75vh] w-full px-6">
             <div className="grid grid-cols-3 gap-8 py-4">
@@ -235,14 +240,16 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="Nueva Idea Sin Título"
-                        className="h-12 border-0 px-0 text-2xl font-bold shadow-none focus-visible:ring-0"
+                        disabled={isCollaborator} // Colaborador no debería cambiar el título
+                        className="h-12 border-0 px-0 text-2xl font-bold shadow-none focus-visible:ring-0 disabled:opacity-100"
                     />
                     <Textarea
                         id="description"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="Añade una descripción detallada del proyecto..."
-                        className="border-0 px-0 shadow-none focus-visible:ring-0 min-h-[60px]"
+                        disabled={isCollaborator}
+                        className="border-0 px-0 shadow-none focus-visible:ring-0 min-h-[60px] disabled:opacity-100"
                         rows={2}
                     />
 
@@ -251,10 +258,12 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     <div className="space-y-4">
                         <div className="flex items-center justify-between mb-2">
                              <Label htmlFor="script" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Guion del Video</Label>
-                             <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
-                                <Wand2 className="mr-2 h-4 w-4" />
-                                Asistente IA
-                             </Button>
+                             {!isCollaborator && (
+                                <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
+                                    <Wand2 className="mr-2 h-4 w-4" />
+                                    Asistente IA
+                                </Button>
+                             )}
                         </div>
                         <RichTextEditor 
                           value={script}
@@ -262,35 +271,37 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                           placeholder="Escribe el guion detallado aquí..."
                           className="min-h-[300px]"
                         />
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="outline" size="sm" disabled={!script} className="mt-2">
-                                    <Save className="mr-2 h-4 w-4" />
-                                    Guardar como plantilla
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Guardar Plantilla de Guion</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    Dale un nombre a esta plantilla para reutilizarla en otros proyectos.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <div className="py-4">
-                                    <Label htmlFor="template-name">Nombre de la Plantilla</Label>
-                                    <Input 
-                                        id="template-name"
-                                        value={newTemplateTitle}
-                                        onChange={(e) => setNewTemplateTitle(e.target.value)}
-                                        placeholder="Ej: Guion para Reels de Producto"
-                                    />
-                                </div>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={handleSaveTemplate}>Guardar Plantilla</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
+                         {!isCollaborator && (
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button variant="outline" size="sm" disabled={!script} className="mt-2">
+                                        <Save className="mr-2 h-4 w-4" />
+                                        Guardar como plantilla
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Guardar Plantilla de Guion</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        Dale un nombre a esta plantilla para reutilizarla en otros proyectos.
+                                    </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <div className="py-4">
+                                        <Label htmlFor="template-name">Nombre de la Plantilla</Label>
+                                        <Input 
+                                            id="template-name"
+                                            value={newTemplateTitle}
+                                            onChange={(e) => setNewTemplateTitle(e.target.value)}
+                                            placeholder="Ej: Guion para Reels de Producto"
+                                        />
+                                    </div>
+                                    <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleSaveTemplate}>Guardar Plantilla</AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                         )}
                     </div>
 
                     {/* --- EDICIÓN Y ENTREGA SECTION --- */}
@@ -307,10 +318,12 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                 <Label htmlFor="editing-instructions" className="text-xs font-bold uppercase tracking-wider text-blue-800">
                                     Instrucciones para Editor
                                 </Label>
-                                <Button variant="ghost" size="sm" className="text-blue-700 hover:text-blue-900 hover:bg-blue-100/50">
-                                    <Sparkles className="mr-2 h-4 w-4" />
-                                    Sugerir Estilo
-                                </Button>
+                                {!isCollaborator && (
+                                    <Button variant="ghost" size="sm" className="text-blue-700 hover:text-blue-900 hover:bg-blue-100/50">
+                                        <Sparkles className="mr-2 h-4 w-4" />
+                                        Sugerir Estilo
+                                    </Button>
+                                )}
                             </div>
                             <Textarea
                                 id="editing-instructions"
@@ -374,7 +387,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="customer" className="flex items-center gap-2 text-muted-foreground"><Users className="h-4 w-4" />Cliente</Label>
-                        <Select value={customerId} onValueChange={setCustomerId}>
+                        <Select value={customerId} onValueChange={setCustomerId} disabled={isCollaborator}>
                             <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un cliente" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
@@ -383,8 +396,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         </Select>
                     </div>
                      <div className="space-y-2">
-                        <Label htmlFor="collaborator" className="flex items-center gap-2 text-muted-foreground"><UserCheck className="h-4 w-4" />Editor</Label>
-                        <Select value={collaboratorId} onValueChange={setCollaboratorId}>
+                        <Label htmlFor="collaborator" className="flex items-center gap-2 text-muted-foreground"><UserCheck className="h-4 w-4" />Responsable</Label>
+                        <Select value={collaboratorId} onValueChange={setCollaboratorId} disabled={isCollaborator}>
                             <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un editor" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
@@ -395,8 +408,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     <div className="space-y-2">
                         <Label htmlFor="due-date" className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
                          <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal bg-background',!dueDate && 'text-muted-foreground')}>
+                            <PopoverTrigger asChild disabled={isCollaborator}>
+                                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal bg-background',!dueDate && 'text-muted-foreground')} disabled={isCollaborator}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dueDate ? format(dueDate, 'PPP', { locale: es }) : (<span>Elige una fecha</span>)}
                                 </Button>
@@ -411,31 +424,13 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                     captionLayout="dropdown-buttons"
                                     fromYear={new Date().getFullYear() - 5}
                                     toYear={new Date().getFullYear() + 5}
-                                    footer={
-                                    <div className="flex justify-between p-2 pt-4 border-t">
-                                        <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setDueDate(undefined)}
-                                        >
-                                        Borrar
-                                        </Button>
-                                        <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setDueDate(new Date())}
-                                        >
-                                        Hoy
-                                        </Button>
-                                    </div>
-                                    }
                                 />
                             </PopoverContent>
                         </Popover>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="priority" className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" />Prioridad</Label>
-                        <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])}>
+                        <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])} disabled={isCollaborator}>
                             <SelectTrigger id="priority" className="bg-background"><SelectValue placeholder="Establecer prioridad" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="low">Baja</SelectItem>
@@ -449,7 +444,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                     
                     <div className="space-y-2">
                         <Label htmlFor="campaign" className="flex items-center gap-2 text-muted-foreground">Campaña</Label>
-                        <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Lanzamiento Verano" className="bg-background" />
+                        <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Lanzamiento Verano" className="bg-background" disabled={isCollaborator} />
                     </div>
                     
                     <div className="space-y-2">
@@ -480,7 +475,7 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
         <DialogFooter className="p-6 border-t bg-background">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" onClick={handleSubmit} className="px-8">
-              Guardar Proyecto
+              Guardar Cambios
             </Button>
         </DialogFooter>
       </DialogContent>

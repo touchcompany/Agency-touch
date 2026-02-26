@@ -28,18 +28,26 @@ export default function DashboardLayout({
       return;
     }
 
-    // Redirección por rol
+    // Redirección por rol: Si es colaborador y está en una ruta financiera, mandarlo a Proyectos
     if (!isUserLoading && appUser?.role === 'collaborator') {
-      // Si un colaborador intenta entrar a la raíz del dashboard o rutas prohibidas
-      const forbiddenRoutes = ['/dashboard/transactions', '/dashboard/invoices', '/dashboard/customers', '/dashboard/collaborators', '/dashboard/services', '/dashboard/automation'];
+      const financialRoutes = [
+        '/dashboard/transactions', 
+        '/dashboard/invoices', 
+        '/dashboard/customers', 
+        '/dashboard/collaborators', 
+        '/dashboard/services', 
+        '/dashboard/automation'
+      ];
       
-      if (pathname === '/dashboard' || forbiddenRoutes.some(route => pathname.startsWith(route))) {
+      const isTryingToAccessForbidden = financialRoutes.some(route => pathname.startsWith(route)) || pathname === '/dashboard';
+      
+      if (isTryingToAccessForbidden) {
         router.push('/dashboard/projects');
       }
     }
   }, [user, appUser, isUserLoading, router, pathname]);
 
-  // Mientras carga, mostrar indicador
+  // Mientras carga el estado del usuario, mostrar un indicador de pantalla completa
   if (isUserLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
@@ -48,7 +56,7 @@ export default function DashboardLayout({
     );
   }
 
-  // Si hay usuario, renderizar el dashboard
+  // Si hay usuario, renderizar el dashboard con la estructura de sidebar
   if (user) {
     return (
       <SidebarProvider>

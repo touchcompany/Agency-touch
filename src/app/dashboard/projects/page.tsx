@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
+import { useFirebase, useCollection, useMemoFirebase, useUser } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
 import { Loader2, Plus, List, LayoutGrid, Filter, X, Lightbulb, Scissors, Send, CheckCircle } from 'lucide-react';
@@ -16,6 +16,7 @@ type View = 'kanban' | 'list';
 
 export default function ProjectsPage() {
     const { firestore, user } = useFirebase();
+    const { appUser } = useUser();
     const [view, setView] = useState<View>('kanban');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Partial<Project> | undefined>(undefined);
@@ -26,7 +27,12 @@ export default function ProjectsPage() {
     const [customerFilter, setCustomerFilter] = useState('all');
     const [collaboratorFilter, setCollaboratorFilter] = useState('all');
     
-    // Data fetching
+    // Identificar si el usuario es colaborador
+    const isCollaborator = appUser?.role === 'collaborator';
+
+    // Data fetching - Nota: Aquí estamos consultando la colección del usuario logueado.
+    // Si un colaborador trabaja para un superuser, deberíamos apuntar a la colección del superuser.
+    // Por ahora, asumimos que los proyectos están en la colección correcta según el flujo de la app.
     const projectsQuery = useMemoFirebase(() => (user ? query(collection(firestore, 'users', user.uid, 'projects'),) : null), [firestore, user]);
     const { data: projects, isLoading: projectsLoading } = useCollection<Project>(projectsQuery);
 
@@ -43,9 +49,13 @@ export default function ProjectsPage() {
             const statusMatch = statusFilter === 'all' || p.status === statusFilter;
             const customerMatch = customerFilter === 'all' || p.customerId === customerFilter;
             const collaboratorMatch = collaboratorFilter === 'all' || p.collaboratorId === collaboratorFilter;
-            return searchMatch && statusMatch && customerMatch && collaboratorMatch;
+            
+            // Si es colaborador, solo puede ver proyectos donde él es el responsable
+            const roleMatch = !isCollaborator || p.collaboratorId === user?.uid;
+            
+            return searchMatch && statusMatch && customerMatch && collaboratorMatch && roleMatch;
         });
-    }, [projects, searchQuery, statusFilter, customerFilter, collaboratorFilter]);
+    }, [projects, searchQuery, statusFilter, customerFilter, collaboratorFilter, isCollaborator, user]);
 
     const handleOpenDialog = (project?: Partial<Project>) => {
         setSelectedProject(project);
@@ -61,20 +71,18 @@ export default function ProjectsPage() {
 
     const isLoading = projectsLoading || customersLoading || collaboratorsLoading;
 
-    // Summary cards data
+    // Summary cards data basados en los proyectos filtrados por rol
     const summary = useMemo(() => {
         const initial: Record<Project['status'] | 'total', number> = { pending: 0, 'in-progress': 0, 'customer-review': 0, completed: 0, total: 0 };
-        if (!projects) return initial;
-        return projects.reduce((acc, p) => {
-            if (p.status) {
-                if(acc[p.status] !== undefined) {
-                    acc[p.status]++;
-                }
+        if (!filteredProjects) return initial;
+        return filteredProjects.reduce((acc, p) => {
+            if (p.status && acc[p.status] !== undefined) {
+                acc[p.status]++;
             }
             acc.total++;
             return acc;
         }, initial);
-    }, [projects]);
+    }, [filteredProjects]);
     
     const summaryCards = [
         { title: 'Ideas', count: summary.pending, icon: Lightbulb, color: 'text-yellow-500' },
@@ -90,7 +98,9 @@ export default function ProjectsPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="font-headline text-3xl font-bold">Gestor de Tareas</h1>
-                    <p className="text-muted-foreground">Organiza y gestiona tus tareas y proyectos</p>
+                    <p className="text-muted-foreground">
+                        {isCollaborator ? 'Gestiona las tareas asignadas a ti' : 'Organiza y gestiona tus tareas y proyectos'}
+                    </p>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center rounded-md bg-muted p-1">
@@ -101,14 +111,17 @@ export default function ProjectsPage() {
                             <List className="h-4 w-4 mr-2"/> Lista
                         </Button>
                     </div>
-                    <Button onClick={() => handleOpenDialog(undefined)}>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Nueva Tarea
-                    </Button>
+                    {/* Solo el superuser puede crear nuevas tareas de raíz */}
+                    {!isCollaborator && (
+                        <Button onClick={() => handleOpenDialog(undefined)}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Nueva Tarea
+                        </Button>
+                    )}
                 </div>
             </div>
 
-            {/* Filters */}
+            {/* Filters - Algunos filtros podrían ocultarse para colaboradores */}
             <Card>
                 <CardContent className="p-4">
                     <div className="flex items-center mb-4 gap-2">
@@ -139,13 +152,16 @@ export default function ProjectsPage() {
                                 <SelectItem value="completed">Publicada</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
-                            <SelectTrigger><SelectValue placeholder="Responsable" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Todos los Responsables</SelectItem>
-                                {collaborators?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-                            </SelectContent>
-                        </Select>
+                        {/* El filtro de responsable solo tiene sentido para el superuser */}
+                        {!isCollaborator && (
+                            <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>
+                                <SelectTrigger><SelectValue placeholder="Responsable" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos los Responsables</SelectItem>
+                                    {collaborators?.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        )}
                     </div>
                      <div className="flex justify-end mt-4">
                         <Button variant="ghost" onClick={clearFilters} className="flex items-center gap-2 text-muted-foreground hover:text-foreground">

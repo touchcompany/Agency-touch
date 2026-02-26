@@ -50,65 +50,58 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId) && isIdImmutable();
       allow delete: if isExistingOwner(userId);
 
+      // Los colaboradores NO pueden acceder a estas colecciones financieras bajo ningún concepto
       match /customers/{customerId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
       
       match /income/{incomeId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
 
       match /invoices/{invoiceId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
       
       match /services/{serviceId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
       
       match /companyProfiles/{profileId} {
-          allow get: if isOwner(userId);
-          allow list: if isOwner(userId);
+          allow get, list: if isOwner(userId);
           allow create: if isCreatingOwnContent(userId);
           allow update: if isExistingOwner(userId) && isUserIdImmutable();
           allow delete: if isExistingOwner(userId);
       }
       
        match /scriptTemplates/{templateId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
 
       match /expenses/{expenseId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
       
       match /collaborators/{collaboratorId} {
-        allow get: if isOwner(userId);
-        allow list: if isOwner(userId);
+        allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);

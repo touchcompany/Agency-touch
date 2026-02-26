@@ -73,7 +73,7 @@ const menuItems = [
     label: 'Proyectos',
     roles: ['superuser', 'collaborator'],
   },
-    {
+  {
     href: '/dashboard/settings',
     icon: Settings,
     label: 'Configuración',
@@ -85,6 +85,7 @@ export function DashboardSidebar() {
   const pathname = usePathname();
   const { appUser } = useUser();
   
+  // Por defecto tratamos como superuser si el rol no está definido explícitamente
   const userRole = appUser?.role || 'superuser';
 
   const isActive = (href: string) => {
@@ -94,6 +95,7 @@ export function DashboardSidebar() {
     return pathname.startsWith(href);
   };
 
+  // Filtrar ítems del menú según el rol del usuario actual
   const filteredItems = menuItems.filter(item => item.roles.includes(userRole));
 
   return (
