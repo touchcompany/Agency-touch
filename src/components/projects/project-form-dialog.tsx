@@ -19,7 +19,7 @@ import { useState, useEffect } from 'react';
 import { useFirebase, useCollection, useMemoFirebase, addDocumentNonBlocking, setDocumentNonBlocking, useUser } from '@/firebase';
 import { collection, doc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
-import type { Customer, Collaborator, Project, ScriptTemplate } from '@/lib/types';
+import type { Customer, Collaborator, Project } from '@/lib/types';
 import { Textarea } from '../ui/textarea';
 import {
   Select,
@@ -36,19 +36,6 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { ScriptAssistantDialog } from './script-assistant-dialog';
-import { RichTextEditor } from '../ui/rich-text-editor';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-
 
 interface ProjectFormDialogProps {
     open: boolean;
@@ -57,15 +44,6 @@ interface ProjectFormDialogProps {
 }
 
 const NINGUNO_VALUE = 'ninguno';
-
-const planoTagsConfig = [
-    { id: 'Talking Head', label: 'Talking Head', icon: User },
-    { id: 'B-Roll', label: 'B-Roll', icon: Video },
-    { id: 'Drone', label: 'Drone', icon: Send },
-    { id: 'POV', label: 'POV', icon: Eye },
-    { id: 'Pantalla', label: 'Pantalla', icon: Monitor },
-    { id: 'Producto', label: 'Producto', icon: Box },
-];
 
 export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDialogProps) {
   const { firestore, user } = useFirebase();
@@ -84,7 +62,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const [publishTime, setPublishTime] = useState('');
   const [editingInstructions, setEditingInstructions] = useState('');
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
-  const [newTemplateTitle, setNewTemplateTitle] = useState('');
   
   const [priority, setPriority] = useState<Project['priority'] | undefined>();
   const [tags, setTags] = useState<string[]>([]);
@@ -143,29 +120,6 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
   const { data: collaborators } = useCollection<Collaborator>(
     collaboratorsQuery
   );
-  
-  const handleSaveTemplate = () => {
-    if (!firestore || !user) return;
-    if (!newTemplateTitle || !script) {
-        toast({ title: "Faltan datos", description: "El título de la plantilla y el contenido del guion no pueden estar vacíos.", variant: "destructive"});
-        return;
-    }
-
-    const templatesRef = collection(firestore, 'users', user.uid, 'scriptTemplates');
-    addDocumentNonBlocking(templatesRef, {
-        userId: user.uid,
-        title: newTemplateTitle,
-        content: script,
-    });
-    toast({ title: "Plantilla guardada", description: "Tu guion ha sido guardado como una plantilla." });
-    setNewTemplateTitle('');
-  };
-
-  const handleTagToggle = (tag: string) => {
-    setTags(prev => 
-        prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
-  };
 
   const handleSubmit = async () => {
     if (!firestore || !user) {
@@ -234,74 +188,47 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
             <div className="grid grid-cols-3 gap-8 py-4">
                 
                 {/* --- LEFT COLUMN --- */}
-                <div className="col-span-3 lg:col-span-2 flex flex-col gap-6">
-                    <Input
-                        id="title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Nueva Idea Sin Título"
-                        disabled={isCollaborator} // Colaborador no debería cambiar el título
-                        className="h-12 border-0 px-0 text-2xl font-bold shadow-none focus-visible:ring-0 disabled:opacity-100"
-                    />
-                    <Textarea
-                        id="description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="Añade una descripción detallada del proyecto..."
-                        disabled={isCollaborator}
-                        className="border-0 px-0 shadow-none focus-visible:ring-0 min-h-[60px] disabled:opacity-100"
-                        rows={2}
-                    />
+                <div className="col-span-3 lg:col-span-2 space-y-6">
+                    <div className="space-y-4">
+                        <Label htmlFor="title" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Título del Proyecto</Label>
+                        <Input
+                            id="title"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="Ej: Lanzamiento Producto Nuevo"
+                            disabled={isCollaborator}
+                            className="text-lg font-bold h-12"
+                        />
+                    </div>
+                    <div className="space-y-4">
+                        <Label htmlFor="description" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Descripción / Objetivo</Label>
+                        <Textarea
+                            id="description"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                            placeholder="Define el objetivo del video..."
+                            disabled={isCollaborator}
+                            rows={3}
+                        />
+                    </div>
 
                     <Separator />
 
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between mb-2">
-                             <Label htmlFor="script" className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Guion del Video</Label>
-                             {!isCollaborator && (
-                                <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
-                                    <Wand2 className="mr-2 h-4 w-4" />
-                                    Asistente IA
-                                </Button>
-                             )}
+                        <div className="flex items-center justify-between">
+                             <Label htmlFor="script" className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Guion Detallado</Label>
+                             <Button variant="ghost" size="sm" onClick={() => setIsAssistantOpen(true)} className="text-primary hover:bg-primary/10">
+                                <Wand2 className="mr-2 h-4 w-4" />
+                                Asistente IA
+                             </Button>
                         </div>
-                        <RichTextEditor 
-                          value={script}
-                          onChange={setScript}
-                          placeholder="Escribe el guion detallado aquí..."
-                          className="min-h-[300px]"
+                        <Textarea
+                            id="script"
+                            value={script}
+                            onChange={(e) => setScript(e.target.value)}
+                            placeholder="Escribe el guion paso a paso aquí..."
+                            className="min-h-[200px] font-mono text-sm leading-relaxed"
                         />
-                         {!isCollaborator && (
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="outline" size="sm" disabled={!script} className="mt-2">
-                                        <Save className="mr-2 h-4 w-4" />
-                                        Guardar como plantilla
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>Guardar Plantilla de Guion</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                        Dale un nombre a esta plantilla para reutilizarla en otros proyectos.
-                                    </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <div className="py-4">
-                                        <Label htmlFor="template-name">Nombre de la Plantilla</Label>
-                                        <Input 
-                                            id="template-name"
-                                            value={newTemplateTitle}
-                                            onChange={(e) => setNewTemplateTitle(e.target.value)}
-                                            placeholder="Ej: Guion para Reels de Producto"
-                                        />
-                                    </div>
-                                    <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                    <AlertDialogAction onClick={handleSaveTemplate}>Guardar Plantilla</AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                         )}
                     </div>
 
                     {/* --- EDICIÓN Y ENTREGA SECTION --- */}
@@ -329,8 +256,8 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                                 id="editing-instructions"
                                 value={editingInstructions}
                                 onChange={(e) => setEditingInstructions(e.target.value)}
-                                placeholder="Instrucciones manuales o generadas por IA..."
-                                className="border-0 bg-transparent p-0 text-blue-600/80 placeholder:text-blue-300 shadow-none focus-visible:ring-0 min-h-[100px]"
+                                placeholder="Añade instrucciones de estilo, transiciones o ritmo..."
+                                className="border-0 bg-transparent p-0 text-blue-600/80 placeholder:text-blue-300 shadow-none focus-visible:ring-0 min-h-[80px]"
                             />
                         </div>
 
@@ -372,110 +299,91 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                 </div>
 
                 {/* --- RIGHT COLUMN --- */}
-                <div className="col-span-3 lg:col-span-1 space-y-4 bg-muted/20 p-4 rounded-xl">
-                    <div className="space-y-2">
-                        <Label htmlFor="status" className="flex items-center gap-2 text-muted-foreground"><ClipboardList className="h-4 w-4" />Estado</Label>
-                        <Select value={status} onValueChange={(v) => setStatus(v as Project['status'])}>
-                            <SelectTrigger className="bg-background"><SelectValue placeholder="Selecciona un estado" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="pending">Idea</SelectItem>
-                                <SelectItem value="in-progress">Edición</SelectItem>
-                                <SelectItem value="customer-review">Para publicar</SelectItem>
-                                <SelectItem value="completed">Publicada</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="customer" className="flex items-center gap-2 text-muted-foreground"><Users className="h-4 w-4" />Cliente</Label>
-                        <Select value={customerId} onValueChange={setCustomerId} disabled={isCollaborator}>
-                            <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un cliente" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
-                                {(customers || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="collaborator" className="flex items-center gap-2 text-muted-foreground"><UserCheck className="h-4 w-4" />Responsable</Label>
-                        <Select value={collaboratorId} onValueChange={setCollaboratorId} disabled={isCollaborator}>
-                            <SelectTrigger className="bg-background"><SelectValue placeholder="Asignar un editor" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
-                                {(collaborators || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
-                            </SelectContent>
-                        </Select>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="due-date" className="flex items-center gap-2 text-muted-foreground"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
-                         <Popover>
-                            <PopoverTrigger asChild disabled={isCollaborator}>
-                                <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal bg-background',!dueDate && 'text-muted-foreground')} disabled={isCollaborator}>
-                                    <CalendarIcon className="mr-2 h-4 w-4" />
-                                    {dueDate ? format(dueDate, 'PPP', { locale: es }) : (<span>Elige una fecha</span>)}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start" disablePortal>
-                                <Calendar 
-                                    mode="single" 
-                                    selected={dueDate} 
-                                    onSelect={setDueDate}
-                                    initialFocus 
-                                    locale={es}
-                                    captionLayout="dropdown-buttons"
-                                    fromYear={new Date().getFullYear() - 5}
-                                    toYear={new Date().getFullYear() + 5}
-                                />
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="priority" className="flex items-center gap-2 text-muted-foreground"><Flag className="h-4 w-4" />Prioridad</Label>
-                        <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])} disabled={isCollaborator}>
-                            <SelectTrigger id="priority" className="bg-background"><SelectValue placeholder="Establecer prioridad" /></SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="low">Baja</SelectItem>
-                                <SelectItem value="medium">Media</SelectItem>
-                                <SelectItem value="high">Alta</SelectItem>
-                            </SelectContent>
-                        </Select>
+                <div className="col-span-3 lg:col-span-1 space-y-6">
+                    <div className="space-y-4 bg-muted/50 p-4 rounded-xl">
+                        <div className="space-y-2">
+                            <Label htmlFor="status" className="flex items-center gap-2"><ClipboardList className="h-4 w-4" />Estado</Label>
+                            <Select value={status} onValueChange={(v) => setStatus(v as Project['status'])}>
+                                <SelectTrigger><SelectValue placeholder="Estado" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="pending">Idea</SelectItem>
+                                    <SelectItem value="in-progress">Edición</SelectItem>
+                                    <SelectItem value="customer-review">Para publicar</SelectItem>
+                                    <SelectItem value="completed">Publicado</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="customer" className="flex items-center gap-2"><Users className="h-4 w-4" />Cliente</Label>
+                            <Select value={customerId} onValueChange={setCustomerId} disabled={isCollaborator}>
+                                <SelectTrigger><SelectValue placeholder="Asignar Cliente" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
+                                    {(customers || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="collaborator" className="flex items-center gap-2"><UserCheck className="h-4 w-4" />Responsable</Label>
+                            <Select value={collaboratorId} onValueChange={setCollaboratorId} disabled={isCollaborator}>
+                                <SelectTrigger><SelectValue placeholder="Asignar Editor" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value={NINGUNO_VALUE}>Ninguno</SelectItem>
+                                    {(collaborators || []).map((c) => (<SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="due-date" className="flex items-center gap-2"><CalendarDays className="h-4 w-4" />Fecha de Entrega</Label>
+                             <Popover>
+                                <PopoverTrigger asChild disabled={isCollaborator}>
+                                    <Button variant={'outline'} className={cn('w-full justify-start text-left font-normal',!dueDate && 'text-muted-foreground')} disabled={isCollaborator}>
+                                        <CalendarIcon className="mr-2 h-4 w-4" />
+                                        {dueDate ? format(dueDate, 'PPP', { locale: es }) : (<span>Elige una fecha</span>)}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start" disablePortal>
+                                    <Calendar 
+                                        mode="single" 
+                                        selected={dueDate} 
+                                        onSelect={(date) => {
+                                            setDueDate(date);
+                                        }}
+                                        initialFocus 
+                                        locale={es}
+                                        captionLayout="dropdown-buttons"
+                                        fromYear={new Date().getFullYear() - 5}
+                                        toYear={new Date().getFullYear() + 5}
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
                     </div>
                     
-                    <Separator />
-                    
-                    <div className="space-y-2">
-                        <Label htmlFor="campaign" className="flex items-center gap-2 text-muted-foreground">Campaña</Label>
-                        <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Lanzamiento Verano" className="bg-background" disabled={isCollaborator} />
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <Label className="flex items-center gap-2 text-muted-foreground"><Tag className="h-4 w-4" />Lista de Planos</Label>
-                         <div className="grid grid-cols-2 gap-2">
-                            {planoTagsConfig.map(tag => (
-                                <Button 
-                                    key={tag.id} 
-                                    variant="ghost"
-                                    onClick={() => handleTagToggle(tag.id)}
-                                    type="button" 
-                                    className={cn(
-                                        "h-auto flex-row justify-start p-3 gap-3 border-none transition-colors duration-200 rounded-xl",
-                                        tags.includes(tag.id) 
-                                            ? "bg-blue-500 text-white shadow-none" 
-                                            : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                                    )}
-                                >
-                                    <tag.icon className={cn("h-4 w-4", tags.includes(tag.id) ? "text-white" : "text-muted-foreground")} />
-                                    <span className={cn("text-[10px] font-medium", tags.includes(tag.id) ? "text-white" : "text-muted-foreground")}>{tag.label}</span>
-                                </Button>
-                            ))}
+                    <div className="space-y-4 bg-muted/20 p-4 rounded-xl">
+                         <div className="space-y-2">
+                            <Label htmlFor="priority" className="flex items-center gap-2"><Flag className="h-4 w-4" />Prioridad</Label>
+                            <Select value={priority} onValueChange={(v) => setPriority(v as Project['priority'])} disabled={isCollaborator}>
+                                <SelectTrigger id="priority"><SelectValue placeholder="Prioridad" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="low">Baja</SelectItem>
+                                    <SelectItem value="medium">Media</SelectItem>
+                                    <SelectItem value="high">Alta</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="campaign" className="flex items-center gap-2">Campaña</Label>
+                            <Input id="campaign" value={campaign} onChange={(e) => setCampaign(e.target.value)} placeholder="Ej: Verano 2024" disabled={isCollaborator} />
                         </div>
                     </div>
                 </div>
             </div>
         </ScrollArea>
-        <DialogFooter className="p-6 border-t bg-background">
+        <DialogFooter className="p-6 border-t">
             <Button variant="ghost" onClick={() => onOpenChange(false)}>Cancelar</Button>
             <Button type="submit" onClick={handleSubmit} className="px-8">
-              Guardar Cambios
+              {project?.id ? 'Guardar Cambios' : 'Crear Proyecto'}
             </Button>
         </DialogFooter>
       </DialogContent>

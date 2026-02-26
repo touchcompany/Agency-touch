@@ -1,19 +1,13 @@
 /**
- * Core Philosophy: This ruleset enforces a strict user-ownership security model. All data is
- * considered private and is only accessible by the user who created it. Access control is
- * determined by the user's authenticated UID.
- *
- * Data Structure: The database is hierarchically organized around users. All application
- * data, including customers, invoices, and transactions, is stored in subcollections
- * nested under a specific user's document path: /users/{userId}/...
+ * Core Philosophy: This ruleset enforces a strict user-ownership model. All data is considered private to the user who created it.
+ * There are no public or shared collections. Access to any piece of data is granted if, and only if, the requesting user's
+ * authenticated UID matches the user ID in the document's path.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // --------------------------------------------------------------------------------
     // Helper Functions
-    // --------------------------------------------------------------------------------
 
     function isSignedIn() {
       return request.auth != null;
@@ -39,10 +33,6 @@ service cloud.firestore {
       return request.resource.data.id == resource.data.id;
     }
 
-    // --------------------------------------------------------------------------------
-    // Collection Rules
-    // --------------------------------------------------------------------------------
-
     match /users/{userId} {
       allow get: if isOwner(userId);
       allow list: if false;
@@ -50,15 +40,15 @@ service cloud.firestore {
       allow update: if isExistingOwner(userId) && isIdImmutable();
       allow delete: if isExistingOwner(userId);
 
-      // Los colaboradores NO pueden acceder a estas colecciones financieras bajo ningún concepto
+      // Colecciones financieras: SOLO el dueño puede acceder
       match /customers/{customerId} {
         allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
-      
-      match /income/{incomeId} {
+
+      match /collaborators/{collaboratorId} {
         allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
@@ -71,22 +61,8 @@ service cloud.firestore {
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
         allow delete: if isExistingOwner(userId);
       }
-      
-      match /services/{serviceId} {
-        allow get, list: if isOwner(userId);
-        allow create: if isCreatingOwnContent(userId);
-        allow update: if isExistingOwner(userId) && isUserIdImmutable();
-        allow delete: if isExistingOwner(userId);
-      }
-      
-      match /companyProfiles/{profileId} {
-          allow get, list: if isOwner(userId);
-          allow create: if isCreatingOwnContent(userId);
-          allow update: if isExistingOwner(userId) && isUserIdImmutable();
-          allow delete: if isExistingOwner(userId);
-      }
-      
-       match /scriptTemplates/{templateId} {
+
+      match /income/{incomeId} {
         allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
@@ -100,7 +76,18 @@ service cloud.firestore {
         allow delete: if isExistingOwner(userId);
       }
       
-      match /collaborators/{collaboratorId} {
+      match /services/{serviceId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
+      }
+
+      match /settings/{docId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      match /companyProfiles/{profileId} {
         allow get, list: if isOwner(userId);
         allow create: if isCreatingOwnContent(userId);
         allow update: if isExistingOwner(userId) && isUserIdImmutable();
@@ -109,7 +96,6 @@ service cloud.firestore {
       
       match /projects/{projectId} {
         // Un colaborador puede ver y editar proyectos donde sea el responsable asignado
-        // incluso si están en la subcolección de otro usuario (el superuser).
         allow get: if isOwner(userId) || (isSignedIn() && resource.data.collaboratorId == request.auth.uid);
         allow list: if isOwner(userId) || (isSignedIn() && request.auth.uid != null); 
         allow create: if isCreatingOwnContent(userId);
@@ -117,8 +103,11 @@ service cloud.firestore {
         allow delete: if isExistingOwner(userId);
       }
 
-      match /settings/{settingsId} {
-        allow read, write: if isOwner(userId);
+      match /scriptTemplates/{templateId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isCreatingOwnContent(userId);
+        allow update: if isExistingOwner(userId) && isUserIdImmutable();
+        allow delete: if isExistingOwner(userId);
       }
     }
   }

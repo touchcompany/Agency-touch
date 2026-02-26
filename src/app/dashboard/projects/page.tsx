@@ -30,9 +30,9 @@ export default function ProjectsPage() {
     // Identificar si el usuario es colaborador
     const isCollaborator = appUser?.role === 'collaborator';
 
-    // Data fetching - Nota: Aquí estamos consultando la colección del usuario logueado.
-    // Si un colaborador trabaja para un superuser, deberíamos apuntar a la colección del superuser.
-    // Por ahora, asumimos que los proyectos están en la colección correcta según el flujo de la app.
+    // Para un MVP, consultamos la colección del usuario logueado.
+    // Si un colaborador trabaja para un superuser, las reglas de Firestore permitirán
+    // el acceso si implementamos una búsqueda por responsable (collaboratorId).
     const projectsQuery = useMemoFirebase(() => (user ? query(collection(firestore, 'users', user.uid, 'projects'),) : null), [firestore, user]);
     const { data: projects, isLoading: projectsLoading } = useCollection<Project>(projectsQuery);
 
@@ -51,6 +51,7 @@ export default function ProjectsPage() {
             const collaboratorMatch = collaboratorFilter === 'all' || p.collaboratorId === collaboratorFilter;
             
             // Si es colaborador, solo puede ver proyectos donde él es el responsable
+            // O si es el dueño del documento (superuser)
             const roleMatch = !isCollaborator || p.collaboratorId === user?.uid;
             
             return searchMatch && statusMatch && customerMatch && collaboratorMatch && roleMatch;
@@ -86,7 +87,7 @@ export default function ProjectsPage() {
     
     const summaryCards = [
         { title: 'Ideas', count: summary.pending, icon: Lightbulb, color: 'text-yellow-500' },
-        { title: 'En Edición', count: summary['in-progress'], icon: Scissors, color: 'text-blue-500' },
+        { title: 'Edición', count: summary['in-progress'], icon: Scissors, color: 'text-blue-500' },
         { title: 'Para publicar', count: summary['customer-review'], icon: Send, color: 'text-purple-500' },
         { title: 'Publicadas', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
     ];
@@ -104,10 +105,20 @@ export default function ProjectsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="flex items-center rounded-md bg-muted p-1">
-                        <Button variant={view === 'kanban' ? 'default' : 'ghost'} size="sm" onClick={() => setView('kanban')}>
+                        <Button 
+                            variant={view === 'kanban' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            onClick={() => setView('kanban')}
+                            className={view === 'kanban' ? 'bg-primary text-primary-foreground' : ''}
+                        >
                             <LayoutGrid className="h-4 w-4 mr-2"/> Kanban
                         </Button>
-                        <Button variant={view === 'list' ? 'default' : 'ghost'} size="sm" onClick={() => setView('list')}>
+                        <Button 
+                            variant={view === 'list' ? 'default' : 'ghost'} 
+                            size="sm" 
+                            onClick={() => setView('list')}
+                            className={view === 'list' ? 'bg-primary text-primary-foreground' : ''}
+                        >
                             <List className="h-4 w-4 mr-2"/> Lista
                         </Button>
                     </div>
@@ -121,7 +132,7 @@ export default function ProjectsPage() {
                 </div>
             </div>
 
-            {/* Filters - Algunos filtros podrían ocultarse para colaboradores */}
+            {/* Filters */}
             <Card>
                 <CardContent className="p-4">
                     <div className="flex items-center mb-4 gap-2">

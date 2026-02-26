@@ -29,7 +29,7 @@ export default function DashboardLayout({
     }
 
     // Redirección por rol: Si es colaborador y está en una ruta financiera, mandarlo a Proyectos
-    if (!isUserLoading && appUser?.role === 'collaborator') {
+    if (!isUserLoading && user && appUser?.role === 'collaborator') {
       const financialRoutes = [
         '/dashboard/transactions', 
         '/dashboard/invoices', 
