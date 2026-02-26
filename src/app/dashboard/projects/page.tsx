@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useFirebase, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Project, Customer, Collaborator } from '@/lib/types';
-import { Loader2, Plus, List, LayoutGrid, Filter, X, Clock, User, CheckCircle, ClipboardList } from 'lucide-react';
+import { Loader2, Plus, List, LayoutGrid, Filter, X, Lightbulb, Scissors, Send, CheckCircle } from 'lucide-react';
 import { ProjectFormDialog } from '@/components/projects/project-form-dialog';
 import { ProjectsKanbanView } from '@/components/projects/projects-kanban-view';
 import { ProjectsListView } from '@/components/projects/projects-list-view';
@@ -77,10 +77,10 @@ export default function ProjectsPage() {
     }, [projects]);
     
     const summaryCards = [
-        { title: 'Pendientes', count: summary.pending, icon: Clock, color: 'text-yellow-500' },
-        { title: 'En Progreso', count: summary['in-progress'], icon: ClipboardList, color: 'text-blue-500' },
-        { title: 'Revisión Cliente', count: summary['customer-review'], icon: User, color: 'text-purple-500' },
-        { title: 'Completadas', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
+        { title: 'Ideas', count: summary.pending, icon: Lightbulb, color: 'text-yellow-500' },
+        { title: 'En Edición', count: summary['in-progress'], icon: Scissors, color: 'text-blue-500' },
+        { title: 'Para publicar', count: summary['customer-review'], icon: Send, color: 'text-purple-500' },
+        { title: 'Publicadas', count: summary.completed, icon: CheckCircle, color: 'text-green-500' },
     ];
 
 
@@ -133,10 +133,10 @@ export default function ProjectsPage() {
                             <SelectTrigger><SelectValue placeholder="Estado" /></SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Todos los Estados</SelectItem>
-                                <SelectItem value="pending">Pendiente</SelectItem>
-                                <SelectItem value="in-progress">En Progreso</SelectItem>
-                                <SelectItem value="customer-review">Revisión Cliente</SelectItem>
-                                <SelectItem value="completed">Completada</SelectItem>
+                                <SelectItem value="pending">Idea</SelectItem>
+                                <SelectItem value="in-progress">Edición</SelectItem>
+                                <SelectItem value="customer-review">Para publicar</SelectItem>
+                                <SelectItem value="completed">Publicada</SelectItem>
                             </SelectContent>
                         </Select>
                         <Select value={collaboratorFilter} onValueChange={setCollaboratorFilter}>

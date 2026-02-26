@@ -29,10 +29,10 @@ interface ProjectsKanbanViewProps {
 }
 
 const projectColumns: { id: Project['status']; title: string }[] = [
-  { id: 'pending', title: 'Pendiente' },
-  { id: 'in-progress', title: 'En Progreso' },
-  { id: 'customer-review', title: 'Revisión Cliente' },
-  { id: 'completed', title: 'Completada' },
+  { id: 'pending', title: 'Idea' },
+  { id: 'in-progress', title: 'Edición' },
+  { id: 'customer-review', title: 'Para publicar' },
+  { id: 'completed', title: 'Publicado' },
 ];
 
 export function ProjectsKanbanView({ projects, customers, collaborators, onCardClick }: ProjectsKanbanViewProps) {

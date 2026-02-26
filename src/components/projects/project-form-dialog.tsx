@@ -365,10 +365,10 @@ export function ProjectFormDialog({ open, onOpenChange, project }: ProjectFormDi
                         <Select value={status} onValueChange={(v) => setStatus(v as Project['status'])}>
                             <SelectTrigger className="bg-background"><SelectValue placeholder="Selecciona un estado" /></SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="pending">Pendiente</SelectItem>
-                                <SelectItem value="in-progress">En Progreso</SelectItem>
-                                <SelectItem value="customer-review">Revisión Cliente</SelectItem>
-                                <SelectItem value="completed">Completada</SelectItem>
+                                <SelectItem value="pending">Idea</SelectItem>
+                                <SelectItem value="in-progress">Edición</SelectItem>
+                                <SelectItem value="customer-review">Para publicar</SelectItem>
+                                <SelectItem value="completed">Publicada</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

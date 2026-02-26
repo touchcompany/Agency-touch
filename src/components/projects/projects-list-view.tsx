@@ -23,10 +23,10 @@ interface ProjectsListViewProps {
 }
 
 const statusTranslations: Record<Project['status'], string> = {
-  pending: 'Pendiente',
-  'in-progress': 'En Progreso',
-  'customer-review': 'Revisión Cliente',
-  completed: 'Completada',
+  pending: 'Idea',
+  'in-progress': 'Edición',
+  'customer-review': 'Para publicar',
+  completed: 'Publicado',
 };
 
 const statusVariants: Record<Project['status'], 'secondary' | 'default' | 'outline' | 'destructive'> = {

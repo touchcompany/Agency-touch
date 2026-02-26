@@ -20,10 +20,10 @@ interface ProjectCardProps {
 }
 
 const statusDisplay: Record<Project['status'], { text: string; className: string }> = {
-  pending: { text: 'PENDIENTE', className: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800' },
-  'in-progress': { text: 'EN PROGRESO', className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800' },
-  'customer-review': { text: 'REVISIÓN', className: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-800' },
-  completed: { text: 'APROBADO', className: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800' },
+  pending: { text: 'IDEA', className: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-800' },
+  'in-progress': { text: 'EDICIÓN', className: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/50 dark:text-blue-300 dark:border-blue-800' },
+  'customer-review': { text: 'PARA PUBLICAR', className: 'bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:border-purple-800' },
+  completed: { text: 'PUBLICADO', className: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-800' },
 };
 
 const tagIcons: Record<string, React.ElementType> = {
