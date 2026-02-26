@@ -17,6 +17,12 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
+    function isSuperuser(userId) {
+      return isOwner(userId) && (
+        get(/databases/$(database)/documents/users/$(userId)).data.role == 'superuser'
+      );
+    }
+
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
@@ -35,10 +41,10 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if false;
-      allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isExistingOwner(userId) && isIdImmutable();
-      allow delete: if isExistingOwner(userId);
+      allow list: if isSignedIn() && (isOwner(userId) || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'superuser');
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && isIdImmutable();
+      allow delete: if isOwner(userId);
 
       // Colecciones financieras: SOLO el dueño (superuser) puede acceder
       match /customers/{customerId} {
@@ -96,7 +102,6 @@ service cloud.firestore {
       
       match /projects/{projectId} {
         // Un colaborador puede ver y editar proyectos donde sea el responsable asignado
-        // O si es el dueño del documento (superuser)
         allow get: if isOwner(userId) || (isSignedIn() && resource.data.collaboratorId == request.auth.uid);
         allow list: if isOwner(userId) || isSignedIn(); 
         allow create: if isCreatingOwnContent(userId);

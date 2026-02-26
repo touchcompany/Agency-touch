@@ -20,6 +20,7 @@ export interface UserHookResult {
 
 export const UserContext = createContext<UserHookResult | undefined>(undefined);
 
+// Helper to convert undefined to null for Firestore compatibility
 const safeValue = (val: any) => val === undefined ? null : val;
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
@@ -52,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 isUserLoading: true,
             }));
 
-           // Auto-creación de perfil si no existe
+           // Auto-creation of profile if it doesn't exist
            if (firestore) {
              const userRef = doc(firestore, 'users', firebaseUser.uid);
              const userSnap = await getDoc(userRef);
@@ -62,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                  email: safeValue(firebaseUser.email),
                  phoneNumber: safeValue(firebaseUser.phoneNumber),
                  displayName: safeValue(firebaseUser.displayName),
-                 role: 'superuser', // Primer usuario es admin
+                 role: 'superuser', // First user is superuser
                  createdAt: new Date().toISOString(),
                });
              }
