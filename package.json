@@ -7,6 +7,7 @@
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "NODE_ENV=production next build",
+    "postbuild": "mkdir -p .next/standalone/public && cp -r public/* .next/standalone/public/ && mkdir -p .next/standalone/.next/static && cp -r .next/static/* .next/standalone/.next/static/ && cp app.js .next/standalone/app.js",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
